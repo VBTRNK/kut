@@ -281,9 +281,9 @@ Part L item).
 - **Rewards.**
   - Wins pay by round, summing to **250** for the champion (ADR-096), paid
     lazily after the final in the transaction that completes the week.
-  - Members who are already out may **call** the winners of later matches.
-    Correct calls pay 30 divided by the matches after round 1, at most 30 a
-    night (ADR-118).
+  - Members who are already out may **call** the winners of later matches, on
+    the evening or the match's pre-match. Correct calls pay 30 divided by the
+    matches after round 1, at most 30 a night (ADR-118, ADR-149).
   - Every entrant gets one `midweek_result` message (ADR-109).
 - **After the night.**
   - Cards get night ratings from 1 to 10 (ADR-117). These are display only and
@@ -291,7 +291,9 @@ Part L item).
   - Share images: a champion poster and "my night", drawn in the browser
     (ADR-120).
 - **Pages.** `/midweek` (picker, evening, champion), `/midweek/[weekStart]`,
-  `/midweek/[weekStart]/match/[matchId]`, `/midweek/past`, all under the
+  `/midweek/[weekStart]/match/[matchId]`,
+  `/midweek/[weekStart]/next/[round]/[pairing]` (pre-match), `/midweek/past`,
+  all under the
   Compete tab (ADR-107). The admin page has the switch, a rehearsal and void.
 - **Live** (ADR-115, ADR-147). Every match in play is watchable on its page:
   - a clock ticking each second on the corrected device clock, held at 90′;
@@ -306,6 +308,12 @@ Part L item).
     now; no report is rendered for a row.
   - The `lg` tree stacks each group's two pairings in equal rows, so the
     bracket line meets both (#216).
+- **Pre-match** (ADR-149). Once both feeders of a later pairing have ended,
+  its row, `Your night` and the call card link to a pre-match: both clubs, a
+  countdown, both fives with the week's Power and plusses per line, and the
+  call card for a member who is out. No win chance or day roll before
+  kick-off; at kick-off it becomes the live match. The evening lists the next
+  round above `This round` as soon as one of its pairings is settled.
 
 **Part L:** 4, 5, 25, 26, 27, 28.
 
@@ -323,13 +331,14 @@ Part L item).
 - **Reveals:** time-gated `midweek_*_public` views (§44.9). Nothing is revealed
   by a job.
 - **Names:** the views carry each member's account name (`*_name`) and club
-  (`side_*_club`, `club_name`, `champion_club`; ADR-145). Pages don't read the
-  club yet.
+  (`side_*_club`, `club_name`, `champion_club`; ADR-145). Only the pre-match
+  reads the club so far.
 - **Lazy trigger:** `src/lib/midweek/run-due.ts`, called from Home and every
   Midweek page.
 - **Reports:** a seeded phrasebook in `src/lib/midweek/report/` (ADR-093).
 - **Live:** `src/lib/midweek/{live,live-load,live-clock}.ts`; the feed and
-  shoot-out in `src/components/midweek/feed.tsx`.
+  shoot-out in `src/components/midweek/feed.tsx`; the pre-match in
+  `src/lib/midweek/prematch.ts` and `src/components/midweek/prematch.tsx`.
 - **Simulation:** `tests/sim/`.
 
 **History.**

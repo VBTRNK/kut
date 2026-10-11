@@ -641,6 +641,7 @@ describe("your night", () => {
     expect(night.rows[1]).toMatchObject({
       kind: "next",
       round: 2,
+      pairing: bye.pairing >> 1,
       coins: pays[1],
       opponent: sibling.winner_side === 0 ? sibling.side_0_name : sibling.side_1_name,
       revealAt: "2026-10-07T19:00:00.000Z",

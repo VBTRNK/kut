@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatClock } from "@/lib/midweek/entry";
 import { pairSentence, sideScore, type BracketPair, type BracketSlot } from "@/lib/midweek/evening";
+import { preMatchHref } from "@/lib/midweek/prematch";
 import { Chip, LiveMarker } from "./chip";
 import { MidweekRowMinute } from "./match-clock";
 
@@ -82,7 +83,8 @@ function Side({
 /**
  * `MidweekMatchRow` (HANDOFF "Bracket"), neutral, never in team colours
  * (DR2-1). Four states: `Kick-off 20:15` before a pairing starts, naming who
- * meet or where they come from (`Winner of Mila v Eline`); every match in
+ * meet or where they come from (`Winner of Mila v Eline`), and once both are
+ * settled `Pre-match` with a link to it (ADR-149); every match in
  * play as `Live` with the score so far beside each side, the minute (`64′`)
  * or `pens` with the kicks scored in brackets, and a link to watch it (DR4-6,
  * ADR-148); `Full time` with both scores, the winner ticked and a link to the
@@ -171,6 +173,33 @@ export function MidweekMatchRow({
           <b aria-hidden="true" className="text-lg leading-none font-black text-brass">
             ›
           </b>
+        )}
+      </Link>
+    );
+  } else if (pair.kind === "upcoming" && pair.preMatch) {
+    // Both clubs settled: the row opens the pre-match (DR4-6, DR4-7, ADR-149).
+    const time = formatClock(pair.kickoffAt);
+    state = (
+      <Link
+        aria-label={`Pre-match: ${pair.sides[0].name} v ${pair.sides[1].name}, kick-off ${time}`}
+        className={`flex items-center gap-2 border-l border-line/40 hover:bg-brass/10 ${dense ? "" : "px-3"}`}
+        href={preMatchHref(weekStart, pair.round, pair.pairing)}
+      >
+        {dense ? (
+          <span className="grid content-center justify-items-center gap-0.5 px-1.5">
+            <b className="text-[12.5px] font-black text-ink tabular-nums">{time}</b>
+            <span className="text-[10px] font-extrabold text-brass">Pre &rsaquo;</span>
+          </span>
+        ) : (
+          <>
+            <span className="grid content-center justify-items-end gap-0.5 text-xs font-bold text-ink-faint">
+              <span>Pre-match</span>
+              <b className="text-[15px] font-black text-ink tabular-nums">{time}</b>
+            </span>
+            <b aria-hidden="true" className="text-lg leading-none font-black text-brass">
+              ›
+            </b>
+          </>
         )}
       </Link>
     );

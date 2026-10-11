@@ -23,3 +23,22 @@ export function useServerTime(at: string, everyMs: number): number {
   }, [at, everyMs]);
   return now;
 }
+
+/**
+ * Whether `target` has passed on the corrected clock (ADR-149): a timer from
+ * the server's render time `at`, which is where the corrected clock stands
+ * when the render arrives. False on the first render, as on the server; null
+ * `at` never fires.
+ */
+export function useReached(target: string, at: string | null): boolean {
+  const [reached, setReached] = useState(false);
+  useEffect(() => {
+    if (at === null) return;
+    const wait = Date.parse(target) - Date.parse(at);
+    // setTimeout overflows past 2^31 − 1 ms (about 24 days) and fires at once.
+    if (wait >= 2 ** 31 - 1) return;
+    const timer = window.setTimeout(() => setReached(true), Math.max(0, wait));
+    return () => window.clearTimeout(timer);
+  }, [target, at]);
+  return reached;
+}

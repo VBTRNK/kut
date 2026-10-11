@@ -182,6 +182,11 @@ export type BracketPair =
       pairing: number;
       kickoffAt: string;
       sides: [BracketSlot, BracketSlot];
+      /**
+       * A later round's pairing whose feeders have both ended, from round 1's
+       * kick-off: it has a pre-match (DR4-7, ADR-149).
+       */
+      preMatch: boolean;
     };
 
 export type BracketRound = {
@@ -222,6 +227,9 @@ export function assembleBracket(input: {
   const { rounds } = input;
   const lock = new Date(input.lockAt);
   const byKey = new Map(input.matches.map((match) => [`${match.round}/${match.pairing}`, match]));
+  // The views show a pairing from its kick-off, so any row means round 1 has
+  // begun and every card's Power is out (ADR-105).
+  const powerOut = input.matches.length > 0;
   const drawn = new Map((input.draw ?? []).map((row) => [row.pairing, row]));
   const slot = (userId: string | null, name: string, placeholder = false): BracketSlot => ({
     userId,
@@ -297,18 +305,20 @@ export function assembleBracket(input: {
         });
         continue;
       }
+      const sides: [BracketSlot, BracketSlot] =
+        source && source.side_1_user_id !== null
+          ? [
+              slot(source.side_0_user_id, source.side_0_name),
+              slot(source.side_1_user_id, source.side_1_name ?? ""),
+            ]
+          : [fromFeeder(2 * pairing), fromFeeder(2 * pairing + 1)];
       pairs.push({
         kind: "upcoming",
         round,
         pairing,
         kickoffAt,
-        sides:
-          source && source.side_1_user_id !== null
-            ? [
-                slot(source.side_0_user_id, source.side_0_name),
-                slot(source.side_1_user_id, source.side_1_name ?? ""),
-              ]
-            : [fromFeeder(2 * pairing), fromFeeder(2 * pairing + 1)],
+        sides,
+        preMatch: round > 1 && powerOut && sides.every((side) => !side.placeholder),
       });
     }
     result.push({
@@ -411,7 +421,15 @@ export type PathRow =
       matchId: string;
       coins: number;
     }
-  | { kind: "next"; round: number; revealAt: string; opponent: string | null; coins: number }
+  | {
+      kind: "next";
+      round: number;
+      /** Its place in the round (§44.6), for the pre-match link. */
+      pairing: number;
+      revealAt: string;
+      opponent: string | null;
+      coins: number;
+    }
   /** Your match is in play (ADR-106): "Playing Eline now.", and what a win pays. */
   | {
       kind: "live";
@@ -511,6 +529,7 @@ export function myNight(input: {
     rows.push({
       kind: "next",
       round,
+      pairing: (lastMatch?.pairing ?? 0) >> 1,
       revealAt: roundStartAt(lock, round, input.scheduleVersion).toISOString(),
       opponent: sibling ? winnerName(sibling) : null,
       coins: pays[round - 1],

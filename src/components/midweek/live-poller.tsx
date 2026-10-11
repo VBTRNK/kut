@@ -32,7 +32,7 @@ export function MidweekLivePoller({
   poll: boolean;
   nextAt?: string | null;
   intervalMs?: number;
-  /** The match page's foot line, which says how often it checks. */
+  /** The foot line of the match page (how often it checks) or the pre-match (when it goes live). */
   foot?: boolean;
 }) {
   const router = useRouter();
@@ -64,7 +64,7 @@ export function MidweekLivePoller({
   return (
     <p className="text-[11px] font-bold text-ink-faint tabular-nums">
       Updated {clockFormat.format(new Date(at))}
-      {foot && poll && ` · checks every ${intervalMs / 1000} seconds`}
+      {foot && (poll ? ` · checks every ${intervalMs / 1000} seconds` : " · goes live at kick-off")}
     </p>
   );
 }

@@ -90,6 +90,11 @@ export type EntryCardRow = {
   week_start: string;
   user_id: string;
   manager_name: string;
+  /**
+   * The member's club (ADR-145), defaulting to `{name}'s Club`; absent on a
+   * database before that migration.
+   */
+  club_name?: string | null;
   auto: boolean;
   keeper_slot: number;
   keeperless: boolean;

@@ -58,6 +58,7 @@ import {
   type BracketRound,
 } from "@/lib/midweek/evening";
 import { loadLiveMatch, type LiveMatch } from "@/lib/midweek/live-load";
+import { nextPairing, preMatchHref } from "@/lib/midweek/prematch";
 import { kickItems } from "@/lib/midweek/report/kicks";
 import {
   loadCalls,
@@ -226,8 +227,9 @@ function RoundSection({
  *   pairings with their kick-off;
  * - `round` while you're in, and `out` (Evening-Out) once you've lost: your
  *   match live while it plays (Evening-YourMatch), your night, then the round
- *   in play ("This round", every match live with its score so far), or between
- *   rounds the next round's kick-offs and the round just played;
+ *   in play ("This round", every match live with its score so far), led by the
+ *   next round once one of its pairings has a pre-match (D3, ADR-149), or
+ *   between rounds the next round's kick-offs and the round just played;
  * - `final`, for everyone: the final live, chance by chance and kick by kick
  *   (Evening-FinalLive), and that coins and the champion follow its end.
  *
@@ -304,11 +306,13 @@ export async function WeekEvening({
   const callBlock = (foot: boolean) =>
     cards && (
       <MidweekPredictions
+        at={nowIso}
         cards={cards}
         coins={predictionCoins(rounds)}
         foot={foot}
         rounds={rounds}
         tournamentId={current.tournament_id as string}
+        weekStart={weekStart}
       />
     );
   const callsPending = cards?.some((card) => card.pick !== null && card.state !== "ended") ?? false;
@@ -327,6 +331,12 @@ export async function WeekEvening({
         })
       : null;
 
+  // The next match's pre-match, once both its feeders have ended (DR4-7, ADR-149).
+  const nextRow = night.rows.find((row) => row.kind === "next");
+  const yourPreMatch =
+    nextRow?.kind === "next" && nextPairing(bracket, nextRow.round, nextRow.pairing)
+      ? preMatchHref(weekStart, nextRow.round, nextRow.pairing)
+      : null;
   const yourNight = night.entered && (
     <section aria-labelledby="night-h" className="grid content-start gap-4">
       <MidweekSectionHead id="night-h" title="Your night">
@@ -335,20 +345,35 @@ export async function WeekEvening({
           {night.alive ? " so far" : ""} &middot; paid after the final
         </p>
       </MidweekSectionHead>
-      <MidweekPath now={nowIso} rounds={rounds} rows={night.rows} weekStart={weekStart} />
+      <MidweekPath
+        now={nowIso}
+        preMatch={yourPreMatch}
+        rounds={rounds}
+        rows={night.rows}
+        weekStart={weekStart}
+      />
     </section>
   );
 
-  // The round in play, or between rounds the next one's kick-offs and the round just played.
+  // The round in play, or between rounds the next one's kick-offs and the round
+  // just played. While the round plays, the next one leads as soon as one of its
+  // pairings has a pre-match (D3).
+  const nextRound = bracket[phase.round];
+  const nextOpen = nextRound?.pairs.some((pair) => pair.kind === "upcoming" && pair.preMatch);
   const roundSections =
     thisRound && inPlay ? (
-      <RoundSection
-        link
-        round={thisRound}
-        title="This round"
-        userId={userId}
-        weekStart={weekStart}
-      />
+      <>
+        {nextOpen && (
+          <RoundSection link={false} round={nextRound} userId={userId} weekStart={weekStart} />
+        )}
+        <RoundSection
+          link
+          round={thisRound}
+          title="This round"
+          userId={userId}
+          weekStart={weekStart}
+        />
+      </>
     ) : (
       <>
         {bracket[phase.round] && (
