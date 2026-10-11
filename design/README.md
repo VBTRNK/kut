@@ -10,6 +10,11 @@ git ls-tree -r --name-only docs-archive-2026-10 design | rg "dc.html"
 git show docs-archive-2026-10:design/midweek/Picker-Saved.dc.html
 ```
 
+Generated mocks render the real components with the app's compiled CSS,
+fail on any sideways scroll, get a screenshot review, and take every number
+from a real function, never typed in: in DR4 that review caught four defects
+before the owner saw them.
+
 The HANDOFF notes here say where they mention `BUILD_SPEC §N` or an old ADR;
 read those from the same tag (see `docs/README.md`). Where a package drew
 "KUT", read FLUT (`flut/HANDOFF.md`).
@@ -23,6 +28,6 @@ read those from the same tag (see `docs/README.md`). Where a package drew
 | `midweek/` (2026-09-25)      | Midweek Madness entry and results pages, approved by the owner. Built (ADR-091 to 093). `midweek/HANDOFF.md`.                                                          | Private                                                                 |
 | `ux-review/` (DR2, 2 Oct)    | MM 2.0 evening and a Compete section. Approved after three rounds. Built (ADR-104, 105, 110 to 113). `ux-review/HANDOFF.md`.                                            | Private                                                                 |
 | `mm2-dr3/` (DR3, 3 Oct)      | Ratings, predictions for members who are out, share images, the plusses count and violet and teal team colours (DR3-10). Built (ADR-116 to 120). `mm2-dr3/HANDOFF.md`. | Private (canvas id `Xi7N3kMA2V2iC1zmtPvXVw`)                            |
-| `mm3/` (DR4, 11 Oct)         | MM 3.0: every match live with a feed newest on top, a running clock, readable shoot-outs (#263), a between-rounds pre-match, per-match ratings from full time, live rows and equal-height bracket pairings (#216), club names (#262). Awaiting the owner's approval. `mm3/HANDOFF.md`. | <https://claude.ai/artifact/LsMTcZJQCRBD3pXiYrem5W> (private)           |
+| `mm3/` (DR4, 11 Oct)         | MM 3.0: every match live with a feed newest on top, a running clock, readable shoot-outs (#263), a between-rounds pre-match, per-match ratings from full time, live rows and equal-height bracket pairings (#216), club names (#262). Approved (#268); builds in S3–S7 of #267. `mm3/HANDOFF.md`. | <https://claude.ai/artifact/LsMTcZJQCRBD3pXiYrem5W> (private)           |
 | `groundmasters/`             | Five card directions for the first Special edition. No direction chosen yet. Rules and open decisions are in issue #222.                                                | Private                                                                 |
 | `flut/` (2026-10-08)         | The FLUT marks, lockup, icons and share images. Built (ADR-137). `flut/HANDOFF.md`. Supersedes the branding in every older package.                                     | Private ("FLUT Rebrand")                                                |

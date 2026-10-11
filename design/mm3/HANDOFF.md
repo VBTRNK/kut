@@ -8,9 +8,9 @@ which still hold for everything this note doesn't change. Where this note
 and an artboard disagree, this note wins; where either disagrees with an ADR,
 the ADR wins until a new ADR changes it.
 
-**Status: awaiting the owner's approval** (S1 pause point, 2026-10-11).
-Nothing here is built. The owner's decisions go under "Owner decisions" at
-the end.
+**Status: approved by the owner** (#268 merged, 2026-10-11), including the
+flagged decisions DR4-4, DR4-7, DR4-11, DR4-12 and DR4-13. Nothing here is
+built yet. The owner's decisions are at the end.
 
 ## The canvas
 
@@ -31,6 +31,11 @@ the end.
   - measured every artboard in Chromium and failed if any scrolled sideways.
   The revised and new components were written as TSX in the app's idiom, so
   their class lists in the artboards can be lifted as they are.
+- **The generator's source is on the canvas** under `project/source/`
+  (`mocks.tsx.txt` and `pages.tsx.txt` are the TSX, renamed so the canvas
+  serves them; `README.txt` says how to rebuild). A build session can lift
+  the revised components from `mocks.tsx.txt` rather than from the
+  artboards' flattened HTML.
 - **Blue-grey dashed boxes** (B1, F1, E3) are design notes, not app copy.
 - **One theme (DR4-13).** FLUT has no light theme, so "both themes" can't
   apply. C2 shows the shoot-out in greyscale instead, as a check that colour
@@ -171,8 +176,9 @@ The row's group label carries the whole sentence:
 **DR4-7. The pre-match (Q2, S5).**
 
 - **Where.** A new page, `/midweek/[weekStart]/next/[round]/[pairing]`. It
-  opens when both feeders have ended (when calls open). At kick-off it polls
-  once and becomes the live match page.
+  opens when both feeders have ended (when calls open). From kick-off the
+  route redirects to the match page (plan S5 step 2), and a waiting page keeps
+  polling until it does.
 - **Its head.** Both clubs in their colours, `v`, `kick-off 20:30` and the
   ticking countdown.
 - **Its line.** `Both fives as they were locked at 19:55, with this week's
@@ -219,8 +225,13 @@ The row's group label carries the whole sentence:
 two-row grid (`grid grid-rows-2`, `grid-rows-1` for a single row) instead of
 `flex flex-col` with `flex-1` children. Its two pairings are then always
 equally tall, so the bracket line from the group's quarter points meets each
-pairing's middle. Confirm with the CI trace first, as #267 says; the tooltip
-half of #216 is a test fix.
+pairing's middle. The cause is not wrapping: names are `truncate`d on a
+non-wrapping row. It is a two-line match row sharing a group with a one-line
+bye row. A probe of the real `MidweekBracket` with the CI fixture's shape
+(five entrants, byes beside a match in round 1, Chromium at 1280 px)
+measured the round-1 pairings 4.6–5.5 px off their quarter points, and
+0.0 px with the two-row grid. The tooltip half of #216 is still a test fix
+to confirm from the CI trace.
 
 **DR4-11. Whose club it is.** Only the pre-match's five headings name both
 (`Sophie Saints` / `Sophie's five`): it is the one place a member studies an
@@ -320,4 +331,11 @@ None of these needs a migration beyond S2's.
 
 ## Owner decisions (DR4)
 
-_None yet: the owner reviews the canvas and this note (S1 pause point)._
+- **2026-10-11:** the owner approved the canvas and this note by merging
+  #268, including every decision flagged in it:
+  - one theme, with a greyscale check instead of a second theme (DR4-13);
+  - trialists keep the account name (DR4-12);
+  - the pre-match's five headings name the club and the account (DR4-11);
+  - calls can also be made on the pre-match; the bracket stays read-only
+    (DR4-7, amends DR3-6);
+  - `ShootoutKick` gains `keeper` (DR4-4).
