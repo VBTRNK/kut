@@ -76,23 +76,26 @@ the 14-day package-age hook.
 
 ## ADR-143 — One safety system for Claude and Codex
 
-Date: 2026-10-10 (S7 live tests, VibeTrunk/kut#212).
+Date: 2026-10-10 (S7 live tests, VibeTrunk/kut#212). Amended 2026-10-11.
 
 - Both agents run the same hook script (`block-dangerous-commands.cjs`, one
   copy per agent, kept identical by a unit test). A command it denies is
   blocked in both; this is proven live in each agent.
 - Codex setup on the owner's machine: the repo's hook trusted in Settings →
   Hooks (again after any change to `.codex/hooks.json`), `approval_policy =
-  "on-request"` with `approvals_reviewer = "user"`, and Codex started at the
-  repo root (the hook path is relative).
+  "on-request"` with `approvals_reviewer = "auto_review"` ("Approve for me",
+  the owner's default since 2026-10-11), and Codex started at the repo root
+  (the hook path is relative).
 - Codex limits, from its docs: a hook can only allow or deny, never ask; a hook
   that crashes or times out lets the command through. Hooks are a guardrail,
   not a complete boundary. The Windows launcher is therefore a plain `node`
   command, and a unit test runs it exactly as written.
-- Codex's `prompt` rules did not stop commands in the extension. In practice,
-  Codex commits and pushes reach the owner because the sandbox can't write
-  `.git` and has no network, so Codex must ask to run them outside it.
-  Approving "always" removes that check.
+- Codex's `prompt` rules did not stop commands in the extension. The sandbox
+  can't write `.git` and has no network, so Codex must ask to run commits and
+  pushes outside it. With auto review, Codex's automatic reviewer answers
+  that request, not the owner. Accepted for convenience: the owner may not
+  see a Codex commit or push beforehand, and the hooks still block the
+  destructive commands. Reviewer `user` restores the owner check.
 
 ## ADR-144 — Hosted migrations through a workflow in VibeTrunk/supabase
 
