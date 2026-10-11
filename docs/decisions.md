@@ -33,11 +33,13 @@ Date: 2026-10-09 (S3 spike, VibeTrunk/kut#212). Full text at the tag `docs-archi
 - No read-only role can read the auth tables on hosted (`postgres` has no grant
   option on schema `auth`), so the backup covers schema `kut` only, like the old
   local backup. Member accounts are not backed up.
-- `.github/workflows/backup.yml` runs nightly at 03:17 UTC as the read-only
+- `.github/workflows/backup.yml` runs nightly at 03:41 UTC as the read-only
   `kut_backup` role through the Session pooler. A privilege audit and a
   denied-insert check come first; the role never holds write or migration
   rights, and never the `postgres` credential (which ADR-144 allows only in
   the `VibeTrunk/supabase` migration workflow).
+- 2026-10-11: the schedule moved from 03:17 to 03:41 UTC (also an odd minute)
+  so that GitHub registers it again: the 03:17 runs started about 6.5 h late.
 - The dump and its manifest come from one snapshot, are age-encrypted to the
   owner's key and kept 30 days. A restore check in a disposable `kut_restore`
   stack must match the schema and row counts and sign a stand-in member in.
