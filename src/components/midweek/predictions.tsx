@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { saveMidweekCall } from "@/app/(app)/midweek/actions";
 import {
@@ -10,7 +11,9 @@ import {
   type CallSide,
 } from "@/lib/midweek/calls";
 import { formatClock } from "@/lib/midweek/entry";
+import { preMatchHref } from "@/lib/midweek/prematch";
 import { LiveMarker } from "./chip";
+import { useReached } from "./use-server-time";
 
 /** The foot under the block (HANDOFF "Copy", Calls). */
 export const CALLS_FOOT =
@@ -82,19 +85,27 @@ const OK = "text-moss";
  * Two toggle buttons, not radios, so a pick can be cleared (DR3-5): a tap
  * saves at once, tapping the other name changes it, tapping your pick again
  * clears it. No submit. Neutral, because a list of matches gets no team
- * colours (DR2-1).
+ * colours (DR2-1). An open card closes itself at kick-off on the corrected
+ * clock, from the server's render time `at` (ADR-149); the trigger still
+ * refuses a late call. With `preMatch`, it links to the match's pre-match.
  */
 function MidweekPredictCard({
-  card,
+  card: rendered,
   tournamentId,
   coins,
   paid,
+  at,
+  preMatch,
 }: {
   card: CallCard;
   tournamentId: string;
   coins: number;
   paid: boolean;
+  at: string | null;
+  preMatch: string | null;
 }) {
+  const kickedOff = useReached(rendered.kickoffAt, rendered.state === "open" ? at : null);
+  const card: CallCard = kickedOff ? { ...rendered, state: "closed" } : rendered;
   const [pick, setPick] = useState(card.pick);
   const [serverPick, setServerPick] = useState(card.pick);
   const [tap, setTap] = useState<Tap>(null);
@@ -186,6 +197,7 @@ function MidweekPredictCard({
 
   let status: ReactNode;
   if (tap?.kind === "saving") status = "Saving your pick…";
+  else if (kickedOff) status = settledStatus({ ...card, pick }, paid, coins);
   else if (tap?.kind === "cleared")
     status = `Pick cleared. Tap a name to call it. Closes at kick-off, ${kickoff}.`;
   else if ((tap?.kind === "saved" || tap?.kind === "changed") && pick !== null)
@@ -304,6 +316,14 @@ function MidweekPredictCard({
         <p aria-live="polite" className="text-[13px] leading-[1.45] text-ink-dim">
           {status}
         </p>
+        {preMatch && !closed && (
+          <Link
+            className="justify-self-start text-[13px] font-bold text-brass hover:underline"
+            href={preMatch}
+          >
+            Pre-match &rarr;
+          </Link>
+        )}
         {error && (
           <p className="text-[13px] text-brick" role="alert">
             {error}
@@ -324,8 +344,11 @@ function Called({ children }: { children: ReactNode }) {
 
 /**
  * `MidweekPredictions` (DR3 HANDOFF §2, ADR-118): on `/midweek` from the moment
- * the member is out. `Call the winners`, or `Your calls` once nothing is left
- * to call, then one card per later match.
+ * the member is out, and on a match's pre-match for that match (DR4-7,
+ * ADR-149). `Call the winners`, or `Your calls` once nothing is left to call,
+ * then one card per later match. `at` is the server's render time, for the
+ * cards' kick-off timers; with `weekStart`, an open card links to its
+ * pre-match.
  */
 export function MidweekPredictions({
   cards,
@@ -334,6 +357,8 @@ export function MidweekPredictions({
   coins,
   paid = false,
   foot = true,
+  at = null,
+  weekStart = null,
 }: {
   cards: readonly CallCard[];
   tournamentId: string;
@@ -341,6 +366,8 @@ export function MidweekPredictions({
   coins: number;
   paid?: boolean;
   foot?: boolean;
+  at?: string | null;
+  weekStart?: string | null;
 }) {
   const { title, note } = callsHeading(cards, rounds, paid);
   return (
@@ -358,10 +385,12 @@ export function MidweekPredictions({
       <ol className="grid gap-2.5">
         {cards.map((card) => (
           <MidweekPredictCard
+            at={at}
             card={card}
             coins={coins}
             key={`${card.round}/${card.pairing}`}
             paid={paid}
+            preMatch={weekStart ? preMatchHref(weekStart, card.round, card.pairing) : null}
             tournamentId={tournamentId}
           />
         ))}

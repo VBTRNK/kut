@@ -431,6 +431,8 @@ export default async function HowItWorksPage() {
               Round 1 comes out at {roundOneAt}, then a round {roundIntervalText(scheduleVersion)}{" "}
               until the final. Every match in play shows its score so far on the evening and the
               bracket; open it to follow it live, chance by chance, and kick by kick in a shoot-out.
+              Between rounds, a match whose two clubs are settled has a pre-match: both fives with
+              their Power for the week. The chances and each card&rsquo;s day roll come at kick-off.
             </li>
             <li>
               No TFH session the week before means a club break: no Midweek Madness that week.
@@ -591,9 +593,9 @@ export default async function HowItWorksPage() {
           </h3>
           <p>
             Once your own match is lost, you can call the winners of the matches still to come, on
-            the Midweek page. A match opens once both matches before it have ended and closes at its
-            kick-off. Until then, tap a name to call it, the other name to change it, or the same
-            name again to clear it.
+            the Midweek page or a match&rsquo;s pre-match. A match opens once both matches before it
+            have ended and closes at its kick-off. Until then, tap a name to call it, the other name
+            to change it, or the same name again to clear it.
           </p>
           <p>
             Every call that comes true pays {predictionCoins(5)} FLUT Coins with up to 32 entrants,{" "}

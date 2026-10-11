@@ -1158,6 +1158,45 @@ test.describe("Midweek Madness rows live (MM 3.0 S4, ADR-148)", () => {
   );
 });
 
+type OutMember = { login: string; round: number };
+
+/**
+ * Whoever goes out first before the final, a release account if one does, and
+ * the round they lose in. The field is the local stack's, so it can be a
+ * fixture member: then it gets the release password for this test (local rows
+ * the teardown deletes).
+ */
+async function outMember(
+  database: Client,
+  weekStart: string,
+  rounds: number,
+): Promise<OutMember | null> {
+  const lost = await database.query<{ id: string; username: string | null; round: number }>(
+    `select p.id, p.username, min(m.round)::int as round from kut.midweek_matches m
+     join kut.midweek_tournaments t on t.id = m.tournament_id
+     join kut.profiles p on p.id in (m.side_0_user_id, m.side_1_user_id)
+     where t.week_start = $1 and not m.bye and m.winner_user_id <> p.id
+       and (p.username in ('release_member', 'release_admin') or p.id::text like '00000097-%')
+     group by p.id, p.username
+     having min(m.round) < $2
+     order by (p.username is null), 3, p.username
+     limit 1`,
+    [weekStart, rounds],
+  );
+  const row = lost.rows[0];
+  if (!row) return null;
+  if (row.username) return { login: row.username, round: row.round };
+  const email = await database.query<{ email: string }>(
+    `update auth.users set encrypted_password = extensions.crypt($2, extensions.gen_salt('bf')),
+       email_confirmed_at = coalesce(email_confirmed_at, now()),
+       instance_id = '00000000-0000-0000-0000-000000000000',
+       confirmation_token = '', recovery_token = '', email_change_token_new = '', email_change = ''
+     where id = $1 returning email`,
+    [row.id, "fictional-release-password"],
+  );
+  return { login: email.rows[0].email, round: row.round };
+}
+
 test.describe("Midweek Madness calls (D, ADR-118)", () => {
   test.afterEach(async () => {
     await withDatabase(endFixtureEvening);
@@ -1169,46 +1208,15 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     await resetMidweek("release_member");
     let weekStart = "";
     let rounds = 0;
-    let out = null as { login: string; round: number } | null;
+    let out = null as OutMember | null;
     await withDatabase(async (database) => {
       ({ weekStart, rounds } = await startFixtureEvening(database));
-      // Whoever goes out first before the final, a release account if one does.
-      // The field is the local stack's, so it can be a fixture member: then it
-      // gets the release password for this test (local rows the teardown deletes).
-      const lost = await database.query<{ id: string; username: string | null; round: number }>(
-        `select p.id, p.username, min(m.round)::int as round from kut.midweek_matches m
-         join kut.midweek_tournaments t on t.id = m.tournament_id
-         join kut.profiles p on p.id in (m.side_0_user_id, m.side_1_user_id)
-         where t.week_start = $1 and not m.bye and m.winner_user_id <> p.id
-           and (p.username in ('release_member', 'release_admin') or p.id::text like '00000097-%')
-         group by p.id, p.username
-         having min(m.round) < $2
-         order by (p.username is null), 3, p.username
-         limit 1`,
-        [weekStart, rounds],
-      );
-      const row = lost.rows[0];
-      if (!row) return;
-      if (!row.username) {
-        const email = await database.query<{ email: string }>(
-          `update auth.users set encrypted_password = extensions.crypt($2, extensions.gen_salt('bf')),
-             email_confirmed_at = coalesce(email_confirmed_at, now()),
-             instance_id = '00000000-0000-0000-0000-000000000000',
-             confirmation_token = '', recovery_token = '', email_change_token_new = '', email_change = ''
-           where id = $1 returning email`,
-          [row.id, "fictional-release-password"],
-        );
-        out = { login: email.rows[0].email, round: row.round };
-      } else out = { login: row.username, round: row.round };
+      out = await outMember(database, weekStart, rounds);
       // A minute before the next round kicks off: every match before it has ended.
-      await advanceFixtureEvening(database, 3 + 15 * row.round);
+      if (out) await advanceFixtureEvening(database, 3 + 15 * out.round);
     });
     test.skip(!out, "Nobody in the fixture goes out before the final.");
-    await page.goto("/login");
-    await page.getByLabel("Username").fill(out!.login);
-    await page.getByLabel("Password").fill("fictional-release-password");
-    await page.getByRole("button", { name: "Sign in" }).click();
-    await expect(page).toHaveURL(/\/$/);
+    await signIn(page, out!.login);
 
     await page.goto("/midweek");
     const block = page.getByRole("region", { name: "Call the winners" });
@@ -1291,6 +1299,169 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     await page.goto("/how-it-works#midweek-calls");
     await expect(page.getByRole("heading", { name: "Calls, once you’re out" })).toBeVisible();
     await expectNoHorizontalOverflow(page);
+  });
+});
+
+test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
+  test.afterEach(async () => {
+    await withDatabase(endFixtureEvening);
+  });
+
+  /** Round 1's first match (never a bye) and the round-2 pairing it feeds. */
+  async function fedPairing(weekStart: string) {
+    let found = { matchId: "", pairing: 0 };
+    await withDatabase(async (database) => {
+      const first = await database.query<{ id: string; pairing: number }>(
+        `select m.id, m.pairing from kut.midweek_matches m
+         join kut.midweek_tournaments t on t.id = m.tournament_id
+         where t.week_start = $1 and m.round = 1 and not m.bye order by m.pairing limit 1`,
+        [weekStart],
+      );
+      found = { matchId: first.rows[0].id, pairing: first.rows[0].pairing >> 1 };
+    });
+    return found;
+  }
+
+  /** Round 2 starts 15 minutes after round 1 (ADR-104): `seconds` before its kick-off. */
+  const beforeRoundTwo = (seconds: number) => 15 * 60 - seconds;
+
+  test(
+    "between rounds: shown once both feeders end, absent while one plays, no win chance or day roll, live at kick-off",
+    { tag: "@narrow" },
+    async ({ page }) => {
+      await resetMidweek("release_member");
+      let weekStart = "";
+      await withDatabase(async (database) => {
+        ({ weekStart } = await startFixtureEvening(database));
+      });
+      const { matchId, pairing } = await fedPairing(weekStart);
+      const url = `/midweek/${weekStart}/next/2/${pairing}`;
+      await signIn(page, "release_member");
+      // Compile the routes before their timing matters.
+      await page.goto(url);
+      await page.goto(`/midweek/${weekStart}`);
+
+      // A minute into round 1: the pairing waits on a feeder in play.
+      await withDatabase((database) => moveFixtureEveningTo(database, matchId, 60));
+      await page.goto(url);
+      await expect(page.getByRole("heading", { level: 1, name: "Not settled yet" })).toBeVisible();
+      await expect(page.getByRole("link", { name: /^Watch .+ v .+ →$/ })).toBeVisible();
+      await expect(page.getByRole("region", { name: /: the five$/ })).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+      await page.goto(`/midweek/${weekStart}`);
+      await expect(page.getByRole("link", { name: /^Pre-match: Winner of / })).toHaveCount(0);
+
+      // Round 1 has ended (8:55 at the longest) and round 2 is 90 seconds away.
+      await withDatabase((database) => moveFixtureEveningTo(database, matchId, beforeRoundTwo(90)));
+      for (const where of ["/midweek", `/midweek/${weekStart}`]) {
+        await page.goto(where);
+        await expect(
+          page.getByRole("link", { name: /^Pre-match: .+ v .+, kick-off \d\d:\d\d$/ }).first(),
+          where,
+        ).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+      }
+      await page.goto("/midweek");
+      const night = page.getByRole("list", { name: "Your night" });
+      if ((await night.getByText(/^Next: .+\.$/).count()) > 0) {
+        await expect(night.getByRole("link", { name: "Pre-match →" })).toBeVisible();
+      }
+
+      const html = (await (await page.goto(url))!.text()).replace(/<!-- -->/g, "");
+      await expect(page).toHaveURL(new RegExp(`${url}$`));
+      // Nothing of the match before kick-off: no win chance, no day roll, no id.
+      expect(html).not.toMatch(/win_?chance|day_?rolls?_?ppm|dayRoll|match_id/i);
+      await expect(page.getByText(/\d%/)).toHaveCount(0);
+      await expect(
+        page.getByRole("group", { name: /^.+ v .+, kick-off \d\d:\d\d\.$/ }),
+      ).toBeVisible();
+      await expect(page.getByRole("timer")).toBeVisible();
+      const fives = page.getByRole("region", { name: /: the five$/ });
+      await expect(fives).toHaveCount(2);
+      for (const five of await fives.all()) {
+        await expect(five.getByText(/’s five/)).toBeVisible();
+        await expect(five.getByRole("definition")).toHaveCount(3);
+        await expect(
+          five.getByText(/ power, (strong|above ordinary|below ordinary|weak)$/),
+        ).toHaveCount(5);
+      }
+      await expect(page.getByText(/· goes live at kick-off$/)).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await expectNoHorizontalOverflow(page);
+
+      // At kick-off the page asks for itself and becomes the live match.
+      await withDatabase((database) => moveFixtureEveningTo(database, matchId, beforeRoundTwo(4)));
+      await page.goto(url);
+      await expect(page).toHaveURL(/\/match\/[0-9a-f-]{36}$/, { timeout: 20_000 });
+      await expect(page.getByText(/ · live$/)).toBeVisible();
+    },
+  );
+
+  test("a member who is out calls it on the pre-match, which closes at kick-off; a late call is refused", async ({
+    page,
+  }) => {
+    await resetMidweek("release_member");
+    let weekStart = "";
+    let rounds = 0;
+    let out = null as OutMember | null;
+    let kickoffMs = 0;
+    await withDatabase(async (database) => {
+      ({ weekStart, rounds } = await startFixtureEvening(database));
+      out = await outMember(database, weekStart, rounds);
+      if (!out) return;
+      // A minute before the next round kicks off: every match before it has ended.
+      await advanceFixtureEvening(database, 3 + 15 * out.round);
+      const next = await database.query<{ ms: string }>(
+        `select (extract(epoch from min(m.reveal_at)) * 1000)::bigint::text as ms
+         from kut.midweek_matches m join kut.midweek_tournaments t on t.id = m.tournament_id
+         where t.week_start = $1 and m.round = $2`,
+        [weekStart, out.round + 1],
+      );
+      kickoffMs = Number(next.rows[0].ms);
+    });
+    test.skip(!out, "Nobody in the fixture goes out before the final.");
+    await signIn(page, out!.login);
+    // The device clock runs on as ever, so it can be paused just before kick-off.
+    await page.clock.install();
+
+    await page.goto("/midweek");
+    await page
+      .getByRole("region", { name: "Call the winners" })
+      .getByRole("link", { name: "Pre-match →" })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/next\/\d+\/\d+$/);
+    const calls = page.getByRole("region", { name: "Call the winners" });
+    const card = calls.getByRole("group", { name: /, kick-off \d\d:\d\d\. Who wins\?$/ });
+    await expect(card).toHaveCount(1);
+    await expect(page.getByRole("region", { name: /: the five$/ })).toHaveCount(2);
+    await expect(calls.getByRole("link", { name: "Pre-match →" })).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+
+    // The server passes kick-off while this page still shows the call open:
+    // the trigger refuses it with its own words.
+    await withDatabase((database) => advanceFixtureEvening(database, 2));
+    const first = card.getByRole("button").first();
+    await expect(first).toBeEnabled();
+    await first.click();
+    await expect(calls.getByRole("alert")).toHaveText(
+      /^Couldn’t save: picks closed at kick-off, \d\d:\d\d\.$/,
+    );
+    await expect(first).toHaveAttribute("aria-pressed", "false");
+
+    // On the page's own clock, the card closes at kick-off, a second before the
+    // page asks for itself again.
+    const now = await page.evaluate(() => Date.now());
+    await page.clock.pauseAt(Math.max(now + 100, kickoffMs - 3_000));
+    for (let step = 0; step < 60 && (await first.isEnabled()); step += 1) {
+      await page.clock.runFor(250);
+    }
+    await expect(first).toBeDisabled();
+    await expect(page).toHaveURL(/\/next\/\d+\/\d+$/);
+    await expect(card.getByText("Closed at kick-off. You didn’t call this one.")).toBeVisible();
+    await page.clock.resume();
+    await expect(page).toHaveURL(/\/match\/[0-9a-f-]{36}$/, { timeout: 20_000 });
   });
 });
 

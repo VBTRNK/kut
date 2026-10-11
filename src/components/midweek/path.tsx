@@ -11,18 +11,22 @@ const ROW =
  * `MidweekPath`, "Your night": a row per round you played (a bye, a win with
  * its report and coins, the round you went out in), then a dashed row for the
  * match in play ("Playing Eline now.", ADR-115) or the next one, with what a
- * win would pay.
+ * win would pay, and `Pre-match →` once its opponent is settled (`preMatch`,
+ * DR4-7, ADR-149).
  */
 export function MidweekPath({
   rows,
   rounds,
   weekStart,
   now,
+  preMatch = null,
 }: {
   rows: readonly PathRow[];
   rounds: number;
   weekStart: string;
   now: string;
+  /** The next match's pre-match, once both its feeders have ended. */
+  preMatch?: string | null;
 }) {
   return (
     <ol aria-label="Your night" className="grid gap-2">
@@ -78,6 +82,17 @@ export function MidweekPath({
                   <b className="text-ink">Next{row.opponent ? `: ${row.opponent}` : ""}.</b>{" "}
                   Kick-off {formatClock(row.revealAt)},{" "}
                   <MidweekCountdown now={now} target={row.revealAt} />.
+                  {preMatch && (
+                    <>
+                      {" "}
+                      <Link
+                        className="font-extrabold whitespace-nowrap text-brass hover:underline"
+                        href={preMatch}
+                      >
+                        Pre-match &rarr;
+                      </Link>
+                    </>
+                  )}
                 </>
               )}
             </p>

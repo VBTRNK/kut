@@ -203,3 +203,29 @@ ADR-115 and ADR-147; design `design/mm3/HANDOFF.md` DR4-6 and DR4-10.
   test's pointer: focusing scrolled another factor under it, whose hover won.
 - **Load:** 16 matches in play, local production build: the evening about
   100 ms, the bracket about 70 ms (medians; budget 500 ms). No cache.
+
+## ADR-149 — The between-rounds pre-match, and calls made there
+
+Date: 2026-10-11 (Midweek Madness 3.0 S5, VibeTrunk/kut#267). Amends ADR-118
+and DR3-6; design `design/mm3/HANDOFF.md` DR4-7 and DR4-11.
+
+- **A later round's pairing has a pre-match** at
+  `/midweek/[weekStart]/next/[round]/[pairing]`, addressed by round and
+  pairing because a match id is public only from its kick-off. It opens once
+  both feeders have ended (when calls open), from round 1's kick-off at the
+  earliest, and from kick-off it redirects to the match page.
+- **Member-readable data only:** the pairing from the feeders' public results
+  and both fives from `midweek_entries_public` (the week's Power, the plusses
+  per line with the engine's `squadBalance`, keeper, injury, trialists). Never
+  the report's Why: the win chance and the day rolls still show only from
+  kick-off (Q2), so a call stays a judgement. The heads name the club, the
+  five headings the club and the account (DR4-11), read tolerantly.
+- **Calls are also made on the pre-match** (DR3-6 becomes: the evening and the
+  pre-match; the bracket stays read-only). An open call card now closes itself
+  at kick-off by a timer on the corrected clock (ADR-147 relied on the
+  refresh); the trigger still refuses a late call, and the card says so.
+- **Ways in:** upcoming rows with both clubs settled (`Pre-match`, dense
+  `Pre ›`), `Your night`'s next row and open call cards. While a round plays,
+  the evening lists the next round above `This round` once one of its
+  pairings has a pre-match. Before that, the URL says the pairing isn't
+  settled and links to a feeder in play.

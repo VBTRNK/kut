@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react";
 import { archetypeLabel } from "@/game/archetypes";
 import { MIDWEEK, PPM } from "@/game/midweek/config";
 import { handicapText } from "@/lib/midweek/evening";
+import { powerBand, powerBarWidth } from "@/lib/midweek/power";
 import { RATING } from "@/lib/midweek/report/rating-rule";
 import type { WhyCard, WhySide } from "@/lib/midweek/report/types";
 import { Chip } from "./chip";
@@ -25,45 +26,6 @@ import { MidweekRatingDisc } from "./rating-disc";
 /** A card's power in this match: the week's power, fixed at the lock, times this match's Day roll. */
 export function matchPower(card: Pick<WhyCard, "powerPpm" | "dayRollPpm">): number {
   return (card.powerPpm / PPM) * (card.dayRollPpm / PPM);
-}
-
-/** Strength bands for Power: pill text, tint, border and the band in words. Bars stay neutral. */
-const BANDS = [
-  {
-    min: 1.1,
-    word: "strong",
-    pill: "border-[#3c5230] bg-[#1c2416] text-[#8bbd6c]",
-  },
-  {
-    min: 1.0,
-    word: "above ordinary",
-    pill: "border-[#4a5030] bg-[#22241a] text-[#c3d27c]",
-  },
-  {
-    min: 0.9,
-    word: "below ordinary",
-    pill: "border-[#5c4419] bg-[#2b1f0a] text-[#e0ac4a]",
-  },
-  {
-    min: -Infinity,
-    word: "weak",
-    pill: "border-[#6a3524] bg-[#2a1712] text-[#e8794f]",
-  },
-] as const;
-
-/** The band of a power as shown, so "1.10" on screen is always strong. */
-export function powerBand(power: number) {
-  const shown = Number(power.toFixed(2));
-  return BANDS.find((band) => shown >= band.min)!;
-}
-
-const BAR_LOW = 0.5;
-const BAR_HIGH = 1.5;
-
-/** The bar's filled share of 0.50–1.50, in percent, never quite empty. */
-export function powerBarWidth(power: number): number {
-  const share = ((power - BAR_LOW) / (BAR_HIGH - BAR_LOW)) * 100;
-  return Math.round(Math.max(2, Math.min(100, share)) * 10) / 10;
 }
 
 /** A factor's effect as `+19%`, `−7%` or a dash. */

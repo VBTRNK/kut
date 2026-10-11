@@ -1,15 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { keepScores } from "@/components/midweek/player-name";
 import { ordinal } from "@/components/midweek/report";
-import {
-  FACTOR_EXPLANATIONS,
-  factorEffect,
-  matchPower,
-  powerBand,
-  powerBarWidth,
-} from "@/components/midweek/why-list";
+import { FACTOR_EXPLANATIONS, factorEffect, matchPower } from "@/components/midweek/why-list";
 import type { Archetype } from "@/game/archetypes";
 import { PPM } from "@/game/midweek/config";
+import { powerBand, powerBarWidth } from "@/lib/midweek/power";
 import { shortLines } from "@/lib/midweek/report/render";
 import type { ReportSide } from "@/lib/midweek/report/types";
 
