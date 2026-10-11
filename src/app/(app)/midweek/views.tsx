@@ -61,6 +61,7 @@ import { loadLiveMatch, type LiveMatch } from "@/lib/midweek/live-load";
 import { kickItems } from "@/lib/midweek/report/kicks";
 import {
   loadCalls,
+  loadLiveRowEvents,
   loadMyRewards,
   loadNightRatingsFor,
   loadWeekResults,
@@ -225,7 +226,7 @@ function RoundSection({
  *   pairings with their kick-off;
  * - `round` while you're in, and `out` (Evening-Out) once you've lost: your
  *   match live while it plays (Evening-YourMatch), your night, then the round
- *   in play ("This round", every other match in play with no score), or between
+ *   in play ("This round", every match live with its score so far), or between
  *   rounds the next round's kick-offs and the round just played;
  * - `final`, for everyone: the final live, chance by chance and kick by kick
  *   (Evening-FinalLive), and that coins and the champion follow its end.
@@ -270,6 +271,8 @@ export async function WeekEvening({
     youThrough: roundsYouAreIn(night, entered, rounds),
   });
   const autoUserIds = new Set(results.entries.filter((row) => row.auto).map((row) => row.user_id));
+  // Every match in play shows its score so far and links to watch it (ADR-148).
+  const rowEvents = await loadLiveRowEvents(supabase, results.matches);
   const bracket = assembleBracket({
     rounds,
     lockAt,
@@ -277,6 +280,7 @@ export async function WeekEvening({
     draw: results.draw,
     matches: results.matches,
     autoUserIds,
+    live: rowEvents ? { events: rowEvents, now } : undefined,
   });
   const roundOne = formatClock(bracket[0].kickoffAt);
   const finalAt = formatClock(bracket[rounds - 1].kickoffAt);

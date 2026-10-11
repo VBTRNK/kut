@@ -49,3 +49,13 @@ export function MidweekMatchClock({
     </>
   );
 }
+
+/**
+ * A row's minute in play (DR4-6, ADR-148): `64′`, ticking like the
+ * scoreboard's clock from public timing only and held at 90′. The row shows
+ * `pens` instead once a poll brings the shoot-out's first kick.
+ */
+export function MidweekRowMinute({ minute, clock }: { minute: number; clock: LiveClock }) {
+  const now = useServerTime(clock.at, 1_000);
+  return <>{Math.max(minute, matchMinute(clock.kickoffAt, clock.scheduleVersion, now))}′</>;
+}

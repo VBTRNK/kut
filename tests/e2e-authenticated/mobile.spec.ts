@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { Client } from "pg";
 import { BRAND } from "../../src/lib/brand";
 import { assertLocalTarget } from "../support/local-target";
@@ -51,6 +51,10 @@ async function expectMatchPageWhy(page: Page) {
   );
   const form = page.getByRole("button", { name: "Form", exact: true }).first();
   await expect(form).toHaveAccessibleDescription(/^The Player's form this week/);
+  // The click leaves the pointer where the boxes now open. If focusing scrolls
+  // another factor under it, Chromium's synthetic hover opens that one instead
+  // (KB-042, #216), so move the pointer off first.
+  await page.mouse.move(0, 0);
   await form.focus();
   const tip = page
     .getByRole("tooltip")
@@ -415,11 +419,7 @@ test.describe("Midweek Madness results (PR 8)", () => {
   test(
     "a completed week's bracket and a match report fit the screen",
     { tag: "@narrow" },
-    async ({ page }, testInfo) => {
-      test.fixme(
-        process.platform === "linux" && testInfo.project.name === "authenticated-pixel7",
-        "KB-042 (#216): the focused Form factor shows no tooltip on Linux at Pixel 7 size",
-      );
+    async ({ page }) => {
       await signIn(page, "release_member");
 
       // The picker carries last week's result with the way to its bracket.
@@ -521,10 +521,6 @@ test.describe("Midweek Madness results (PR 8)", () => {
   });
 
   test("from lg, every bracket line meets the match it leads to (KB-031)", async ({ page }) => {
-    test.fixme(
-      process.platform === "linux",
-      "KB-042 (#216): a round-1 pairing sits off its quarter point with Linux text metrics",
-    );
     await signIn(page, "release_member");
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(`/midweek/${COMPLETED_WEEK}`);
@@ -779,6 +775,12 @@ async function roundMatches(weekStart: string, round: number) {
   return result;
 }
 
+/** A live scoreboard, `Live, 48th minute: Mila 1, Eline 0`, never a row in play. */
+const LIVE_BOARD = /^Live, (?!.*Watch it\.$)/;
+
+/** A row in play (DR4-6, ADR-148): `Live, 48th minute: Mila 1, Eline 0. Watch it.` */
+const LIVE_ROW = /^Live, (?:\d+(?:st|nd|rd|th) minute|penalties): .+ \d+, .+ \d+.*\. Watch it\.$/;
+
 test.describe("Midweek Madness live (F6, ADR-115)", () => {
   test.afterEach(async () => {
     await withDatabase(endFixtureEvening);
@@ -814,14 +816,13 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
     await expect(eveningClock(page)).toHaveAccessibleName(/locked; [\w ]+ \d\d:\d\d, live/);
     if (mine) {
       await expect(page.getByRole("heading", { name: "Your match" })).toBeVisible();
-      await expect(page.getByRole("group", { name: /^Live, / })).toBeVisible();
+      await expect(page.getByRole("group", { name: LIVE_BOARD })).toBeVisible();
       await expect(page.getByRole("link", { name: "Watch it →" })).toBeVisible();
     }
     await expect(page.getByRole("heading", { name: "This round" })).toBeVisible();
     if (other) {
-      await expect(
-        page.getByRole("group", { name: /, in play\. The result shows at full time\.$/ }).first(),
-      ).toBeVisible();
+      // Every match in play is live on its row, with its score so far (ADR-148).
+      await expect(page.getByRole("group", { name: LIVE_ROW }).first()).toBeVisible();
     }
     // Nothing about round 1 reads as played yet.
     await expect(page.getByRole("group", { name: / won\.$/ })).toHaveCount(0);
@@ -835,7 +836,7 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
     // Every match in play is watched live (ADR-147).
     await page.goto(`/midweek/${weekStart}/match/${match.id}`);
     await expect(page.getByText(mine ? /· your match · live$/ : /^[^·]+ · live$/)).toBeVisible();
-    await expect(page.getByRole("group", { name: /^Live, / })).toBeVisible();
+    await expect(page.getByRole("group", { name: LIVE_BOARD })).toBeVisible();
     await expect(page.getByRole("heading", { name: "How it’s going" })).toBeVisible();
     await expect(page.getByText(/· checks every 10 seconds$/)).toBeVisible();
     await expect(page.getByText(/Goals and assists are added at full time\./)).toBeVisible();
@@ -864,7 +865,7 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
     await signIn(page, "release_member");
     await page.goto("/midweek");
     await expect(page.getByRole("heading", { level: 1, name: "The final is live" })).toBeVisible();
-    await expect(page.getByRole("group", { name: /^Live, / })).toBeVisible();
+    await expect(page.getByRole("group", { name: LIVE_BOARD })).toBeVisible();
     await expect(
       page.getByText(/^The champion is named and coins are paid when the final ends\./),
     ).toBeVisible();
@@ -1056,6 +1057,103 @@ test.describe("Midweek Madness, every match live (MM 3.0 S3, ADR-147)", () => {
     await expect(page.getByText("Decider", { exact: true })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });
+});
+
+test.describe("Midweek Madness rows live (MM 3.0 S4, ADR-148)", () => {
+  test.afterEach(async () => {
+    await withDatabase(endFixtureEvening);
+  });
+
+  /** The goals members may see now in these matches, counted from the stored events. */
+  async function goalsSoFar(ids: string[]) {
+    let goals = 0;
+    await withDatabase(async (database) => {
+      const counted = await database.query<{ goals: string }>(
+        `select count(*)::text as goals from kut.midweek_match_events
+         where match_id = any($1::uuid[]) and kind = 'chance' and outcome = 'goal'
+           and reveal_at <= now()`,
+        [ids],
+      );
+      goals = Number(counted.rows[0].goals);
+    });
+    return goals;
+  }
+
+  /** The goals the live rows show, summed: `… Mila 1, Eline 0. Watch it.` */
+  async function goalsShown(rows: Locator) {
+    let total = 0;
+    for (const name of await rows.evaluateAll((all) =>
+      all.map((row) => row.getAttribute("aria-label") ?? ""),
+    )) {
+      const [, a, b] = /: .+ (\d+), .+ (\d+)[,.]/.exec(name) ?? [];
+      total += Number(a) + Number(b);
+    }
+    return total;
+  }
+
+  test(
+    "every match in play shows Live, its score so far and a ticking minute, links to watch it, and no result",
+    { tag: "@narrow" },
+    async ({ page }) => {
+      await resetMidweek("release_member");
+      let weekStart = "";
+      await withDatabase(async (database) => {
+        ({ weekStart } = await startFixtureEvening(database));
+      });
+      const { matches } = await roundMatches(weekStart, 2);
+      const ids = matches.map((m) => m.id);
+      await signIn(page, "release_member");
+      // Compile both routes before their timing matters.
+      await page.goto("/midweek");
+      await page.goto(`/midweek/${weekStart}`);
+      // Round 2 kicked off 150 seconds ago: about the 48th minute.
+      await withDatabase((database) => moveFixtureEveningTo(database, matches[0].id, 150));
+
+      for (const url of ["/midweek", `/midweek/${weekStart}`]) {
+        const before = await goalsSoFar(ids);
+        const html = (await (await page.goto(url))!.text()).replace(/<!-- -->/g, "");
+        const after = await goalsSoFar(ids);
+        const rows = page.getByRole("group", { name: LIVE_ROW });
+        await expect(rows, url).toHaveCount(matches.length);
+        const shown = await goalsShown(rows);
+        expect(shown, url).toBeGreaterThanOrEqual(before);
+        expect(shown, url).toBeLessThanOrEqual(after);
+        // Nothing of round 2 reads as played: no result, no end, no report link.
+        expect(html, url).not.toMatch(/ends_at|on penalties\. /);
+        const round2 =
+          url === "/midweek"
+            ? page.getByRole("region", { name: "This round" })
+            : page.locator("#round-2");
+        await expect(round2.getByRole("group", { name: / won\.$/ }), url).toHaveCount(0);
+        await expect(round2.getByRole("link", { name: /^Match report: / }), url).toHaveCount(0);
+        await expect(round2.getByText("Full time"), url).toHaveCount(0);
+        await expectNoHorizontalOverflow(page);
+      }
+
+      // The minute ticks between polls (a minute is 3.1 seconds).
+      const minute = page
+        .getByRole("group", { name: LIVE_ROW })
+        .first()
+        .getByText(/^\d+′$/);
+      const first = await minute.textContent();
+      await expect(minute).not.toHaveText(first!, { timeout: 6_000 });
+
+      // Every row links to its match, live.
+      await page
+        .getByRole("link", { name: /^Watch it: .+ v .+$/ })
+        .first()
+        .click();
+      await expect(page).toHaveURL(/\/match\/[0-9a-f-]{36}$/);
+      await expect(page.getByText(/ · live$/)).toBeVisible();
+
+      // From lg the tree carries the same live rows, inside the screen.
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(`/midweek/${weekStart}`);
+      const tree = page.getByTestId("bracket-tree");
+      await expect(tree.getByRole("group", { name: LIVE_ROW })).toHaveCount(matches.length);
+      await expectNoHorizontalOverflow(page);
+    },
+  );
 });
 
 test.describe("Midweek Madness calls (D, ADR-118)", () => {

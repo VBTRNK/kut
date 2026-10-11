@@ -42,6 +42,7 @@ import {
 } from "@/lib/midweek/evening";
 import {
   loadCalls,
+  loadLiveRowEvents,
   loadMyRewards,
   loadNightRatingsFor,
   loadPickShares,
@@ -117,6 +118,9 @@ export default async function MidweekBracketPage({
 
   const now = new Date();
   const results = await loadWeekResults(supabase, tournament.tournament_id, now);
+  const evening = tournament.status === "simulated";
+  // Every match in play shows its score so far and links to watch it (ADR-148).
+  const rowEvents = evening ? await loadLiveRowEvents(supabase, results.matches) : null;
   const bracket = assembleBracket({
     rounds,
     lockAt,
@@ -124,8 +128,8 @@ export default async function MidweekBracketPage({
     draw: results.draw,
     matches: results.matches,
     autoUserIds: new Set(results.entries.filter((row) => row.auto).map((row) => row.user_id)),
+    live: rowEvents ? { events: rowEvents, now } : undefined,
   });
-  const evening = tournament.status === "simulated";
   const night = myNight({
     userId: user.id,
     rounds,

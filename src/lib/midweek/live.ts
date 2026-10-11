@@ -11,7 +11,7 @@
 import { MIDWEEK } from "@/game/midweek/config";
 import { scheduleFor } from "@/game/midweek/schedule";
 import type { ShootoutKick, TimelineItem } from "./report/types";
-import type { MatchRow } from "./rows";
+import type { EventRow, MatchRow } from "./rows";
 
 /**
  * Withholds the result of every match still in play: goals, penalties and the
@@ -78,6 +78,58 @@ export function matchMinute(
     0,
     Math.min(MIDWEEK.match.minutes, Math.floor((elapsed * MIDWEEK.match.minutes) / regulationMs)),
   );
+}
+
+/** "39th", "1st", "22nd": the minute as screen readers hear it. */
+export function ordinal(n: number): string {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return `${n}th`;
+  return `${n}${["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
+}
+
+/** What a row needs of a match's events: a member read, each row from its own moment. */
+export type RowEvent = Pick<EventRow, "match_id" | "kind" | "side" | "outcome">;
+
+/**
+ * A match in play as its row shows it (DR4-6, ADR-148): the goals so far, the
+ * kicks scored once its shoot-out has a kick to show, and the minute from the
+ * kick-off. Counted from `midweek_events_public`, which shows each event only
+ * from its own moment (ADR-106), so no report is rendered and nothing is read
+ * with the service role. A goal is a chance scored: a penalty kick shares the
+ * outcome but counts only in the shoot-out, and the settling draw is a `toss`.
+ */
+export type RowLive = {
+  goals: [number, number];
+  /** Kicks scored per side, from the shoot-out's first kick; null before it. */
+  penalties: [number, number] | null;
+  minute: number;
+  clock: LiveClock;
+};
+
+export function rowLive(input: {
+  match: Pick<MatchRow, "match_id" | "reveal_at">;
+  events: readonly RowEvent[];
+  scheduleVersion: number | null;
+  now: Date;
+}): RowLive {
+  const goals: [number, number] = [0, 0];
+  const kicks: [number, number] = [0, 0];
+  let shootout = false;
+  for (const event of input.events) {
+    if (event.match_id !== input.match.match_id) continue;
+    if (event.kind === "chance" && event.outcome === "goal") goals[event.side] += 1;
+    if (event.kind === "penalty") {
+      shootout = true;
+      if (event.outcome === "goal") kicks[event.side] += 1;
+    }
+  }
+  const at = input.now.toISOString();
+  return {
+    goals,
+    penalties: shootout ? kicks : null,
+    minute: matchMinute(input.match.reveal_at, input.scheduleVersion, input.now.getTime()),
+    clock: { kickoffAt: input.match.reveal_at, scheduleVersion: input.scheduleVersion, at },
+  };
 }
 
 /** A match in play, as it stands at `now`. */

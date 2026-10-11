@@ -77,8 +77,9 @@ function RoundTime({ round }: { round: BracketRound }) {
  * `MidweekBracket`. Below `lg`, the rounds as sections in order, each pair of
  * pairings joined by a bracket line naming the match its winners meet in.
  * From `lg`, the same data as a tree, one column per round (DR2-4). Every
- * round shows its kick-off, and every pairing its state: kick-off, full time,
- * or a bye (ADR-113). Your path is brass in both; names are neutral.
+ * round shows its kick-off, and every pairing its state: kick-off, live with
+ * the score so far (ADR-148), full time, or a bye (ADR-113). Your path is
+ * brass in both; names are neutral.
  *
  * HANDOFF drew the tree `aria-hidden` beside a list that is `display: none`
  * from `lg`, which leaves a screen reader nothing at that width. So the tree
@@ -177,8 +178,10 @@ export function MidweekBracket({
               const last = column === total - 1;
               const { rowStart, rowSpan } = treeGroupRows(round.round, index, group.length);
               return (
+                // Two equal rows (DR4-10, #216): a two-line match beside a
+                // one-line bye stays as tall, so the line meets both middles.
                 <div
-                  className={`relative flex flex-col ${ROW_START[rowStart] ?? ""} ${ROW_SPAN[rowSpan] ?? ""} ${
+                  className={`relative grid ${group.length === 2 ? "grid-rows-2" : "grid-rows-1"} ${ROW_START[rowStart] ?? ""} ${ROW_SPAN[rowSpan] ?? ""} ${
                     last
                       ? ""
                       : `after:absolute after:top-1/4 after:-right-[15px] after:bottom-1/4 after:w-3.5 after:rounded-r-md after:border-2 after:border-l-0 after:content-[''] ${mine ? "after:border-brass" : "after:border-line"}`
@@ -188,7 +191,7 @@ export function MidweekBracket({
                 >
                   {group.map((pair) => (
                     <div
-                      className={`relative flex flex-1 items-center py-[5px] ${
+                      className={`relative flex items-center py-[5px] ${
                         column > 0
                           ? `before:absolute before:top-1/2 before:-left-3.5 before:w-[13px] before:border-t-2 before:content-[''] ${hasYou(pair, you) ? "before:border-brass" : "before:border-line"}`
                           : ""

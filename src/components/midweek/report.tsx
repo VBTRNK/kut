@@ -1,9 +1,9 @@
 import type { Side } from "@/game/midweek/match";
-import type { LiveScore } from "@/lib/midweek/live";
+import { ordinal, type LiveScore } from "@/lib/midweek/live";
 import { shootoutStory } from "@/lib/midweek/report/kicks";
 import type { ShootoutReport, TimelineItem } from "@/lib/midweek/report/types";
 import { Chip } from "./chip";
-import { MidweekKickRow, MidweekMomentRow, MidweekShootoutTally, ordinal } from "./feed";
+import { MidweekKickRow, MidweekMomentRow, MidweekShootoutTally } from "./feed";
 import { MidweekMatchClock } from "./match-clock";
 import { PlayerName, ReportText } from "./player-name";
 

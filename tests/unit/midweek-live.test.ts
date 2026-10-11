@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { clockOffsetMs, correctedNowMs } from "@/lib/midweek/live-clock";
-import { liveView, maskInPlay, matchMinute } from "@/lib/midweek/live";
+import { assembleBracket, pairSentence } from "@/lib/midweek/evening";
+import { liveView, maskInPlay, matchMinute, rowLive, type RowEvent } from "@/lib/midweek/live";
 import { kickItems } from "@/lib/midweek/report/kicks";
 import type { ShootoutKick, TimelineItem } from "@/lib/midweek/report/types";
 import type { MatchRow } from "@/lib/midweek/rows";
@@ -191,5 +192,103 @@ describe("kickItems (DR4-4)", () => {
       [1, 1],
     ]);
     expect(items.every((kick) => kick.line === null && !kick.decider)).toBe(true);
+  });
+});
+
+describe("rows of matches in play (DR4-6, ADR-148)", () => {
+  const kickoffAt = "2026-10-14T18:00:00.000Z";
+  const at = (ms: number) => new Date(Date.parse(kickoffAt) + ms);
+  const ev = (kind: RowEvent["kind"], side: 0 | 1, outcome: RowEvent["outcome"], id = "m") => ({
+    match_id: id,
+    kind,
+    side,
+    outcome,
+  });
+  const regulation: RowEvent[] = [
+    ev("chance", 0, "goal"),
+    ev("chance", 1, "save"),
+    ev("chance", 1, "goal"),
+    ev("chance", 0, "woodwork"),
+    ev("chance", 1, "goal"),
+    // Another match's goal never counts here.
+    ev("chance", 0, "goal", "other"),
+  ];
+
+  it("counts chances scored per side, and the minute from the kick-off", () => {
+    expect(
+      rowLive({ match: row("m"), events: regulation, scheduleVersion: 2, now: at(199_200) }),
+    ).toEqual({
+      goals: [1, 2],
+      penalties: null,
+      minute: 64,
+      clock: { kickoffAt, scheduleVersion: 2, at: at(199_200).toISOString() },
+    });
+  });
+
+  it("counts kicks only in the shoot-out, from its first kick, and never the settling draw", () => {
+    const missFirst = [...regulation.slice(0, 3), ev("penalty", 0, "save")];
+    expect(
+      rowLive({ match: row("m"), events: missFirst, scheduleVersion: 2, now: at(285_000) }),
+    ).toMatchObject({ goals: [1, 1], penalties: [0, 0], minute: 90 });
+    const level = [
+      ev("chance", 0, "goal"),
+      ev("chance", 1, "goal"),
+      ev("penalty", 0, "goal"),
+      ev("penalty", 1, "goal"),
+      ev("penalty", 0, "wide"),
+      ev("penalty", 1, "save"),
+      ev("toss", 1, null),
+    ];
+    expect(
+      rowLive({ match: row("m"), events: level, scheduleVersion: 2, now: at(320_000) }),
+    ).toMatchObject({ goals: [1, 1], penalties: [1, 1] });
+  });
+
+  it("the bracket shows every match in play live with its score, and a week with no event times whole", () => {
+    const now = at(199_200);
+    const playing = row("m", {
+      winner_side: null,
+      winner_user_id: null,
+      side_0_goals: null,
+      side_1_goals: null,
+      in_play: true,
+    });
+    const bracket = (matches: MatchRow[], live = true) =>
+      assembleBracket({
+        rounds: 1,
+        lockAt: "2026-10-14T17:55:00.000Z",
+        scheduleVersion: 2,
+        matches,
+        autoUserIds: new Set(),
+        live: live ? { events: regulation, now } : undefined,
+      })[0].pairs[0];
+    const pair = bracket([playing]);
+    expect(pair).toMatchObject({ kind: "inplay", live: { goals: [1, 2], minute: 64 } });
+    expect(pairSentence(pair)).toBe("Live, 64th minute: Sanne 1, Eline 2. Watch it.");
+    // Without the events read, still live and linked, with no score.
+    expect(pairSentence(bracket([playing], false))).toBe("Live: Sanne v Eline. Watch it.");
+    // A week from before ADR-104 has no stored end, so it shows whole from the
+    // kick-off with its stored score; its events are never counted.
+    const [old] = maskInPlay([row("m")], new Map([["m", null]]), now);
+    const whole = bracket([old]);
+    expect(whole.kind).toBe("played");
+    expect(pairSentence(whole)).toBe("Sanne 1, Eline 0. Sanne won.");
+  });
+
+  it("names the shoot-out in the sentence", () => {
+    const pair = assembleBracket({
+      rounds: 1,
+      lockAt: "2026-10-14T17:55:00.000Z",
+      scheduleVersion: 2,
+      matches: [row("m", { winner_side: null, winner_user_id: null, in_play: true })],
+      autoUserIds: new Set(),
+      live: {
+        events: [ev("chance", 0, "goal"), ev("chance", 1, "goal"), ev("penalty", 0, "goal")],
+        now: at(290_000),
+      },
+    })[0].pairs[0];
+    expect(pairSentence(pair)).toBe(
+      "Live, penalties: Sanne 1, Eline 1, 1–0 in the shoot-out. Watch it.",
+    );
   });
 });
