@@ -153,3 +153,27 @@ Date: 2026-10-11 (after Midweek Madness 3.0 S2). Amends `docs/OPERATIONS.md`.
 - Running a reviewed read-only smoke inside the apply job is filed as
   VibeTrunk/supabase#87, for when migrations get frequent or a second tool
   joins.
+
+## ADR-147 — Every match live: feed, clock, readable shoot-out
+
+Date: 2026-10-11 (Midweek Madness 3.0 S3, VibeTrunk/kut#267, #263). Amends
+ADR-115; design `design/mm3/HANDOFF.md` DR4-1 to DR4-5.
+
+- **Every match in play is watched live** on its page by ADR-115's route: only
+  what is due by real time leaves the server. The "in play, result at full
+  time" match page is retired (rows follow in S4).
+- **The feed is newest on top** while live (kicks, `Penalties · 2–2 at 90′`,
+  moments, kick-off); the full-time report stays oldest first.
+- **The clock** ticks each second from the kick-off, the schedule version and
+  the server's render time, which corrects the device clock
+  (`src/lib/midweek/live-clock.ts`). It holds at 90′; penalties and full time
+  come only from the server. The same clock drives the countdowns and the
+  poller's wait for the next kick-off, whose refresh closes the calls card
+  (simpler than a client-side disable; the trigger stays the authority).
+- **Polling:** the match page every 10 s, 5 s in a shoot-out; the evening and
+  bracket 20 s. A waiting page polls on from its kick-off until a refresh
+  lands; a tab shown again refreshes at once.
+- **A kick** shows `Pen 3`, the outcome with the tally, and taker v keeper
+  (`ShootoutKick.keeper`). Its commentary and the decider show only at full
+  time, under their own kick (`ShootoutReport.decider`). A level shoot-out
+  stays live after its last kick until the draw's moment.

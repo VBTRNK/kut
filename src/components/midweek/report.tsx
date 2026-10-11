@@ -1,13 +1,13 @@
 import type { Side } from "@/game/midweek/match";
 import type { LiveScore } from "@/lib/midweek/live";
-import type {
-  MomentKind,
-  ShootoutKick,
-  ShootoutReport,
-  TimelineItem,
-} from "@/lib/midweek/report/types";
-import { Chip, LiveMarker } from "./chip";
-import { PlayerName, ReportText, TEAM_TEXT } from "./player-name";
+import { shootoutStory } from "@/lib/midweek/report/kicks";
+import type { ShootoutReport, TimelineItem } from "@/lib/midweek/report/types";
+import { Chip } from "./chip";
+import { MidweekKickRow, MidweekMomentRow, MidweekShootoutTally, ordinal } from "./feed";
+import { MidweekMatchClock } from "./match-clock";
+import { PlayerName, ReportText } from "./player-name";
+
+export { ordinal };
 
 /**
  * The match report's parts (BUILD_SPEC §44.10, design/ux-review/HANDOFF.md
@@ -23,9 +23,11 @@ export type Managers = readonly [string, string];
  * `MidweekScoreboard`: always side 0 on the left and side 1 on the right, from
  * the per-side goals, never the renderer's winner-first `score`; names and
  * digits in team colour, no chance counter (DR1-5), and both sides' fills as
- * a strip across the top (DR3-2). At full time Through and
- * Out chips; live (ADR-115) the score so far and `Live · 64′` or `Live · pens
- * 3–3`, with no chips until it ends.
+ * a strip across the top (DR3-2). At full time Through and Out chips. Live
+ * (ADR-115, DR4-2) the score so far, no chips until it ends, and on its own
+ * row under the score, so long names keep their width, the running clock
+ * `Live · 64′` or `Live · pens 3–3` with its progress line
+ * (`MidweekMatchClock`); Home's compact card keeps the minute under the score.
  */
 export function MidweekScoreboard({
   managers,
@@ -101,149 +103,49 @@ export function MidweekScoreboard({
           <p className="text-[11.5px] font-bold whitespace-nowrap text-live tabular-nums">
             {live.penalties ? `pens ${live.penalties[0]}–${live.penalties[1]}` : `${live.minute}′`}
           </p>
-        ) : live ? (
-          <LiveMarker>
-            Live &middot;{" "}
-            {live.penalties ? `pens ${live.penalties[0]}–${live.penalties[1]}` : `${live.minute}′`}
-          </LiveMarker>
-        ) : (
+        ) : live ? null : (
           <p className="text-[11.5px] font-bold whitespace-nowrap text-ink-faint tabular-nums">
             {penalties ? `${penalties[0]}–${penalties[1]} on pens` : "full time"}
           </p>
         )}
       </div>
       {side(1)}
+      {live && !compact && (
+        <MidweekMatchClock clock={live.clock} minute={live.minute} penalties={live.penalties} />
+      )}
     </div>
   );
 }
 
-const KIND_WORD: Record<MomentKind, string> = {
-  goal: "Goal",
-  save: "Save",
-  block: "Block",
-  woodwork: "Woodwork",
-  wide: "Wide",
-};
-
-/** "39th", "1st", "22nd": the minute as screen readers hear it. */
-export function ordinal(n: number): string {
-  const tens = n % 100;
-  if (tens >= 11 && tens <= 13) return `${n}th`;
-  return `${n}${["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
-}
-
-/** The score after a moment, the scoring side's digit emphasised. */
-function Score({ item }: { item: TimelineItem }) {
-  const [a, b] = item.score;
-  const goal = item.kind === "goal";
-  return (
-    <>
-      {goal && item.side === 0 ? <b className="font-black text-ink">{a}</b> : a}–
-      {goal && item.side === 1 ? <b className="font-black text-ink">{b}</b> : b}
-    </>
-  );
-}
-
 /**
- * `MidweekLaneTimeline` (HANDOFF "Matches"): the key moments in order, each
- * leaning to its side. In a column under 600 px: one lane, a side-0 chance
- * with a violet rail on the left and room on the right, a side-1 chance
- * mirrored. From 600 px of its own width (a container query, not the page):
- * two lanes either side of a minute-and-score spine. Each item says whose
- * chance it is in words for screen readers. On a live page (ADR-115) the
- * newest moment has a brass outline and slides in, unless the member asked for
- * reduced motion.
+ * `MidweekLaneTimeline` (HANDOFF "Matches"): the full-time report's key
+ * moments, oldest first, as a story under its headline (Q4), each leaning to
+ * its side (`MidweekMomentRow`). A live page shows `MidweekLiveFeed` instead,
+ * newest first.
  */
 export function MidweekLaneTimeline({
   timeline,
   managers,
-  live = false,
 }: {
   timeline: readonly TimelineItem[];
   managers: Managers;
-  live?: boolean;
 }) {
-  if (live && timeline.length === 0) {
-    return <p className="text-sm text-ink-faint">No chance yet.</p>;
-  }
   return (
     <div className="@container">
       <ol aria-label="Key moments" className="grid gap-2 @min-[600px]:gap-1.5">
-        {timeline.map((item, index) => {
-          const goal = item.kind === "goal";
-          const left = item.side === 0;
-          const newest = live && index === timeline.length - 1;
-          const whose = goal
-            ? `Goal for ${managers[item.side]}`
-            : `${managers[item.side]}’s chance`;
-          return (
-            <li
-              className="@min-[600px]:grid @min-[600px]:grid-cols-[minmax(0,1fr)_64px_minmax(0,1fr)] @min-[600px]:items-start"
-              key={index}
-            >
-              <div
-                className={`grid gap-1 rounded-xl px-3 py-2.5 text-sm leading-normal @min-[600px]:row-start-1 @min-[600px]:m-0 ${newest ? "mw-chance-in outline-1 outline-brass" : ""} ${
-                  left
-                    ? "mr-8 border-l-[3px] border-team-0-fill bg-team-0-bg/55 @min-[600px]:col-start-1"
-                    : "ml-8 border-r-[3px] border-team-1-fill bg-team-1-bg/55 @min-[600px]:col-start-3"
-                }`}
-              >
-                <p
-                  aria-hidden="true"
-                  className={`flex items-center gap-2 text-xs font-extrabold ${left ? "" : "flex-row-reverse"}`}
-                >
-                  <span className="text-ink-faint tabular-nums @min-[600px]:hidden">
-                    {item.minute}&prime;
-                  </span>
-                  <span
-                    className={`inline-flex items-center rounded-md border px-[7px] py-px text-[9.5px] font-black tracking-[0.1em] uppercase ${goal ? "border-brass bg-brass text-ink-on-accent" : "border-transparent bg-report-tag text-report-ink"}`}
-                  >
-                    {KIND_WORD[item.kind]}
-                  </span>
-                  <PlayerName side={item.side}>{managers[item.side]}</PlayerName>
-                  <span
-                    className={`text-ink-dim tabular-nums @min-[600px]:hidden ${left ? "ml-auto" : "mr-auto"}`}
-                  >
-                    <Score item={item} />
-                  </span>
-                </p>
-                <p className="sr-only">
-                  {ordinal(item.minute)} minute. {whose}.
-                </p>
-                <p className={`text-pretty ${goal ? "text-ink" : "text-ink-dim"}`}>
-                  <ReportText parts={item.parts} />
-                </p>
-                <p className="sr-only">
-                  Score: {managers[0]} {item.score[0]}, {managers[1]} {item.score[1]}.
-                </p>
-              </div>
-              <p
-                aria-hidden="true"
-                className="hidden justify-items-center gap-0.5 pt-2.5 text-xs font-extrabold text-ink-faint tabular-nums @min-[600px]:col-start-2 @min-[600px]:row-start-1 @min-[600px]:grid"
-              >
-                <span>{item.minute}&prime;</span>
-                <span className="text-[13px] text-ink">
-                  <Score item={item} />
-                </span>
-              </p>
-            </li>
-          );
-        })}
+        {timeline.map((item) => (
+          <MidweekMomentRow item={item} key={`m${item.minute}-${item.side}`} managers={managers} />
+        ))}
       </ol>
     </div>
   );
 }
 
-const KICK = "grid h-5 w-5 place-items-center rounded-full text-[11px] font-black";
-const SCORED = ["bg-team-0-fill text-ink-on-team-0", "bg-team-1-fill text-ink-on-team-1"] as const;
-const MISSED = "border-[1.5px] border-ink-faint text-ink-faint";
-
 /**
- * `MidweekShootout` at full time (HANDOFF "Shoot-out", static rows): per side
- * the manager, then the running total (DR2-5), then the kicks, scored filled
- * in team colour (✓), missed ringed (✕); a table of every kick for screen
- * readers; then the renderer's lines (the misses and the decider), the decider
- * emphasised.
+ * `MidweekShootout` at full time (#263, DR4-5): the tally, the intro line,
+ * then every kick in order as the live feed showed it, each with its own line
+ * of commentary under it (`shootoutStory`), the decider outlined in brass, and
+ * a draw's line last when a draw settled it.
  */
 export function MidweekShootout({
   shootout,
@@ -252,156 +154,31 @@ export function MidweekShootout({
   shootout: ShootoutReport;
   managers: Managers;
 }) {
+  const story = shootoutStory(shootout);
   return (
-    <section aria-labelledby="shootout-h" className="grid gap-2">
+    <section aria-labelledby="shootout-h" className="grid gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <h2 className="display text-3xl" id="shootout-h">
           Penalties
         </h2>
         <p className="text-[13px] text-ink-faint">{shootout.kicks.length} kicks</p>
       </div>
-      <div aria-hidden="true" className="grid gap-2">
-        {([0, 1] as const).map((s) => (
-          <div
-            className="grid grid-cols-[minmax(0,6.5rem)_1.75rem_minmax(0,1fr)] items-center gap-2.5"
-            key={s}
-          >
-            <span className="truncate text-sm">
-              <PlayerName side={s}>{managers[s]}</PlayerName>
-            </span>
-            <span className={`text-center text-xl font-black tabular-nums ${TEAM_TEXT[s]}`}>
-              {shootout.score[s]}
-            </span>
-            <span className="flex flex-wrap gap-1">
-              {shootout.kicks
-                .filter((kick) => kick.side === s)
-                .map((kick, index) => (
-                  <span
-                    className={`${KICK} ${kick.outcome === "goal" ? SCORED[s] : MISSED}`}
-                    key={index}
-                  >
-                    {kick.outcome === "goal" ? "✓" : "✕"}
-                  </span>
-                ))}
-            </span>
-          </div>
-        ))}
-      </div>
-      {/* A table ignores `sr-only`'s 1 px width and would widen a phone's
-          layout viewport, so a block clips it instead. */}
-      <div className="sr-only">
-        <table>
-          <caption>Every kick in order</caption>
-          <thead>
-            <tr>
-              <th scope="col">Round</th>
-              <th scope="col">Side</th>
-              <th scope="col">Kicker</th>
-              <th scope="col">Result</th>
-            </tr>
-          </thead>
-          <tbody>
-            {shootout.kicks.map((kick, index) => (
-              <tr key={index}>
-                <td>{kick.round}</td>
-                <td>{managers[kick.side]}</td>
-                <td>{kick.kicker}</td>
-                <td>{kick.outcome === "goal" ? "scored" : "missed"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <ol className="mt-1.5 grid gap-2">
-        {shootout.lineParts.map((parts, index) => {
-          const last = index === shootout.lineParts.length - 1;
-          return (
-            <li
-              className={`border-l-2 pl-3.5 text-[14.5px] leading-[1.55] text-pretty ${last ? "border-brass font-bold text-ink" : "border-line/70 text-ink-dim"}`}
-              key={index}
-            >
-              <ReportText parts={parts} />
-            </li>
-          );
-        })}
-      </ol>
-    </section>
-  );
-}
-
-/**
- * `MidweekShootoutLive` (HANDOFF "Shoot-out, live"): per side the manager, the
- * running total (DR2-5), then the kicks so far, filled in team colour (✓) or
- * ringed (✕), with dashed rings for the first five still to come. Grows in
- * place; a long sudden death wraps. The last kick is read out politely.
- */
-export function MidweekShootoutLive({
-  kicks,
-  penalties,
-  managers,
-}: {
-  kicks: readonly ShootoutKick[];
-  penalties: readonly [number, number];
-  managers: Managers;
-}) {
-  const last = kicks.at(-1) ?? null;
-  return (
-    <section aria-labelledby="shootout-h" className="grid gap-2">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-        <h2 className="display text-3xl" id="shootout-h">
-          Penalties
-        </h2>
-        <p className="text-[13px] text-ink-faint">
-          {kicks.length} {kicks.length === 1 ? "kick" : "kicks"} so far &middot; one every 5 seconds
-        </p>
-      </div>
-      <div className="grid gap-2">
-        {([0, 1] as const).map((s) => {
-          const taken = kicks.filter((kick) => kick.side === s);
-          return (
-            <div
-              aria-label={`${managers[s]}: ${penalties[s]} scored from ${taken.length}`}
-              className="grid grid-cols-[minmax(0,6.5rem)_1.75rem_minmax(0,1fr)] items-center gap-2.5"
-              key={s}
-              role="group"
-            >
-              <span aria-hidden="true" className="truncate text-sm">
-                <PlayerName side={s}>{managers[s]}</PlayerName>
-              </span>
-              <span
-                aria-hidden="true"
-                className={`text-center text-xl font-black tabular-nums ${TEAM_TEXT[s]}`}
-              >
-                {penalties[s]}
-              </span>
-              <span aria-hidden="true" className="flex flex-wrap gap-1">
-                {taken.map((kick, index) => (
-                  <span
-                    className={`${KICK} ${kick.outcome === "goal" ? SCORED[s] : MISSED}`}
-                    key={index}
-                  >
-                    {kick.outcome === "goal" ? "✓" : "✕"}
-                  </span>
-                ))}
-                {Array.from({ length: Math.max(0, 5 - taken.length) }, (_, index) => (
-                  <span
-                    className={`${KICK} border-[1.5px] border-dashed border-line`}
-                    key={`to-come-${index}`}
-                  />
-                ))}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-      <p aria-live="polite" className="text-sm text-ink">
-        {last && (
-          <>
-            Last kick: <PlayerName side={last.side}>{last.kicker}</PlayerName>{" "}
-            {last.outcome === "goal" ? "scores" : "misses"}.
-          </>
-        )}
+      <MidweekShootoutTally kicks={story.kicks} managers={managers} />
+      <p className="border-l-2 border-line/70 pl-3.5 text-[14.5px] leading-[1.55] text-pretty text-ink-dim">
+        <ReportText parts={story.intro} />
       </p>
+      <div className="@container">
+        <ol aria-label="Every kick in order" className="grid gap-2 @min-[600px]:gap-1.5">
+          {story.kicks.map((kick) => (
+            <MidweekKickRow key={`k${kick.side}-${kick.round}`} kick={kick} />
+          ))}
+        </ol>
+      </div>
+      {story.toss && (
+        <p className="border-l-2 border-brass pl-3.5 text-[14.5px] leading-[1.55] font-bold text-pretty text-ink">
+          <ReportText parts={story.toss} />
+        </p>
+      )}
     </section>
   );
 }

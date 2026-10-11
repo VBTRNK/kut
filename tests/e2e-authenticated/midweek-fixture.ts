@@ -1,5 +1,6 @@
 import type { Client } from "pg";
-import { lockAt, nextTournamentWeek } from "@/game/midweek/schedule";
+import { MIDWEEK } from "@/game/midweek/config";
+import { lockAt, nextTournamentWeek, scheduleFor } from "@/game/midweek/schedule";
 import { seedHash } from "@/game/midweek/rng";
 import {
   assertFixtureDatabase,
@@ -406,8 +407,28 @@ export async function advanceFixtureEvening(
   minutes: number,
   options: { runWorker?: boolean } = {},
 ) {
+  await shiftFixtureEvening(database, minutes * 60_000);
+  if (options.runWorker) await runWorker(database);
+}
+
+/**
+ * Moves tonight's evening so that one match kicked off `seconds` ago on this
+ * machine's clock, the one the app server reads (MM 3.0 S3).
+ */
+export async function moveFixtureEveningTo(database: Client, matchId: string, seconds: number) {
+  const match = await database.query<{ reveal_ms: string }>(
+    "select (extract(epoch from reveal_at) * 1000)::bigint::text as reveal_ms from kut.midweek_matches where id = $1",
+    [matchId],
+  );
+  await shiftFixtureEvening(
+    database,
+    Number(match.rows[0].reveal_ms) - (Date.now() - seconds * 1000),
+  );
+}
+
+async function shiftFixtureEvening(database: Client, ms: number) {
   const week = await fixtureWeek(database);
-  const shift = `${minutes} minutes`;
+  const shift = `${ms / 1000} seconds`;
   await database.query("begin");
   try {
     await database.query("set local session_replication_role = replica");
@@ -434,7 +455,121 @@ export async function advanceFixtureEvening(
     await database.query("rollback");
     throw error;
   }
-  if (options.runWorker) await runWorker(database);
+}
+
+/** A staged kick, from the stored winner's side or the loser's. */
+export type StagedKick = readonly ["winner" | "loser", "goal" | "save" | "woodwork" | "wide"];
+
+/**
+ * Rewrites one match of tonight's evening into a 0–0 that goes to penalties
+ * with exactly these kicks, and the settling draw after them when `draw`
+ * (MM 3.0 S3): the fixture's seeded evening has no shoot-out of a chosen
+ * shape. Its goals become shots off the woodwork, and the stored winner stays
+ * the winner, so the rest of the bracket still follows. Each kick and the draw
+ * get their moment as the engine times them (ADR-104), and the match ends with
+ * the last. Local stack only, with the guards bypassed as above.
+ */
+export async function stageShootout(
+  database: Client,
+  matchId: string,
+  kicks: readonly StagedKick[],
+  draw = false,
+) {
+  const match = await database.query<{
+    reveal_ms: string;
+    winner_side: 0 | 1;
+    side_0_user_id: string;
+    side_1_user_id: string;
+    tournament_id: string;
+    schedule_version: number;
+  }>(
+    `select (extract(epoch from m.reveal_at) * 1000)::bigint::text as reveal_ms, m.winner_side,
+       m.side_0_user_id, m.side_1_user_id, m.tournament_id, t.schedule_version
+     from kut.midweek_matches m join kut.midweek_tournaments t on t.id = m.tournament_id
+     where m.id = $1 and not m.bye`,
+    [matchId],
+  );
+  if (match.rowCount !== 1) throw new Error("No such match to stage a shoot-out in.");
+  const row = match.rows[0];
+  const keepers = await database.query<{ user_id: string; keeper_slot: number }>(
+    "select user_id, keeper_slot from kut.midweek_entries where tournament_id = $1 and user_id = any($2::uuid[])",
+    [row.tournament_id, [row.side_0_user_id, row.side_1_user_id]],
+  );
+  const keeperOf = (side: 0 | 1) =>
+    keepers.rows.find((k) => k.user_id === (side === 0 ? row.side_0_user_id : row.side_1_user_id))!
+      .keeper_slot;
+  const winner = row.winner_side;
+  const loser: 0 | 1 = winner === 0 ? 1 : 0;
+  const tally: [number, number] = [0, 0];
+  const taken: [number, number] = [0, 0];
+  const staged = kicks.map(([who, outcome]) => {
+    const side = who === "winner" ? winner : loser;
+    taken[side] += 1;
+    if (outcome === "goal") tally[side] += 1;
+    return { side, round: taken[side], outcome, keeper: keeperOf(side === 0 ? 1 : 0) };
+  });
+  if (draw ? tally[0] !== tally[1] : tally[winner] <= tally[loser]) {
+    throw new Error("A staged shoot-out must leave the stored winner the winner.");
+  }
+  const schedule = scheduleFor(row.schedule_version);
+  const regulationMs = MIDWEEK.match.chanceSlots * schedule.slotSeconds * 1000;
+  const kickMs = schedule.kickSeconds * 1000;
+  const at = (index: number) =>
+    new Date(Number(row.reveal_ms) + regulationMs + (index + 1) * kickMs).toISOString();
+
+  await database.query("begin");
+  try {
+    await database.query("set local session_replication_role = replica");
+    await database.query(
+      `update kut.midweek_match_events set outcome = 'woodwork', defender_slot = null
+       where match_id = $1 and kind = 'chance' and outcome = 'goal'`,
+      [matchId],
+    );
+    await database.query(
+      "delete from kut.midweek_match_events where match_id = $1 and kind in ('penalty', 'toss')",
+      [matchId],
+    );
+    const last = await database.query<{ seq: number }>(
+      "select coalesce(max(seq), -1) as seq from kut.midweek_match_events where match_id = $1",
+      [matchId],
+    );
+    let seq = last.rows[0].seq;
+    for (const [index, kick] of staged.entries()) {
+      seq += 1;
+      await database.query(
+        `insert into kut.midweek_match_events
+           (match_id, seq, kind, side, penalty_round, kicker_slot, keeper_slot, outcome, p_goal_ppm, reveal_at)
+         values ($1, $2, 'penalty', $3, $4, $5, $6, $7, 750000, $8)`,
+        [
+          matchId,
+          seq,
+          kick.side,
+          kick.round,
+          (kick.round - 1) % 5,
+          kick.keeper,
+          kick.outcome,
+          at(index),
+        ],
+      );
+    }
+    if (draw) {
+      seq += 1;
+      await database.query(
+        "insert into kut.midweek_match_events (match_id, seq, kind, side, reveal_at) values ($1, $2, 'toss', $3, $4)",
+        [matchId, seq, winner, at(staged.length)],
+      );
+    }
+    await database.query(
+      `update kut.midweek_matches set side_0_goals = 0, side_1_goals = 0,
+         side_0_penalties = $2, side_1_penalties = $3, ends_at = $4
+       where id = $1`,
+      [matchId, tally[0], tally[1], at(draw ? staged.length : staged.length - 1)],
+    );
+    await database.query("commit");
+  } catch (error) {
+    await database.query("rollback");
+    throw error;
+  }
 }
 
 /**

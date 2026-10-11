@@ -18,7 +18,7 @@ import {
   scheduleVersionOf,
   skipOrVoidNotice,
 } from "@/lib/midweek/entry";
-import { capitalise, fiveOf, isWeekStart, matchName, roundName } from "@/lib/midweek/evening";
+import { capitalise, isWeekStart, matchName } from "@/lib/midweek/evening";
 import { maskInPlay } from "@/lib/midweek/live";
 import { loadLiveMatch, loadMatchEnds } from "@/lib/midweek/live-load";
 import { reportInputFromRows, renderStoredReport } from "@/lib/midweek/report/from-db";
@@ -37,8 +37,8 @@ export const metadata = { title: "Midweek Madness match report" };
  * (design/ux-review `Match-Other-FullTime`, ADR-111), rendered on the server
  * from the stored match, its events and both sides' lock-time entries, every
  * name in its side's colour. A match that isn't revealed yet, a bye or a void
- * week has no report. A match in play shows live, or as in play, without its
- * result (`InPlayMatch`, ADR-115). Once the week is complete, the Why list
+ * week has no report. Every match in play shows live, chance by chance, without
+ * its result (`InPlayMatch`, ADR-115, ADR-147). Once the week is complete, the Why list
  * adds each card's rating for this match (`Match-Rated`, ADR-117); not
  * earlier, even at full time, because a rating needs the whole week's result.
  */
@@ -108,8 +108,7 @@ export default async function MidweekReportPage({
   if (entriesResponse.error) throw new Error("Could not load this match's squads.");
 
   // A match in play shows no result before its full time (ADR-106, ADR-115):
-  // live, chance by chance, for the member's own match and the final; any
-  // other match as "in play".
+  // every match live, chance by chance (ADR-147).
   const now = new Date();
   const ends =
     tournament.status === "simulated"
@@ -119,41 +118,30 @@ export default async function MidweekReportPage({
   if (shown.in_play) {
     const entries = (entriesResponse.data ?? []) as EntryCardRow[];
     const rounds = tournament.rounds;
-    const isFinal = shown.round === rounds;
+    const scheduleVersion = scheduleVersionOf(tournament);
     const yours =
       shown.side_0_user_id === user.id ? 0 : shown.side_1_user_id === user.id ? 1 : null;
-    const watched = isFinal || yours !== null;
     const live = await loadLiveMatch(supabase, {
       tournament: {
         tournament_id: tournament.tournament_id,
         seed_hash: tournament.seed_hash,
         rounds,
       },
-      scheduleVersion: scheduleVersionOf(tournament),
+      scheduleVersion,
       match: shown,
       now,
     });
-    const name = roundName(shown.round, rounds);
     const autoOf = (id: string | null) => entries.some((row) => row.user_id === id && row.auto);
     return (
       <InPlayMatch
         auto={[autoOf(shown.side_0_user_id), autoOf(shown.side_1_user_id)]}
         back={back}
-        fives={[shown.side_0_user_id, shown.side_1_user_id].flatMap((id) => {
-          const five = id ? fiveOf(entries, id) : null;
-          return five ? [five] : [];
-        })}
-        kicker={
-          isFinal
-            ? "The final · live"
-            : watched
-              ? `${name} · your match · live`
-              : `${name} · in play`
-        }
+        kickoffAt={shown.reveal_at}
+        kicker={`${capitalise(matchName(shown.round, shown.pairing, rounds))}${yours !== null ? " · your match" : ""} · live`}
         live={live}
         managers={[shown.side_0_name, shown.side_1_name ?? ""]}
         now={now.toISOString()}
-        watched={watched}
+        scheduleVersion={scheduleVersion}
         youSide={yours}
       />
     );

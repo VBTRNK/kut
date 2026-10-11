@@ -2,10 +2,10 @@
  * The live evening (MM 2.0 F6, ADR-115; data in ADR-106): which matches are in
  * play, and what a match in play shows at a given moment. Pure and client-safe.
  *
- * Every match unfolds at the same pace (owner decision Q7); a member watches
- * their own match and the final chance by chance, and sees every other match's
- * result at its full time. Nothing here decides a result: the moments, kicks
- * and score come from the stored match's rendered report, revealed by time.
+ * Every match unfolds at the same pace (owner decision Q7), and a member can
+ * watch any match in play chance by chance (MM 3.0, ADR-147). Nothing here
+ * decides a result: the moments, kicks and score come from the stored match's
+ * rendered report, revealed by time.
  */
 
 import { MIDWEEK } from "@/game/midweek/config";
@@ -45,8 +45,40 @@ export function maskInPlay(
   });
 }
 
-/** A match in play on a scoreboard: its running clock, or the shoot-out's tally once it has begun. */
-export type LiveScore = { minute: number; penalties: readonly [number, number] | null };
+/**
+ * A match in play on a scoreboard: its minute, or the shoot-out's tally once it
+ * has begun. With `clock`, the scoreboard's minute ticks on the client from
+ * public timing only (`MidweekMatchClock`, ADR-147).
+ */
+export type LiveScore = {
+  minute: number;
+  penalties: readonly [number, number] | null;
+  clock?: LiveClock;
+};
+
+/** What the running clock may know: the kick-off, the schedule and when the server rendered. */
+export type LiveClock = { kickoffAt: string; scheduleVersion: number | null; at: string };
+
+/**
+ * The match clock at `nowMs`, 0′ to 90′: kick-off plus the minute's share of
+ * the 14 chance slots (ADR-104), held at 90′. It never says what follows 90′:
+ * full time and penalties come only from the server (a late end would give a
+ * shoot-out away, ADR-106).
+ */
+export function matchMinute(
+  kickoffAt: string,
+  scheduleVersion: number | null,
+  nowMs: number,
+): number {
+  const schedule = scheduleFor(scheduleVersion);
+  const regulationMs = MIDWEEK.match.chanceSlots * schedule.slotSeconds * 1000;
+  if (regulationMs <= 0) return MIDWEEK.match.minutes;
+  const elapsed = nowMs - Date.parse(kickoffAt);
+  return Math.max(
+    0,
+    Math.min(MIDWEEK.match.minutes, Math.floor((elapsed * MIDWEEK.match.minutes) / regulationMs)),
+  );
+}
 
 /** A match in play, as it stands at `now`. */
 export type LiveView = {
@@ -54,7 +86,7 @@ export type LiveView = {
   minute: number;
   /** Goals so far, side 0 first. */
   score: [number, number];
-  /** The moments revealed so far, oldest first. */
+  /** The moments revealed so far, oldest first (the live feed shows them newest first). */
   timeline: TimelineItem[];
   /** The kicks taken so far, in order; empty before full time. */
   kicks: ShootoutKick[];
@@ -90,16 +122,7 @@ export function liveView(input: {
     kicks.filter((kick) => kick.side === side && kick.outcome === "goal").length;
   const shootout = input.kicks.length > 0 && elapsed >= regulationMs;
   return {
-    minute:
-      regulationMs > 0
-        ? Math.max(
-            0,
-            Math.min(
-              MIDWEEK.match.minutes,
-              Math.floor((elapsed * MIDWEEK.match.minutes) / regulationMs),
-            ),
-          )
-        : MIDWEEK.match.minutes,
+    minute: matchMinute(input.kickoffAt, input.scheduleVersion, input.now.getTime()),
     score: timeline.at(-1)?.score ?? [0, 0],
     timeline,
     kicks,

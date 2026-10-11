@@ -293,6 +293,13 @@ Part L item).
 - **Pages.** `/midweek` (picker, evening, champion), `/midweek/[weekStart]`,
   `/midweek/[weekStart]/match/[matchId]`, `/midweek/past`, all under the
   Compete tab (ADR-107). The admin page has the switch, a rehearsal and void.
+- **Live** (ADR-115, ADR-147). Every match in play is watchable on its page:
+  - a clock ticking each second on the corrected device clock, held at 90′;
+  - the feed newest on top: kicks, then the report's moments;
+  - each kick reads `Pen 3`, the outcome and tally, taker v keeper; its
+    commentary and the decider come only at full time (#263).
+  - Nothing shows before its real moment. The match page polls every 10 s
+    (5 s in a shoot-out), the evening and bracket every 20 s.
 
 **Part L:** 4, 5, 25, 26, 27, 28.
 
@@ -315,6 +322,8 @@ Part L item).
 - **Lazy trigger:** `src/lib/midweek/run-due.ts`, called from Home and every
   Midweek page.
 - **Reports:** a seeded phrasebook in `src/lib/midweek/report/` (ADR-093).
+- **Live:** `src/lib/midweek/{live,live-load,live-clock}.ts`; the feed and
+  shoot-out in `src/components/midweek/feed.tsx`.
 - **Simulation:** `tests/sim/`.
 
 **History.**

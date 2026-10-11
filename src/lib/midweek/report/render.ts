@@ -439,9 +439,11 @@ function renderShootout(
       side: kick.side,
       round: kick.round,
       kicker: nameText(names[kick.side][kick.kicker]),
+      keeper: nameText(names[kick.side === 0 ? 1 : 0][kick.keeper]),
       outcome: kick.outcome,
     })),
     score: outcome.penalties!,
+    decider: toss ? null : kicks.length - 1,
     lines: lines.map((line) => line.text),
     lineParts: lines.map((line) => line.parts),
   };

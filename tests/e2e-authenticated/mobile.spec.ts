@@ -8,9 +8,12 @@ import {
   COMPLETED_WEEK,
   endFixtureEvening,
   FIXTURE_PHOTO,
+  moveFixtureEveningTo,
   resetMidweekMember,
   setWeekArchetype,
+  stageShootout,
   startFixtureEvening,
+  type StagedKick,
 } from "./midweek-fixture";
 
 async function signIn(page: Page, username: string) {
@@ -829,26 +832,21 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
     await expect(page.getByRole("link", { name: /^Match report: / })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
 
+    // Every match in play is watched live (ADR-147).
     await page.goto(`/midweek/${weekStart}/match/${match.id}`);
-    if (mine) {
-      await expect(page.getByText(/· your match · live$/)).toBeVisible();
-      await expect(page.getByRole("group", { name: /^Live, / })).toBeVisible();
-      await expect(page.getByText("A new chance every 20 seconds")).toBeVisible();
-    } else {
-      await expect(page.getByText(/ · in play$/)).toBeVisible();
-      await expect(page.getByText(/^You’re not in this match, so it isn’t shown/)).toBeVisible();
-      await expect(page.getByRole("region", { name: /’s line-up$/ })).toHaveCount(2);
-    }
-    await expect(page.getByText(/· checks for new chances every 20 seconds$/)).toBeVisible();
+    await expect(page.getByText(mine ? /· your match · live$/ : /^[^·]+ · live$/)).toBeVisible();
+    await expect(page.getByRole("group", { name: /^Live, / })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "How it’s going" })).toBeVisible();
+    await expect(page.getByText(/· checks every 10 seconds$/)).toBeVisible();
     await expect(page.getByText(/Goals and assists are added at full time\./)).toBeVisible();
     await expect(page.getByRole("group", { name: /^Final score:/ })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
 
     if (mine && other) {
       await page.goto(`/midweek/${weekStart}/match/${other.id}`);
-      await expect(page.getByText(/ · in play$/)).toBeVisible();
-      await expect(page.getByText(/^You’re not in this match, so it isn’t shown/)).toBeVisible();
-      await expect(page.getByRole("region", { name: /’s line-up$/ })).toHaveCount(2);
+      await expect(page.getByText(/^[^·]+ · live$/)).toBeVisible();
+      await expect(page.getByRole("heading", { name: "How it’s going" })).toBeVisible();
+      await expect(page.getByText(/^You’re not in this match/)).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
     }
   });
@@ -875,11 +873,187 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`/midweek/${weekStart}/match/${matches[0].id}`);
     await expect(page.getByText(/^The final · live$/)).toBeVisible();
-    await expect(page.getByRole("heading", { name: "How it went" })).toBeVisible();
-    const story = await page.getByRole("heading", { name: "How it went" }).boundingBox();
+    await expect(page.getByRole("heading", { name: "How it’s going" })).toBeVisible();
+    const story = await page.getByRole("heading", { name: "How it’s going" }).boundingBox();
     const why = await page.getByRole("heading", { name: "Why" }).boundingBox();
     // From lg the Why sits beside the story.
     expect(why!.x).toBeGreaterThan(story!.x + 200);
+    await expectNoHorizontalOverflow(page);
+  });
+});
+
+test.describe("Midweek Madness, every match live (MM 3.0 S3, ADR-147)", () => {
+  test.afterEach(async () => {
+    await withDatabase(endFixtureEvening);
+  });
+
+  /** A round-2 match release_member isn't in: round 2 always has two, so one is someone else's. */
+  async function othersMatch() {
+    await resetMidweek("release_member");
+    let weekStart = "";
+    await withDatabase(async (database) => {
+      ({ weekStart } = await startFixtureEvening(database));
+    });
+    const { member, matches } = await roundMatches(weekStart, 2);
+    const other = matches.find((m) => m.side_0_user_id !== member && m.side_1_user_id !== member);
+    if (!other) throw new Error("The fixture evening has no round-2 match without release_member.");
+    return { matchId: other.id, url: `/midweek/${weekStart}/match/${other.id}` };
+  }
+
+  /** The page `seconds` after the match's kick-off, and the HTML it was served as. */
+  async function openAt(page: Page, url: string, matchId: string, seconds: number) {
+    await withDatabase((database) => moveFixtureEveningTo(database, matchId, seconds));
+    const response = await page.goto(url);
+    return (await response!.text()).replace(/<!-- -->/g, "");
+  }
+
+  /** What a live page must never carry before full time (ADR-106, ADR-115). */
+  function expectNoResult(html: string) {
+    expect(html).not.toMatch(/Final score|✓ Through|How it went|Decider|on pens|ends_at/);
+  }
+
+  /** A kick's moment after kick-off: 280 seconds of play, then one every 5 (ADR-104). */
+  const kickAt = (kick: number) => 280 + 5 * kick;
+
+  test(
+    "another member's match one minute in: its chances so far, a ticking clock, nothing of its result",
+    { tag: "@narrow" },
+    async ({ page }) => {
+      const { url, matchId } = await othersMatch();
+      await signIn(page, "release_member");
+      // Compile the route before its timing matters (the dev server compiles on first visit).
+      await page.goto(url);
+      const html = await openAt(page, url, matchId, 60);
+
+      await expect(page.getByText(/^[^·]+ · live$/)).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^.+ v .+$/);
+      await expect(page.getByRole("heading", { name: "How it’s going" })).toBeVisible();
+      await expect(page.getByText("Newest first")).toBeVisible();
+      await expect(page.getByText(/^Kick-off \d\d:\d\d$/)).toBeVisible();
+      await expect(page.getByText(/· checks every 10 seconds$/)).toBeVisible();
+      expectNoResult(html);
+      // No moment from after the minute the server rendered.
+      const rendered = Number(/Live, (\d+)(?:st|nd|rd|th) minute/.exec(html)?.[1]);
+      expect(rendered).toBeGreaterThanOrEqual(19);
+      for (const [, minute] of html.matchAll(/(\d+)(?:st|nd|rd|th) minute\. /g)) {
+        expect(Number(minute)).toBeLessThanOrEqual(rendered);
+      }
+      // The clock ticks between polls (a minute is 3.1 seconds).
+      const timer = page.getByRole("timer");
+      await expect(timer).toHaveText(/^Live · \d+′$/);
+      const first = await timer.textContent();
+      await expect(timer).not.toHaveText(first!, { timeout: 6_000 });
+      await expectNoHorizontalOverflow(page);
+
+      await page.setViewportSize({ width: 1440, height: 900 });
+      const story = await page.getByRole("heading", { name: "How it’s going" }).boundingBox();
+      const why = await page.getByRole("heading", { name: "Why" }).boundingBox();
+      expect(why!.x).toBeGreaterThan(story!.x + 200);
+      await expectNoHorizontalOverflow(page);
+    },
+  );
+
+  test(
+    "a long sudden death kick by kick (#263), then each kick's line and the decider at full time",
+    { tag: "@narrow" },
+    async ({ page }) => {
+      const { url, matchId } = await othersMatch();
+      // Six kicks each scored, then the loser's seventh saved: 14 kicks, 7–6.
+      const kicks: StagedKick[] = [
+        ...Array.from({ length: 6 }, (): StagedKick[] => [
+          ["loser", "goal"],
+          ["winner", "goal"],
+        ]).flat(),
+        ["loser", "save"],
+        ["winner", "goal"],
+      ];
+      await withDatabase((database) => stageShootout(database, matchId, kicks));
+      await signIn(page, "release_member");
+      await page.goto(url);
+      const html = await openAt(page, url, matchId, kickAt(12) + 2.5);
+
+      await expect(page.getByRole("timer")).toHaveText(/^Live · pens \d+–\d+$/);
+      await expect(page.getByText(/· checks every 5 seconds$/)).toBeVisible();
+      await expect(page.getByText("Penalties · 0–0 at 90′")).toBeVisible();
+      await expect(page.getByRole("group", { name: /: \d+ scored from \d+$/ })).toHaveCount(2);
+      const feed = page.getByRole("list", { name: "The match so far, newest first" });
+      const shownKicks = feed.getByText(/^(Latest\. )?Penalty \d+: /);
+      const shown = await shownKicks.count();
+      expect(shown).toBeGreaterThanOrEqual(12);
+      expect(shown).toBeLessThan(14);
+      await expect(page.getByText(`${shown} kicks so far · one every 5 seconds`)).toBeVisible();
+      await expect(shownKicks.first()).toHaveText(/^Latest\. Penalty \d+: /);
+      // Exactly the kicks due are in the page.
+      expect(html.match(/Penalty \d+: /g)).toHaveLength(shown);
+      expectNoResult(html);
+      await expectNoHorizontalOverflow(page);
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await expectNoHorizontalOverflow(page);
+
+      await withDatabase((database) => moveFixtureEveningTo(database, matchId, kickAt(14) + 1));
+      await page.reload();
+      await expect(page.getByRole("group", { name: /won 7–6 on penalties\.$/ })).toBeVisible();
+      await expect(page.getByText("14 kicks", { exact: true })).toBeVisible();
+      const story = page.getByRole("list", { name: "Every kick in order" });
+      await expect(story.getByRole("listitem")).toHaveCount(14);
+      await expect(story.getByText("Decider", { exact: true })).toHaveCount(1);
+      await expect(story.getByRole("listitem").last()).toContainText("Decider");
+      await expect(story.getByRole("listitem").nth(12)).toContainText("saved");
+      await expectNoHorizontalOverflow(page);
+    },
+  );
+
+  test("an early-decided shoot-out shows nothing of its end before its deciding kick", async ({
+    page,
+  }) => {
+    const { url, matchId } = await othersMatch();
+    await withDatabase((database) =>
+      stageShootout(database, matchId, [
+        ["loser", "save"],
+        ["winner", "goal"],
+        ["loser", "wide"],
+        ["winner", "goal"],
+        ["loser", "woodwork"],
+        ["winner", "goal"],
+      ]),
+    );
+    await signIn(page, "release_member");
+    await page.goto(url);
+    const html = await openAt(page, url, matchId, kickAt(5) + 2.5);
+    await expect(page.getByRole("timer")).toHaveText(/^Live · pens (0–2|2–0)$/);
+    await expect(page.getByText("5 kicks so far · one every 5 seconds")).toBeVisible();
+    await expect(page.getByText("Miss", { exact: true })).toHaveCount(3);
+    expectNoResult(html);
+
+    await withDatabase((database) => moveFixtureEveningTo(database, matchId, kickAt(6) + 1));
+    await page.reload();
+    await expect(page.getByRole("group", { name: /won 3–0 on penalties\.$/ })).toBeVisible();
+    await expect(page.getByText("6 kicks", { exact: true })).toBeVisible();
+    await expect(page.getByText("Decider", { exact: true })).toHaveCount(1);
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("a shoot-out still level after every kick stays live until the draw settles it", async ({
+    page,
+  }) => {
+    const { url, matchId } = await othersMatch();
+    const level = Array.from({ length: 5 }, (): StagedKick[] => [
+      ["loser", "goal"],
+      ["winner", "goal"],
+    ]).flat();
+    await withDatabase((database) => stageShootout(database, matchId, level, true));
+    await signIn(page, "release_member");
+    await page.goto(url);
+    // After the tenth kick, before the draw five seconds later.
+    const html = await openAt(page, url, matchId, kickAt(10) + 2.5);
+    await expect(page.getByRole("timer")).toHaveText("Live · pens 5–5");
+    await expect(page.getByText("10 kicks so far · one every 5 seconds")).toBeVisible();
+    expectNoResult(html);
+
+    await withDatabase((database) => moveFixtureEveningTo(database, matchId, kickAt(11) + 1));
+    await page.reload();
+    await expect(page.getByRole("group", { name: /won 5–5 on penalties\.$/ })).toBeVisible();
+    await expect(page.getByText("Decider", { exact: true })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });
 });
