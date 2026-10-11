@@ -1118,8 +1118,10 @@ test.describe("Midweek Madness rows live (MM 3.0 S4, ADR-148)", () => {
         const shown = await goalsShown(rows);
         expect(shown, url).toBeGreaterThanOrEqual(before);
         expect(shown, url).toBeLessThanOrEqual(after);
-        // Nothing of round 2 reads as played: no result, no end, no report link.
-        expect(html, url).not.toMatch(/ends_at|on penalties\. /);
+        // Nothing of round 2 reads as played: no end in the payload, and no
+        // result, report link or full time in its section (round 1's played
+        // rows may say "on penalties").
+        expect(html, url).not.toMatch(/ends_at/);
         const round2 =
           url === "/midweek"
             ? page.getByRole("region", { name: "This round" })
