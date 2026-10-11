@@ -286,8 +286,10 @@ Part L item).
     matches after round 1, at most 30 a night (ADR-118, ADR-149).
   - Every entrant gets one `midweek_result` message (ADR-109).
 - **After the night.**
-  - Cards get night ratings from 1 to 10 (ADR-117). These are display only and
-    never touch OVR.
+  - Cards get ratings from 1 to 10 (ADR-117). These are display only and
+    never touch OVR. A match's ratings show from its full time, on its report
+    and on the evening under `Your night` (ADR-150); the night's rating and
+    line come once the week is complete.
   - Share images: a champion poster and "my night", drawn in the browser
     (ADR-120).
 - **Pages.** `/midweek` (picker, evening, champion), `/midweek/[weekStart]`,

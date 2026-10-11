@@ -229,3 +229,24 @@ and DR3-6; design `design/mm3/HANDOFF.md` DR4-7 and DR4-11.
   the evening lists the next round above `This round` once one of its
   pairings has a pre-match. Before that, the URL says the pairing isn't
   settled and links to a feeder in play.
+
+## ADR-150 — A match's ratings from its full time
+
+Date: 2026-10-11 (Midweek Madness 3.0 S6, VibeTrunk/kut#267). Amends ADR-117
+("shown once the week is complete"); design `design/mm3/HANDOFF.md` DR4-8.
+
+- **Why it needed no data change:** `matchRatings` is a pure function of one
+  match's events and result, and the rating already includes the result, so it
+  can never show before full time. The week's end was a display choice, not a
+  data need.
+- **The report** shows each card's rating for that match as soon as the match
+  has ended (the Why's discs, both sides), not once the week is complete. The
+  in-play branch is still returned first, so a match in play carries none.
+- **The evening** adds `Your five against {opponent}` under `Your night`
+  (`MidweekMatchRatings`): the member's latest finished match, best first, no
+  ★ and no lines, with a link to its report. It shows from that match's full
+  time until the next one ends. The loader reads one match's events and
+  degrades to no block if the read fails.
+- **Unchanged:** the night's rating, its line and `★ Best` (the mean of the
+  matches, a line keyed on the seed hash) still wait for the week to be
+  complete and take this block's place. Names stay the account's here (Q7).

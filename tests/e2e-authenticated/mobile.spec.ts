@@ -1465,6 +1465,88 @@ test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
   });
 });
 
+test.describe("Midweek Madness ratings at full time (MM 3.0 S6, ADR-150)", () => {
+  test.afterEach(async () => {
+    await withDatabase(endFixtureEvening);
+  });
+
+  const RATED = /^rated \d+\.\d out of 10 for this match$/;
+
+  test(
+    "a match is rated at its full time, on its report and under Your night, and not before; the night waits",
+    { tag: "@narrow" },
+    async ({ page }) => {
+      await resetMidweek("release_member");
+      let weekStart = "";
+      await withDatabase(async (database) => {
+        ({ weekStart } = await startFixtureEvening(database));
+      });
+      const round1 = await roundMatches(weekStart, 1);
+      const round2 = await roundMatches(weekStart, 2);
+      const first = round1.matches[0];
+      const mine = round1.matches.find(
+        (m) => m.side_0_user_id === round1.member || m.side_1_user_id === round1.member,
+      );
+      let length = 0;
+      await withDatabase(async (database) => {
+        const row = await database.query<{ seconds: number }>(
+          "select extract(epoch from ends_at - reveal_at)::int as seconds from kut.midweek_matches where id = $1",
+          [first.id],
+        );
+        length = row.rows[0].seconds;
+      });
+      const report = (id: string) => `/midweek/${weekStart}/match/${id}`;
+      await signIn(page, "release_member");
+      // Compile the routes before their timing matters.
+      await page.goto(report(first.id));
+      await page.goto("/midweek");
+
+      // Twenty seconds before full time: in play, so no rating anywhere in the page.
+      await withDatabase((database) => moveFixtureEveningTo(database, first.id, length - 20));
+      const before = (await (await page.goto(report(first.id)))!.text()).replace(/<!-- -->/g, "");
+      expect(before).not.toMatch(/out of 10 for this match|ends_at/);
+      await expect(page.getByText(/ · live$/)).toBeVisible();
+      await expect(page.getByText(RATED)).toHaveCount(0);
+
+      // Round 2 is a minute in: round 1 has ended, and round 2's page is still unrated.
+      await withDatabase((database) => moveFixtureEveningTo(database, round2.matches[0].id, 60));
+      const playing = (await (await page.goto(report(round2.matches[0].id)))!.text()).replace(
+        /<!-- -->/g,
+        "",
+      );
+      expect(playing).not.toMatch(/out of 10 for this match/);
+
+      for (const width of [320, 412]) {
+        await page.setViewportSize({ width, height: 800 });
+        await page.goto(report(first.id));
+        await expect(page.getByRole("heading", { name: "How it went" })).toBeVisible();
+        // Five cards a side, each with a disc, while the week is still running.
+        await expect(page.getByText(RATED)).toHaveCount(10);
+        await expect(page.getByText(/^Rating$/).first()).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+
+        await page.goto("/midweek");
+        const block = page.getByRole("region", { name: /^Your five against / });
+        if (mine) {
+          await expect(block).toBeVisible();
+          await expect(block.getByText(RATED)).toHaveCount(5);
+          await expect(block.getByText(/ · out of 10 for this match$/)).toBeVisible();
+          await expect(block.getByRole("link", { name: "Report →" })).toHaveAttribute(
+            "href",
+            report(mine.id),
+          );
+          // The night's block, its lines and its star wait for the week to be complete.
+          await expect(block.getByText("★")).toHaveCount(0);
+        } else {
+          await expect(block).toHaveCount(0);
+        }
+        await expect(page.getByRole("region", { name: "Your five’s ratings" })).toHaveCount(0);
+        await expectNoHorizontalOverflow(page);
+      }
+    },
+  );
+});
+
 test.describe("Midweek Madness share images (F8, ADR-120)", () => {
   // One fixture Player of the champion's five gets a real local photo, so the
   // canvas draws a photo fetched from Storage; a tainted canvas couldn't export.

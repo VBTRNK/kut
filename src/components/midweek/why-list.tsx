@@ -18,7 +18,7 @@ import { MidweekRatingDisc } from "./rating-disc";
  * factor boxes under every card, and each box's label explains itself on
  * hover, tap or focus. No tables, so nothing scrolls sideways at any width;
  * bars are SVG with `width` attributes because the CSP blocks inline styles.
- * Once the week is complete each card also shows its rating for this match
+ * From full time each card also shows its rating for this match
  * (DR3 HANDOFF §1, ADR-117): an untinted disc on the right, apart from the
  * Power pill on the left in shape, side, range and colour.
  */
@@ -141,7 +141,7 @@ function CardRow({
   setTips,
 }: {
   card: WhyCard;
-  /** This match's rating, once the week is complete. */
+  /** This match's rating, from its full time. */
   rating: number | null;
   open: boolean;
   tipKey: string;
@@ -213,7 +213,7 @@ export function MidweekWhyList({
   why: readonly [WhySide, WhySide];
   /** A match in play: its goals and assists are left out until full time (ADR-115). */
   beforeFullTime?: boolean;
-  /** Each card's rating for this match by side and slot, once the week is complete (ADR-117). */
+  /** Each card's rating for this match by side and slot, from its full time (ADR-117, ADR-150). */
   ratings?: readonly [readonly number[], readonly number[]] | null;
 }) {
   const [open, setOpen] = useState(false);
