@@ -181,7 +181,7 @@ const sumTallies = (tallies: readonly CardTally[]): CardTally =>
 const ORDINALS = ["first", "second", "third", "fourth", "fifth"];
 
 /** The card names on one side, as the report spells them: a trialist is the manager's. */
-function cardNames(input: ReportInput, side: Side): string[] {
+export function cardNames(input: ReportInput, side: Side): string[] {
   const own = input.sides[side];
   const trialists = own.cards.filter((card) => card.name === null).length;
   let seen = 0;

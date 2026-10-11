@@ -562,8 +562,9 @@ export default async function HowItWorksPage() {
             Ratings
           </h3>
           <p>
-            Once the week is paid, every card you entered gets a rating out of 10 for each match it
-            played, and one for the night: the mean of its matches. A bye isn&rsquo;t a match.
+            Every card you entered gets a rating out of 10 for each match it plays, the moment that
+            match ends, and one for the night once the week is paid: the mean of its matches. A bye
+            isn&rsquo;t a match.
           </p>
           <ul className="ml-5 list-disc space-y-1">
             <li>
@@ -584,9 +585,10 @@ export default async function HowItWorksPage() {
             </li>
           </ul>
           <p>
-            Your five&rsquo;s ratings are on the champion page until Thursday night and on that
-            week&rsquo;s bracket for good. Every match report shows each card&rsquo;s rating for
-            that match.
+            During the night, the evening shows your five&rsquo;s ratings for the match you just
+            played. After the final the night&rsquo;s ratings are on the champion page until
+            Thursday night and on that week&rsquo;s bracket for good. Every match report shows each
+            card&rsquo;s rating for that match from its full time.
           </p>
           <h3 className="scroll-mt-6 pt-2 font-black text-ink" id="midweek-calls">
             Calls, once you&rsquo;re out

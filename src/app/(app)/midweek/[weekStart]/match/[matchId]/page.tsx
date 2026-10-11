@@ -38,9 +38,9 @@ export const metadata = { title: "Midweek Madness match report" };
  * from the stored match, its events and both sides' lock-time entries, every
  * name in its side's colour. A match that isn't revealed yet, a bye or a void
  * week has no report. Every match in play shows live, chance by chance, without
- * its result (`InPlayMatch`, ADR-115, ADR-147). Once the week is complete, the Why list
- * adds each card's rating for this match (`Match-Rated`, ADR-117); not
- * earlier, even at full time, because a rating needs the whole week's result.
+ * its result (`InPlayMatch`, ADR-115, ADR-147). From the match's full time the
+ * Why list adds each card's rating for this match (`Match-Rated`, ADR-117,
+ * ADR-150): it needs only this match, so not the week's end.
  */
 export default async function MidweekReportPage({
   params,
@@ -163,10 +163,11 @@ export default async function MidweekReportPage({
   });
   if (!input) notFound();
   const report = renderStoredReport(input);
-  const ratings =
-    tournament.status === "complete"
-      ? (matchRatings(input).map((side) => side.map((card) => card.rating)) as [number[], number[]])
-      : null;
+  // Past the in-play branch above, so this match has ended (ADR-150).
+  const ratings = matchRatings(input).map((side) => side.map((card) => card.rating)) as [
+    number[],
+    number[],
+  ];
   const managers: Managers = [input.sides[0].manager, input.sides[1].manager];
   const youSide =
     match.side_0_user_id === user.id ? 0 : match.side_1_user_id === user.id ? 1 : null;

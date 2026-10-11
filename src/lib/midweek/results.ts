@@ -4,7 +4,13 @@ import type { createClient } from "@/lib/supabase/server";
 import type { MidweekTournament, MyRewardRow } from "./entry";
 import { maskInPlay, type RowEvent } from "./live";
 import { loadMatchEnds } from "./live-load";
-import { nightRatings, playedMatches, type NightRatings } from "./night-ratings";
+import {
+  latestMatchRatings,
+  nightRatings,
+  playedMatches,
+  type MatchRated,
+  type NightRatings,
+} from "./night-ratings";
 import type { DrawRow, EntryCardRow, EventRow, MatchRow, PickShareRow } from "./rows";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -102,7 +108,8 @@ export async function loadLiveRowEvents(
  * every listed member's matches in one query, never one call per match, and
  * the photos of their fives. The ratings block wants the member's; the share
  * images the champion's too. A member who wasn't entered has no entry, and
- * nothing is rated before the week is complete (ADR-117).
+ * the night's rating waits for the week to be complete (ADR-117); one match's
+ * ratings need only that match (`loadLatestMatchRatings`, ADR-150).
  */
 export async function loadNightRatingsFor(
   supabase: SupabaseServerClient,
@@ -162,6 +169,39 @@ export async function loadNightRatings(
   userId: string,
 ): Promise<NightRatings | null> {
   return (await loadNightRatingsFor(supabase, tournament, results, [userId])).get(userId) ?? null;
+}
+
+/**
+ * A member's five rated for their latest finished match (DR4-8, ADR-150): one
+ * member read of that match's events, which are all past by its full time. The
+ * ratings are extra on the evening, so a failed read returns null instead of
+ * failing the page. Nothing is read before the member has a finished match.
+ */
+export async function loadLatestMatchRatings(
+  supabase: SupabaseServerClient,
+  tournament: { seed_hash: string | null; rounds: number | null; week_start: string },
+  results: { matches: readonly MatchRow[]; entries: readonly EntryCardRow[] },
+  userId: string,
+): Promise<MatchRated | null> {
+  if (!tournament.rounds) return null;
+  const last = playedMatches(results.matches, userId).at(-1);
+  if (!last) return null;
+  const { data, error } = await supabase
+    .schema("kut")
+    .from("midweek_events_public")
+    .select("*")
+    .eq("match_id", last.match.match_id)
+    .order("seq");
+  if (error) return null;
+  return latestMatchRatings({
+    seedHash: tournament.seed_hash ?? "",
+    userId,
+    rounds: tournament.rounds,
+    weekStart: tournament.week_start,
+    matches: results.matches,
+    events: (data ?? []) as EventRow[],
+    entries: results.entries,
+  });
 }
 
 /**

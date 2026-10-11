@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Side } from "@/game/midweek/match";
 import type { SimulatedTournament } from "@/game/midweek/tournament";
 import { roundShort } from "@/lib/midweek/evening";
-import { nightRatings, playedMatches } from "@/lib/midweek/night-ratings";
+import { latestMatchRatings, nightRatings, playedMatches } from "@/lib/midweek/night-ratings";
 import { reportInput } from "@/lib/midweek/report/from-engine";
 import { matchRatings, rateNight } from "@/lib/midweek/report/ratings";
 import type { MatchRow } from "@/lib/midweek/rows";
@@ -150,5 +150,76 @@ describe("a member's night ratings from stored rows", () => {
 
   it("is null for a member who wasn't entered", () => {
     expect(rate(simulated[0], "not-entered")).toBeNull();
+  });
+});
+
+/**
+ * One match's ratings from its full time (DR4-8, ADR-150): the member's latest
+ * finished match, from that match's rows alone, best first, no night lines.
+ */
+describe("a member's ratings for their latest finished match", () => {
+  const latest = (t: (typeof simulated)[number], userId: string, rows = stored(t.result)) =>
+    latestMatchRatings({
+      seedHash: t.seedHash,
+      userId,
+      rounds: t.result.rounds,
+      weekStart: "2026-10-05",
+      matches: rows,
+      events: t.result.matches.flatMap(eventRows),
+      entries: entryRows(t.result, true),
+    });
+
+  it("rates the last match played, as matchRatings rates it, best first", () => {
+    for (const t of simulated) {
+      for (const entry of t.result.entries) {
+        const view = latest(t, entry.userId);
+        const played = t.result.matches
+          .filter((m) => m.userIds.includes(entry.userId))
+          .sort((a, b) => a.round - b.round);
+        if (played.length === 0) {
+          expect(view, t.name).toBeNull();
+          continue;
+        }
+        const match = played.at(-1)!;
+        const side = match.userIds.indexOf(entry.userId) as Side;
+        const expected = matchRatings(reportInput(t.result, match, t.seedHash, directory))[side];
+        expect(view!.cards).toHaveLength(expected.length);
+        for (const card of view!.cards) expect(card.rating).toBe(expected[card.slot].rating);
+        const ratings = view!.cards.map((card) => card.rating);
+        expect(ratings).toEqual([...ratings].sort((a, b) => b - a));
+        expect(view!.href).toBe(`/midweek/2026-10-05/match/${matchRow(match).match_id}`);
+        expect(view!.opponent).toBe(directory.manager(match.userIds[side === 0 ? 1 : 0]));
+        expect(view!.round).not.toMatch(/finals$/);
+      }
+    }
+  });
+
+  it("shows the match just ended, and not the next one while it plays", () => {
+    const t = simulated.find(
+      (x) => x.result.rounds > 1 && x.result.matches.some((m) => m.round === 2),
+    )!;
+    const next = t.result.matches.find((m) => m.round === 2)!;
+    const [first] = next.userIds;
+    // Round 2 still in play: masked rows carry no winner, so round 1 is the latest.
+    const rows = stored(t.result).map((row) =>
+      row.round === 2 ? { ...row, winner_side: null, winner_user_id: null } : row,
+    );
+    const view = latest(t, first, rows);
+    const round1 = t.result.matches.find((m) => m.round === 1 && m.userIds.includes(first));
+    if (round1) {
+      expect(view!.href).toContain(matchRow(round1).match_id);
+    } else {
+      expect(view).toBeNull();
+    }
+    // Once round 2 has ended, it takes over.
+    expect(latest(t, first)!.href).toContain(matchRow(next).match_id);
+  });
+
+  it("has no night lines or best chip, only what one match gives", () => {
+    const t = simulated[0];
+    const view = latest(t, t.result.entries[0].userId);
+    for (const card of view?.cards ?? []) {
+      expect(Object.keys(card).sort()).toEqual(["mini", "meta", "name", "rating", "slot"].sort());
+    }
   });
 });

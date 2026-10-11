@@ -2,9 +2,9 @@ import type { LiveCardPlayer } from "@/components/live-card";
 import { archetypeLabel } from "@/game/archetypes";
 import type { Side } from "@/game/midweek/match";
 import { getRarityTier } from "@/game/rating-engine";
-import { entryCardFace, roundShort, TIER_LABEL } from "./evening";
+import { entryCardFace, roundName, roundShort, TIER_LABEL } from "./evening";
 import { reportInputFromRows } from "./report/from-db";
-import { rateNight, type NightMatch } from "./report/ratings";
+import { cardNames, matchRatings, rateNight, type NightMatch } from "./report/ratings";
 import type { EntryCardRow, EventRow, MatchRow } from "./rows";
 
 /**
@@ -63,6 +63,18 @@ export function playedMatches(matches: readonly MatchRow[], userId: string) {
     .map((match) => ({ match, side: (match.side_0_user_id === userId ? 0 : 1) as Side }));
 }
 
+/** The card's own row: its meta line and its mini card (null for a trialist). */
+function cardDetails(row: EntryCardRow) {
+  const inGoal = row.slot === row.keeper_slot ? " · in goal" : "";
+  const tier = getRarityTier(row.ovr);
+  const trialist = row.trialist || row.player_name === null;
+  return {
+    trialist,
+    meta: `${archetypeLabel(row.archetype)} · ${trialist ? "Common" : TIER_LABEL[tier]}${inGoal}`,
+    mini: trialist ? null : { rarityTier: tier, ovr: row.ovr, injured: row.injured },
+  };
+}
+
 export function nightRatings(input: {
   seedHash: string;
   userId: string;
@@ -98,15 +110,13 @@ export function nightRatings(input: {
   const cards = rated
     .map((card): RatedCard => {
       const row = own[card.slot];
-      const inGoal = row.slot === row.keeper_slot ? " · in goal" : "";
-      const tier = getRarityTier(row.ovr);
-      const trialist = row.trialist || row.player_name === null;
+      const { trialist, meta, mini } = cardDetails(row);
       return {
         slot: card.slot,
         name: card.label.text,
-        meta: `${archetypeLabel(row.archetype)} · ${trialist ? "Common" : TIER_LABEL[tier]}${inGoal}`,
+        meta,
         face: trialist ? null : entryCardFace(row, input.photoUrls),
-        mini: trialist ? null : { rarityTier: tier, ovr: row.ovr, injured: row.injured },
+        mini,
         ovr: row.ovr,
         rating: card.rating,
         line: card.line,
@@ -130,6 +140,76 @@ export function nightRatings(input: {
     userId: input.userId,
     manager: own[0].manager_name,
     matchCount: night.length,
+    cards,
+  };
+}
+
+export type MatchRatedCard = {
+  slot: number;
+  name: string;
+  meta: string;
+  mini: RatedCard["mini"];
+  rating: number;
+};
+
+/** One match's ratings for a member's five (`MidweekMatchRatings`, DR4-8, ADR-150). */
+export type MatchRated = {
+  opponent: string;
+  /** `Quarter-final`, singular. */
+  round: string;
+  href: string;
+  cards: MatchRatedCard[];
+};
+
+/**
+ * A member's five rated for their latest finished match (DR4-8, ADR-150): a
+ * pure function of that one match's events and result, so it needs no seed and
+ * no other match, and it can show from the match's full time. No lines and no
+ * ★: those need the whole night. Null when the member has no finished match.
+ * `matches` is masked by real time, so a match in play has no winner here.
+ */
+export function latestMatchRatings(input: {
+  seedHash: string;
+  userId: string;
+  rounds: number;
+  weekStart: string;
+  matches: readonly MatchRow[];
+  /** At least the events of that match. */
+  events: readonly EventRow[];
+  entries: readonly EntryCardRow[];
+}): MatchRated | null {
+  const last = playedMatches(input.matches, input.userId).at(-1);
+  if (!last) return null;
+  const { match, side } = last;
+  const reportInput = reportInputFromRows({
+    seedHash: input.seedHash,
+    rounds: input.rounds,
+    match,
+    events: input.events.filter((event) => event.match_id === match.match_id),
+    entries: input.entries,
+    ownersPublished: false,
+  });
+  if (!reportInput) return null;
+  const own = input.entries
+    .filter((row) => row.user_id === input.userId)
+    .sort((a, b) => a.slot - b.slot);
+  const names = cardNames(reportInput, side);
+  const cards = matchRatings(reportInput)
+    [side].map((card, slot): MatchRatedCard | null => {
+      const row = own[slot];
+      if (!row) return null;
+      const { meta, mini } = cardDetails(row);
+      return { slot, name: names[slot], meta, mini, rating: card.rating };
+    })
+    .filter((card): card is MatchRatedCard => card !== null)
+    // Best first; a tie keeps slot order (Array.sort is stable).
+    .sort((a, b) => b.rating - a.rating);
+  if (cards.length === 0) return null;
+  const name = roundName(match.round, input.rounds);
+  return {
+    opponent: (side === 0 ? match.side_1_name : match.side_0_name) ?? "",
+    round: name.endsWith("finals") ? name.slice(0, -1) : name,
+    href: `/midweek/${input.weekStart}/match/${match.match_id}`,
     cards,
   };
 }

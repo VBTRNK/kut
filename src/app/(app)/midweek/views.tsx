@@ -12,6 +12,7 @@ import { MIDWEEK_PAGE, MidweekPageHead, MidweekSectionHead } from "@/components/
 import { MidweekPath } from "@/components/midweek/path";
 import { MidweekWeeklyCalls } from "@/components/midweek/calls-list";
 import { MidweekPredictions } from "@/components/midweek/predictions";
+import { MidweekMatchRatings } from "@/components/midweek/match-ratings";
 import { MidweekRatingList } from "@/components/midweek/rating-list";
 import { MidweekShare } from "@/components/midweek/share";
 import { MidweekKickRow, MidweekMomentRow, MidweekShootoutTally } from "@/components/midweek/feed";
@@ -62,6 +63,7 @@ import { nextPairing, preMatchHref } from "@/lib/midweek/prematch";
 import { kickItems } from "@/lib/midweek/report/kicks";
 import {
   loadCalls,
+  loadLatestMatchRatings,
   loadLiveRowEvents,
   loadMyRewards,
   loadNightRatingsFor,
@@ -337,22 +339,34 @@ export async function WeekEvening({
     nextRow?.kind === "next" && nextPairing(bracket, nextRow.round, nextRow.pairing)
       ? preMatchHref(weekStart, nextRow.round, nextRow.pairing)
       : null;
+  // Their five's ratings for the match just played, from its full time (DR4-8, ADR-150).
+  const matchRated = night.entered
+    ? await loadLatestMatchRatings(
+        supabase,
+        { seed_hash: current.seed_hash, rounds, week_start: weekStart },
+        results,
+        userId,
+      )
+    : null;
   const yourNight = night.entered && (
-    <section aria-labelledby="night-h" className="grid content-start gap-4">
-      <MidweekSectionHead id="night-h" title="Your night">
-        <p className="text-[13px] text-ink-faint">
-          +{night.coins}
-          {night.alive ? " so far" : ""} &middot; paid after the final
-        </p>
-      </MidweekSectionHead>
-      <MidweekPath
-        now={nowIso}
-        preMatch={yourPreMatch}
-        rounds={rounds}
-        rows={night.rows}
-        weekStart={weekStart}
-      />
-    </section>
+    <div className="grid content-start gap-8">
+      <section aria-labelledby="night-h" className="grid content-start gap-4">
+        <MidweekSectionHead id="night-h" title="Your night">
+          <p className="text-[13px] text-ink-faint">
+            +{night.coins}
+            {night.alive ? " so far" : ""} &middot; paid after the final
+          </p>
+        </MidweekSectionHead>
+        <MidweekPath
+          now={nowIso}
+          preMatch={yourPreMatch}
+          rounds={rounds}
+          rows={night.rows}
+          weekStart={weekStart}
+        />
+      </section>
+      {matchRated && <MidweekMatchRatings rated={matchRated} />}
+    </div>
   );
 
   // The round in play, or between rounds the next one's kick-offs and the round
