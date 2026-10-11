@@ -979,6 +979,30 @@ test.describe("Midweek Madness, every match live (MM 3.0 S3, ADR-147)", () => {
       const first = await timer.textContent();
       await expect(timer).not.toHaveText(first!, { timeout: 6_000 });
       await expectNoHorizontalOverflow(page);
+      // The scoreboard clips, so a name or chip pushed past its edge hides
+      // instead of scrolling: every part must lie inside it (S8, 320 px).
+      const board = page.getByRole("group", { name: LIVE_BOARD });
+      const clipped = await board.evaluate((el) => {
+        const edge = el.getBoundingClientRect();
+        // A clamped name's inline parts include its hidden lines: the
+        // paragraph's own box stands for them.
+        return Array.from(el.querySelectorAll("*"))
+          .filter((child) => {
+            if (child.parentElement?.closest(".line-clamp-2")) return false;
+            const box = child.getBoundingClientRect();
+            return (
+              box.width > 0 &&
+              (box.left < edge.left - 1 ||
+                box.right > edge.right + 1 ||
+                box.bottom > edge.bottom + 1)
+            );
+          })
+          .map(
+            (child) =>
+              `${child.tagName} ${child.className} ${JSON.stringify(child.getBoundingClientRect())} in ${JSON.stringify(edge)}`,
+          );
+      });
+      expect(clipped).toEqual([]);
 
       await page.setViewportSize({ width: 1440, height: 900 });
       const story = await page.getByRole("heading", { name: "How it’s going" }).boundingBox();

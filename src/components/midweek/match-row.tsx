@@ -158,7 +158,15 @@ export function MidweekMatchRow({
         href={`/midweek/${weekStart}/match/${pair.match.match_id}`}
       >
         <span className="grid justify-items-center gap-1">
-          <LiveMarker />
+          {dense ? (
+            // The tree's column is narrow: the word alone, no dot or padding, so
+            // a penalty tally beside the score is never covered (S8).
+            <span className="rounded-full border border-live-line bg-live-bg px-1.5 py-px text-[10px] font-black tracking-[0.06em] text-live uppercase">
+              Live
+            </span>
+          ) : (
+            <LiveMarker />
+          )}
           {live && (
             <span className="text-[11.5px] font-bold whitespace-nowrap text-live tabular-nums">
               {live.penalties ? (

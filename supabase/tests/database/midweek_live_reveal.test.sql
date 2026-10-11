@@ -49,13 +49,11 @@ select is((select array_agg(attname::text order by attnum) from pg_attribute
   array['match_id','tournament_id','round','pairing','seq','kind','side','minute','penalty_round','creator_slot',
     'shooter_slot','defender_slot','kicker_slot','keeper_slot','chance_type','outcome','p_goal_ppm','reveal_at'],
   'the event projection keeps its columns and appends reveal_at');
-select is((select array_agg(attname::text order by attnum) from pg_attribute
+select is((select (array_agg(attname::text order by attnum))[1:13] from pg_attribute
   where attrelid='kut.midweek_tournaments_public'::regclass and attnum>0 and not attisdropped),
   array['tournament_id','week_start','lock_at','seed_hash','status','status_reason','void_note','rounds',
-    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version',
-    -- appended by ADR-145
-    'champion_club'],
-  'the tournament list keeps its columns');
+    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version'],
+  'the tournament list keeps its first columns (the exact list is pinned in midweek_engine.test.sql)');
 select table_privs_are('kut','midweek_matches_public','anon',array[]::text[],'anon still cannot read matches');
 select table_privs_are('kut','midweek_events_public','authenticated',array['SELECT'],'members still read events');
 

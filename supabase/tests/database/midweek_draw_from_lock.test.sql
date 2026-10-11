@@ -44,13 +44,11 @@ select is((select array_agg(attname::text order by attnum) from pg_attribute
     -- appended by ADR-116, then ADR-145
     'balance_ppm','club_name'],
   'the entries keep their columns');
-select is((select array_agg(attname::text order by attnum) from pg_attribute
+select is((select (array_agg(attname::text order by attnum))[1:13] from pg_attribute
   where attrelid='kut.midweek_tournaments_public'::regclass and attnum>0 and not attisdropped),
   array['tournament_id','week_start','lock_at','seed_hash','status','status_reason','void_note','rounds',
-    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version',
-    -- appended by ADR-145
-    'champion_club'],
-  'the tournament list keeps its columns');
+    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version'],
+  'the tournament list keeps its first columns (the exact list is pinned in midweek_engine.test.sql)');
 select is((select attname::text from pg_attribute where attrelid='kut.midweek_current'::regclass and attnum>0
   and not attisdropped order by attnum desc limit 1),'evening_live','midweek_current appends evening_live last');
 
