@@ -119,3 +119,21 @@ credential rule.
   stays red there until its catalogue PR merges (`docs/RELEASING.md`).
 - A local `db push` from `VibeTrunk/supabase` stays a fallback, with the
   owner's OK.
+
+## ADR-145 — Club names in the Midweek views
+
+Date: 2026-10-11 (Midweek Madness 3.0 S2, VibeTrunk/kut#267, #262).
+
+- The four Midweek views that name a member append the club: `side_0_club`
+  and `side_1_club` on `midweek_matches_public` and `midweek_draw_public`,
+  `club_name` on `midweek_entries_public`, and `champion_club` on
+  `midweek_tournaments_public` (shown exactly when the champion is).
+- The club is `coalesce(nullif(btrim(club_name), ''), display_name || '''s Club')`,
+  as on the club value leaderboard; a bye has no second club. It is the
+  current name, like the account name beside it, not a snapshot at the lock.
+- The name columns stay: the account name is shown where the member acts
+  (calls, the picker, `Your night`, trialist labels), the club where the team
+  plays, wins or goes through (`design/mm3/HANDOFF.md`, Q7). The result message
+  written in SQL is unchanged. `my_midweek_predictions` keeps only the account
+  name of the called member.
+- Pages read the columns from S7, falling back to the account name.

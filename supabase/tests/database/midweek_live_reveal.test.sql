@@ -40,7 +40,9 @@ select is((select array_agg(attname::text order by attnum) from pg_attribute
   array['match_id','tournament_id','week_start','round','pairing','bye','side_0_user_id','side_0_name',
     'side_1_user_id','side_1_name','side_0_goals','side_1_goals','side_0_penalties','side_1_penalties',
     'winner_side','winner_user_id','win_chance_ppm','side_0_day_rolls_ppm','side_1_day_rolls_ppm','reveal_at',
-    'ends_at','in_play'],
+    'ends_at','in_play',
+    -- appended by ADR-145
+    'side_0_club','side_1_club'],
   'the match projection keeps its columns and appends ends_at and in_play');
 select is((select array_agg(attname::text order by attnum) from pg_attribute
   where attrelid='kut.midweek_events_public'::regclass and attnum>0 and not attisdropped),
@@ -50,7 +52,9 @@ select is((select array_agg(attname::text order by attnum) from pg_attribute
 select is((select array_agg(attname::text order by attnum) from pg_attribute
   where attrelid='kut.midweek_tournaments_public'::regclass and attnum>0 and not attisdropped),
   array['tournament_id','week_start','lock_at','seed_hash','status','status_reason','void_note','rounds',
-    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version'],
+    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version',
+    -- appended by ADR-145
+    'champion_club'],
   'the tournament list keeps its columns');
 select table_privs_are('kut','midweek_matches_public','anon',array[]::text[],'anon still cannot read matches');
 select table_privs_are('kut','midweek_events_public','authenticated',array['SELECT'],'members still read events');

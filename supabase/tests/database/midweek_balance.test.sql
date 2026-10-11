@@ -27,7 +27,7 @@ select function_privs_are('kut','_mm_balance',array['text[]','integer'],'authent
 select function_privs_are('kut','_mm_balance',array['text[]','integer'],'anon',array[]::text[],
   'anon cannot call the rule');
 select is((select attname::text from pg_attribute where attrelid='kut.midweek_entries_public'::regclass
-    and attnum = (select max(attnum) from pg_attribute where attrelid='kut.midweek_entries_public'::regclass and attnum > 0)),
+    and attnum = (select attnum + 1 from pg_attribute where attrelid='kut.midweek_entries_public'::regclass and attname = 'owners')),
   'balance_ppm','midweek_entries_public appends balance_ppm after the existing columns');
 
 -- ---------------------------------------------------------------------------
