@@ -7,6 +7,7 @@ import {
   type SimulatedTournament,
 } from "@/game/midweek/tournament";
 import { FACT_KINDS } from "@/lib/midweek/report/facts";
+import { shootoutStory } from "@/lib/midweek/report/kicks";
 import { reportInput, type Directory } from "@/lib/midweek/report/from-engine";
 import { PHRASE_POOLS } from "@/lib/midweek/report/phrasebook";
 import {
@@ -132,6 +133,55 @@ describe("midweek match reports", () => {
       expect(report.shootout!.lines).toHaveLength(1 + unscored + (toss ? 1 : lastScored ? 1 : 0));
       expect(report.score).toContain("on penalties");
     }
+  });
+
+  it("places each shoot-out line under its own kick, the decider last (#263, DR4-5)", () => {
+    const shapes = { early: 0, suddenDeath: 0, draw: 0 };
+    const shootouts = rendered.filter(({ report }) => report.shootout);
+    // A draw settles only a shoot-out still level after its sudden death, too
+    // rare for the corpus, so a few are replayed with one appended.
+    const drawn = shootouts.slice(0, 5).map(({ input }) => {
+      const withDraw: ReportInput = {
+        ...input,
+        outcome: {
+          ...input.outcome,
+          events: [...input.outcome.events, { kind: "toss", side: input.outcome.winnerSide }],
+        },
+      };
+      return { input: withDraw, report: renderMatchReport(withDraw) };
+    });
+    for (const { input, report } of [...shootouts, ...drawn]) {
+      const shootout = report.shootout!;
+      const story = shootoutStory(shootout);
+      const toss = input.outcome.events.some((e) => e.kind === "toss");
+      const kicks = shootout.kicks.length;
+      if (toss) shapes.draw += 1;
+      else if (kicks < 10) shapes.early += 1;
+      else if (kicks > 10) shapes.suddenDeath += 1;
+
+      // Every line is used once, in order: the intro, the kicks' lines, the draw's.
+      const used = [story.intro, ...story.kicks.flatMap((k) => (k.line ? [k.line] : []))];
+      if (story.toss) used.push(story.toss);
+      expect(used).toEqual(shootout.lineParts);
+      expect(shootout.decider).toBe(toss ? null : kicks - 1);
+      expect(story.toss !== null).toBe(toss);
+      expect(story.kicks.filter((k) => k.decider)).toHaveLength(toss ? 0 : 1);
+      // Every kick not scored has a line; a scored one only as the decider.
+      for (const kick of story.kicks) {
+        expect(kick.line !== null).toBe(kick.outcome !== "goal" || kick.decider);
+      }
+      expect(story.kicks.at(-1)!.tally).toEqual(shootout.score);
+      // The keeper is the other side's, as the stored event says (DR4-4).
+      const events = input.outcome.events.filter((e) => e.kind === "penalty");
+      shootout.kicks.forEach((kick, i) => {
+        const keeper = input.sides[kick.side === 0 ? 1 : 0].cards[events[i].keeper];
+        if (keeper.name) expect(kick.keeper).toContain(keeper.name);
+        else expect(kick.keeper).toMatch(/trialist/);
+      });
+    }
+    expect(shapes.early).toBeGreaterThan(0);
+    expect(shapes.suddenDeath).toBeGreaterThan(0);
+    expect(shapes.draw).toBeGreaterThan(0);
   });
 
   it("shows owner counts only at three or more, and never names who owns a card", () => {

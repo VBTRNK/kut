@@ -79,6 +79,8 @@ export type ShootoutKick = {
   side: Side;
   round: number;
   kicker: string;
+  /** The other side's keeper who faced the kick, from the stored event (DR4-4). */
+  keeper: string;
   outcome: "goal" | "save" | "woodwork" | "wide";
 };
 
@@ -86,6 +88,8 @@ export type ShootoutReport = {
   firstSide: Side;
   kicks: ShootoutKick[];
   score: [number, number];
+  /** The decisive kick's index in `kicks`; null when a draw settled a level shoot-out. */
+  decider: number | null;
   /** Intro, each kick not scored, and the decisive kick or draw. */
   lines: string[];
   /** `lines` as segments. */

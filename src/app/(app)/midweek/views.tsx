@@ -14,11 +14,8 @@ import { MidweekWeeklyCalls } from "@/components/midweek/calls-list";
 import { MidweekPredictions } from "@/components/midweek/predictions";
 import { MidweekRatingList } from "@/components/midweek/rating-list";
 import { MidweekShare } from "@/components/midweek/share";
-import {
-  MidweekLaneTimeline,
-  MidweekScoreboard,
-  MidweekShootoutLive,
-} from "@/components/midweek/report";
+import { MidweekKickRow, MidweekMomentRow, MidweekShootoutTally } from "@/components/midweek/feed";
+import { MidweekScoreboard } from "@/components/midweek/report";
 import { MidweekSeed } from "@/components/midweek/seed";
 import { MIDWEEK } from "@/game/midweek/config";
 import { predictionCoins } from "@/game/midweek/rewards";
@@ -61,6 +58,7 @@ import {
   type BracketRound,
 } from "@/lib/midweek/evening";
 import { loadLiveMatch, type LiveMatch } from "@/lib/midweek/live-load";
+import { kickItems } from "@/lib/midweek/report/kicks";
 import {
   loadCalls,
   loadMyRewards,
@@ -410,6 +408,8 @@ export async function WeekEvening({
             live={live}
             match={pair.match}
             title="The final"
+            now={nowIso}
+            scheduleVersion={scheduleVersion}
             userId={userId}
             weekStart={weekStart}
           />
@@ -456,6 +456,8 @@ export async function WeekEvening({
             live={live}
             match={watched.match}
             title="Your match"
+            now={nowIso}
+            scheduleVersion={scheduleVersion}
             userId={userId}
             weekStart={weekStart}
           />
@@ -507,8 +509,10 @@ export async function WeekEvening({
 
 /**
  * A match this member watches live (Evening-YourMatch, Evening-FinalLive): the
- * scoreboard in team colours, a single-match block (DR2-1), as it stands now;
- * then the shoot-out's kicks once it has begun, or else the latest chance.
+ * scoreboard in team colours with the running clock (DR4-2), a single-match
+ * block (DR2-1), as it stands now; then the shoot-out's tally and its latest
+ * kick once it has begun, or else the latest moment. The match page has the
+ * whole feed.
  */
 function LiveMatchBlock({
   title,
@@ -518,6 +522,8 @@ function LiveMatchBlock({
   userId,
   autoUserIds,
   weekStart,
+  now,
+  scheduleVersion,
 }: {
   title: string;
   id: string;
@@ -526,9 +532,14 @@ function LiveMatchBlock({
   userId: string;
   autoUserIds: ReadonlySet<string>;
   weekStart: string;
+  now: string;
+  scheduleVersion: number;
 }) {
   const managers = [match.side_0_name, match.side_1_name ?? ""] as const;
   const side1 = match.side_1_user_id ?? "";
+  const kicks = kickItems(live?.live.kicks ?? []);
+  const lastKick = kicks.at(-1);
+  const latest = live?.live.timeline.at(-1);
   return (
     <section aria-labelledby={id} className="grid gap-3.5">
       <MidweekSectionHead id={id} title={title}>
@@ -542,20 +553,42 @@ function LiveMatchBlock({
       <MidweekScoreboard
         auto={[autoUserIds.has(match.side_0_user_id), autoUserIds.has(side1)]}
         goals={live?.live.score ?? [0, 0]}
-        live={{ minute: live?.live.minute ?? 0, penalties: live?.live.penalties ?? null }}
+        live={{
+          minute: live?.live.minute ?? 0,
+          penalties: live?.live.penalties ?? null,
+          clock: { kickoffAt: match.reveal_at, scheduleVersion, at: now },
+        }}
         managers={managers}
         penalties={null}
         winnerSide={null}
         youSide={match.side_0_user_id === userId ? 0 : side1 === userId ? 1 : null}
       />
       {live?.live.shootout && live.live.penalties ? (
-        <MidweekShootoutLive
-          kicks={live.live.kicks}
-          managers={managers}
-          penalties={live.live.penalties}
-        />
-      ) : live && live.live.timeline.length > 0 ? (
-        <MidweekLaneTimeline live managers={managers} timeline={live.live.timeline.slice(-1)} />
+        <>
+          <MidweekShootoutTally kicks={kicks} live managers={managers} />
+          {lastKick && (
+            <div className="@container">
+              <ol aria-label="The latest kick" className="grid gap-2">
+                <MidweekKickRow
+                  key={`k${lastKick.side}-${lastKick.round}`}
+                  kick={lastKick}
+                  newest
+                />
+              </ol>
+            </div>
+          )}
+        </>
+      ) : latest ? (
+        <div className="@container">
+          <ol aria-label="The latest chance" className="grid gap-2">
+            <MidweekMomentRow
+              item={latest}
+              key={`m${latest.minute}-${latest.side}`}
+              managers={managers}
+              newest
+            />
+          </ol>
+        </div>
       ) : null}
     </section>
   );
