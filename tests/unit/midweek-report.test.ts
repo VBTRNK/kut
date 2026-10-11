@@ -37,6 +37,8 @@ const directory: Directory = {
   player: (id) =>
     `${FIRST_NAMES[Number(id.replace(/\D/g, "")) % FIRST_NAMES.length]} ${id.toUpperCase()}`,
   manager: (id) => `Manager ${id.toUpperCase()}`,
+  // Distinct from the account, so the corpus proves which one each mention uses (Q7).
+  club: (id) => `Club ${id.toUpperCase()}`,
 };
 
 type Rendered = { input: ReportInput; report: MatchReport };
@@ -239,9 +241,9 @@ describe("midweek match reports", () => {
   it("gives every line as segments that read as its text, names tagged with their side", () => {
     let owned = 0;
     for (const report of [...rendered.map((r) => r.report), ...crafted()]) {
-      const managers = report.why.map((side) => side.manager);
-      // On screen a name shows without its "(manager)"; nothing else differs.
-      const suffix = new RegExp(` \\((${managers.map(escape).join("|")})\\)`, "g");
+      const clubs = report.why.map((side) => side.club);
+      // On screen a name shows without its "(club)"; nothing else differs.
+      const suffix = new RegExp(` \\((${clubs.map(escape).join("|")})\\)`, "g");
       const lines: [string, Segment[]][] = [
         [report.headline, report.headlineParts],
         ...report.facts.map((f): [string, Segment[]] => [f.text, f.parts]),
@@ -256,10 +258,10 @@ describe("midweek match reports", () => {
         expect(parts.map((p) => p.text).join(""), text).toBe(expected);
         for (const part of parts.filter((p) => p.side !== undefined)) {
           const side = report.why[part.side!];
-          const names = [side.manager, ...side.cards.map((c) => c.label.text)];
+          const names = [side.club, ...side.cards.map((c) => c.label.text)];
           expect(names, text).toContain(part.text);
           if (part.owner !== undefined) {
-            expect(part.owner).toBe(side.manager);
+            expect(part.owner).toBe(side.club);
             owned += 1;
           }
         }

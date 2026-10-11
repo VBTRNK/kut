@@ -653,7 +653,7 @@ function drawFoot(ctx: Ctx, assets: ShareAssets, foot: string) {
   text(ctx, fit(ctx, foot, INNER), M, 1290, { color: C.inkFaint });
 }
 
-/** The serif headline, shrunk until it fits the width. */
+/** The serif headline, shrunk until it fits the width, then cut with an ellipsis (an 80-character club). */
 function headline(
   ctx: Ctx,
   assets: ShareAssets,
@@ -669,7 +669,7 @@ function headline(
     current -= 4;
     font(ctx, assets, 400, current, true);
   }
-  text(ctx, value, x, y, { color: C.ink });
+  text(ctx, fit(ctx, value, max), x, y, { color: C.ink });
 }
 
 export function drawPoster(ctx: Ctx, data: PosterData, assets: ShareAssets) {

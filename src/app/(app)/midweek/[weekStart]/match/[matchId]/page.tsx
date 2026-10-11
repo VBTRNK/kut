@@ -7,7 +7,7 @@ import {
   MidweekLaneTimeline,
   MidweekScoreboard,
   MidweekShootout,
-  type Managers,
+  type Clubs,
 } from "@/components/midweek/report";
 import { MidweekWhyList } from "@/components/midweek/why-list";
 import { MIDWEEK } from "@/game/midweek/config";
@@ -24,7 +24,7 @@ import { loadLiveMatch, loadMatchEnds } from "@/lib/midweek/live-load";
 import { reportInputFromRows, renderStoredReport } from "@/lib/midweek/report/from-db";
 import { matchRatings } from "@/lib/midweek/report/ratings";
 import { loadTournamentByWeek } from "@/lib/midweek/results";
-import type { EntryCardRow, EventRow, MatchRow } from "@/lib/midweek/rows";
+import { sideClub, type EntryCardRow, type EventRow, type MatchRow } from "@/lib/midweek/rows";
 import { runDueMidweek } from "@/lib/midweek/run-due";
 import { createClient } from "@/lib/supabase/server";
 import { InPlayMatch } from "./in-play";
@@ -144,7 +144,7 @@ export default async function MidweekReportPage({
             : `${capitalise(matchName(shown.round, shown.pairing, rounds))}${yours !== null ? " · your match" : ""} · live`
         }
         live={live}
-        managers={[shown.side_0_name, shown.side_1_name ?? ""]}
+        clubs={[sideClub(shown, 0), sideClub(shown, 1)]}
         now={now.toISOString()}
         scheduleVersion={scheduleVersion}
         youSide={yours}
@@ -168,7 +168,7 @@ export default async function MidweekReportPage({
     number[],
     number[],
   ];
-  const managers: Managers = [input.sides[0].manager, input.sides[1].manager];
+  const clubs: Clubs = [input.sides[0].club, input.sides[1].club];
   const youSide =
     match.side_0_user_id === user.id ? 0 : match.side_1_user_id === user.id ? 1 : null;
 
@@ -193,7 +193,7 @@ export default async function MidweekReportPage({
         <MidweekScoreboard
           auto={[input.sides[0].auto, input.sides[1].auto]}
           goals={input.outcome.goals}
-          managers={managers}
+          clubs={clubs}
           penalties={input.outcome.penalties}
           winnerSide={input.outcome.winnerSide}
           youSide={youSide}
@@ -216,9 +216,9 @@ export default async function MidweekReportPage({
               <h2 className="display text-3xl" id="timeline-h">
                 How it went
               </h2>
-              <MidweekLaneTimeline managers={managers} timeline={report.timeline} />
+              <MidweekLaneTimeline clubs={clubs} timeline={report.timeline} />
             </section>
-            {report.shootout && <MidweekShootout managers={managers} shootout={report.shootout} />}
+            {report.shootout && <MidweekShootout clubs={clubs} shootout={report.shootout} />}
           </div>
           <aside className="min-w-0">
             <MidweekWhyList ratings={ratings} why={report.why} />

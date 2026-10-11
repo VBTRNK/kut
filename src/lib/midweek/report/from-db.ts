@@ -1,7 +1,7 @@
 import type { Archetype } from "@/game/archetypes";
 import type { ChanceType } from "@/game/midweek/config";
 import type { MatchEvent, Side } from "@/game/midweek/match";
-import type { EntryCardRow, EventRow, MatchRow } from "../rows";
+import { clubName, type EntryCardRow, type EventRow, type MatchRow } from "../rows";
 import { pickLabel, renderMatchReport } from "./render";
 import type { MatchReport, ReportInput, ReportSide } from "./types";
 
@@ -35,6 +35,7 @@ function toSide(rows: readonly EntryCardRow[]): ReportSide | null {
   if (cards.length !== sorted.length) return null;
   return {
     manager: cards[0].manager_name,
+    club: clubName(cards[0].club_name, cards[0].manager_name),
     auto: cards[0].auto,
     keeperSlot: cards[0].keeper_slot,
     keeperless: cards[0].keeperless,

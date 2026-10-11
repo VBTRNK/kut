@@ -618,10 +618,20 @@ export default async function HowItWorksPage() {
             and you&rsquo;re never entered or shown.
           </p>
           <p>
+            Midweek shows your club name, the one you set in{" "}
+            <Link className="underline" href="/settings">
+              Settings
+            </Link>
+            , wherever your team plays, wins or goes through: the bracket, the match pages, the
+            results and the images. Your own name stays where you act: your night, your calls and
+            the picker. A trialist is still named after you. Renaming your club renames it on past
+            weeks too.
+          </p>
+          <p>
             After the final, the Midweek page can make two images for the club&rsquo;s group chat:
-            the champion poster and your night. They show managers&rsquo; and Players&rsquo; names
-            and Players&rsquo; photos, so they travel beyond FLUT once you send them. They&rsquo;re
-            made on your phone; nothing is uploaded.
+            the champion poster and your night. They show club, manager and Player names and
+            Players&rsquo; photos, so they travel beyond FLUT once you send them. They&rsquo;re made
+            on your phone; nothing is uploaded.
           </p>
           <h3 className="pt-2 font-black text-ink">Fair draws</h3>
           <p>

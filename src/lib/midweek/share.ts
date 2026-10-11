@@ -15,7 +15,7 @@ import {
   type MyNight,
 } from "./evening";
 import type { NightRatings } from "./night-ratings";
-import type { EntryCardRow, MatchRow } from "./rows";
+import { sideClub, type EntryCardRow, type MatchRow } from "./rows";
 
 /**
  * The two share images (DR3 HANDOFF §3, ADR-120): the champion poster anyone
@@ -156,7 +156,10 @@ function scoreFor(match: MatchRow, side: 0 | 1): { text: string; pens: boolean }
   return { text: `${mine.goals}–${theirs.goals}`, pens: false };
 }
 
-/** The poster's path: `Round 2` over `7–0 Emma`, a shoot-out as `1–1, 5–4 pens Sophie`, a bye as `Bye`. */
+/**
+ * The poster's path: `Round 2` over `7–0 Emma`, a shoot-out as `1–1, 5–4 pens Sophie`, a bye as
+ * `Bye`. The champion's opponents are named by club, as the bracket names them (Q7).
+ */
 export function posterTiles(
   matches: readonly MatchRow[],
   userId: string,
@@ -165,7 +168,7 @@ export function posterTiles(
   return pathOf(matches, userId).map(({ match, side }) => {
     const round = roundShort(match.round, rounds);
     if (match.bye) return { round, text: "Bye", out: false };
-    const opponent = (side === 0 ? match.side_1_name : match.side_0_name) ?? "";
+    const opponent = sideClub(match, side === 0 ? 1 : 0);
     const score = scoreFor(match, side);
     return { round, text: `${score.text}${score.pens ? " pens" : ""} ${opponent}`, out: false };
   });
@@ -212,7 +215,9 @@ export function posterData(input: {
   lockAt: string;
   rounds: number;
   championId: string;
+  /** The champion's club, and the account whose five it is. */
   championName: string;
+  championAccount: string;
   final: MatchRow;
   matches: readonly MatchRow[];
   ratings: NightRatings;
@@ -224,7 +229,7 @@ export function posterData(input: {
     top: shareTop(input.lockAt),
     champion: input.championName,
     line: finalLine(input.final),
-    fiveLabel: `${possessive(input.championName)} five · rated out of 10 for the night`,
+    fiveLabel: `${possessive(input.championAccount)} five · rated out of 10 for the night`,
     cards: shareCards(input.ratings),
     tiles: posterTiles(input.matches, input.championId, input.rounds),
     foot: `${input.entrants} entrants · ${input.goals} goals`,
@@ -278,7 +283,9 @@ export function shareImages(input: {
   scheduleVersion: number;
   userId: string;
   championId: string | null;
+  /** The champion's club, else null; with the account name for the five's label. */
   championName: string | null;
+  championAccount?: string | null;
   matches: readonly MatchRow[];
   entries: readonly Pick<EntryCardRow, "user_id" | "auto">[];
   ratings: ReadonlyMap<string, NightRatings>;
@@ -298,6 +305,7 @@ export function shareImages(input: {
           rounds: input.rounds,
           championId: input.championId,
           championName: champion,
+          championAccount: input.championAccount ?? champion,
           final,
           matches: input.matches,
           ratings: championRatings,

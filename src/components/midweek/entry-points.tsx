@@ -109,7 +109,7 @@ export function MidweekLiveCard({
             auto={match.auto}
             compact
             goals={match.goals}
-            managers={match.managers}
+            clubs={match.clubs}
             live={match.live}
             penalties={match.penalties}
             winnerSide={match.winnerSide}

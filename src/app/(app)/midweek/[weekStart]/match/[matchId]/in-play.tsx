@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MidweekLiveFeed, MidweekShootoutTally } from "@/components/midweek/feed";
 import { MidweekLivePoller } from "@/components/midweek/live-poller";
 import { MIDWEEK_PAGE } from "@/components/midweek/page-head";
-import { MidweekScoreboard, type Managers } from "@/components/midweek/report";
+import { MidweekScoreboard, type Clubs } from "@/components/midweek/report";
 import { MidweekWhyList } from "@/components/midweek/why-list";
 import { matchPollMs } from "@/lib/midweek/live-clock";
 import type { LiveMatch } from "@/lib/midweek/live-load";
@@ -19,7 +19,7 @@ import { kickItems } from "@/lib/midweek/report/kicks";
 export function InPlayMatch({
   back,
   kicker,
-  managers,
+  clubs,
   youSide,
   auto,
   live,
@@ -29,7 +29,7 @@ export function InPlayMatch({
 }: {
   back: { href: string; label: string };
   kicker: string;
-  managers: Managers;
+  clubs: Clubs;
   youSide: 0 | 1 | null;
   auto: readonly [boolean, boolean];
   live: LiveMatch | null;
@@ -53,7 +53,7 @@ export function InPlayMatch({
             {kicker}
           </p>
           <h1 className="sr-only">
-            {managers[0]} v {managers[1]}
+            {clubs[0]} v {clubs[1]}
           </h1>
         </header>
         <MidweekScoreboard
@@ -64,7 +64,7 @@ export function InPlayMatch({
             penalties: live?.live.penalties ?? null,
             clock: { kickoffAt, scheduleVersion, at: now },
           }}
-          managers={managers}
+          clubs={clubs}
           penalties={null}
           winnerSide={null}
           youSide={youSide}
@@ -82,7 +82,7 @@ export function InPlayMatch({
                     5 seconds
                   </p>
                 </div>
-                <MidweekShootoutTally kicks={kicks} live managers={managers} />
+                <MidweekShootoutTally kicks={kicks} live clubs={clubs} />
               </section>
             )}
             <section aria-labelledby="feed-h" className="grid gap-3.5">
@@ -95,7 +95,7 @@ export function InPlayMatch({
               <MidweekLiveFeed
                 kickoffAt={kickoffAt}
                 kicks={kicks}
-                managers={managers}
+                clubs={clubs}
                 shootout={shootout}
                 timeline={live?.live.timeline ?? []}
               />

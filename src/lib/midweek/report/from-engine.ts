@@ -10,12 +10,15 @@ import type { ReportInput, ReportSide } from "./types";
 export type Directory = {
   player: (playerId: string) => string;
   manager: (userId: string) => string;
+  /** The entrant's club; the manager's name when the directory has none. */
+  club?: (userId: string) => string;
 };
 
 function toSide(entry: Entry, tournament: SimulatedTournament, directory: Directory): ReportSide {
   const shares = new Map(tournament.pickShares.map((share) => [share.playerId, share]));
   return {
     manager: directory.manager(entry.userId),
+    club: (directory.club ?? directory.manager)(entry.userId),
     auto: entry.auto,
     keeperSlot: entry.keeperSlot,
     keeperless: entry.keeperless,

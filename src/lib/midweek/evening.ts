@@ -14,6 +14,7 @@ import { roundPayouts } from "@/game/midweek/rewards";
 import { roundStartAt } from "@/game/midweek/schedule";
 import { ARCHETYPE_OFFSETS, getRarityTier } from "@/game/rating-engine";
 import {
+  championClub,
   formatClock,
   formatDayDate,
   stageName,
@@ -21,7 +22,7 @@ import {
   type MyRewardRow,
 } from "./entry";
 import { ordinal, rowLive, type RowEvent, type RowLive } from "./live";
-import type { DrawRow, EntryCardRow, MatchRow } from "./rows";
+import { sideClub, type DrawRow, type EntryCardRow, type MatchRow } from "./rows";
 
 const AMS = "Europe/Amsterdam";
 
@@ -126,8 +127,13 @@ export function championLeads(tournament: { status: string; lock_at: string }, n
 
 // ---- the bracket ---------------------------------------------------------------------
 
+/** The winner's account name: calls name the member (Q7). */
 export const winnerName = (match: MatchRow) =>
   match.winner_side === 0 ? match.side_0_name : (match.side_1_name ?? match.side_0_name);
+
+/** The winner's club, which the bracket and the results name (Q7, ADR-151). */
+export const winnerClub = (match: MatchRow) =>
+  sideClub(match, match.winner_side === 1 && match.side_1_name !== null ? 1 : 0);
 
 /**
  * Whether a revealed pairing is at full time: a bye always is, and a match once
@@ -145,7 +151,10 @@ export const atFullTime = (match: MatchRow) =>
 
 export type BracketSlot = {
   userId: string | null;
+  /** The club, which the bracket shows (Q7, ADR-151). */
   name: string;
+  /** The account name, which a call names (Q7). */
+  account: string;
   auto: boolean;
   /** Not settled yet: "Winner of Mila v Eline", "Winner, Quarters 1". */
   placeholder: boolean;
@@ -231,12 +240,23 @@ export function assembleBracket(input: {
   // begun and every card's Power is out (ADR-105).
   const powerOut = input.matches.length > 0;
   const drawn = new Map((input.draw ?? []).map((row) => [row.pairing, row]));
-  const slot = (userId: string | null, name: string, placeholder = false): BracketSlot => ({
+  const slot = (
+    userId: string | null,
+    name: string,
+    account: string,
+    placeholder = false,
+  ): BracketSlot => ({
     userId,
     name,
+    account,
     placeholder,
     auto: !placeholder && userId !== null && input.autoUserIds.has(userId),
   });
+  /** One side of a match or a drawn pairing: its club, and its account for the calls. */
+  const named = (row: MatchRow | DrawRow, side: 0 | 1): BracketSlot =>
+    side === 0
+      ? slot(row.side_0_user_id, sideClub(row, 0), row.side_0_name)
+      : slot(row.side_1_user_id, sideClub(row, 1), row.side_1_name ?? "");
   const result: BracketRound[] = [];
   for (let round = 1; round <= rounds; round += 1) {
     const kickoffAt = roundStartAt(lock, round, input.scheduleVersion).toISOString();
@@ -246,16 +266,19 @@ export function assembleBracket(input: {
       const feeder = before?.pairs[pairing];
       if (feeder?.kind === "bye") return { ...feeder.sides[0] };
       if (feeder?.kind === "played") {
-        return slot(feeder.match.winner_user_id, winnerName(feeder.match));
+        return named(feeder.match, settledWinner(feeder.match));
       }
       if (round === 2 && feeder && !feeder.sides.some((side) => side.placeholder)) {
-        return slot(null, `Winner of ${feeder.sides[0].name} v ${feeder.sides[1].name}`, true);
+        const [a, b] = feeder.sides;
+        return slot(
+          null,
+          `Winner of ${a.name} v ${b.name}`,
+          `Winner of ${a.account} v ${b.account}`,
+          true,
+        );
       }
-      return slot(
-        null,
-        round > 1 ? `Winner, ${feederName(round - 1, pairing, rounds)}` : "To be drawn",
-        true,
-      );
+      const text = round > 1 ? `Winner, ${feederName(round - 1, pairing, rounds)}` : "To be drawn";
+      return slot(null, text, text, true);
     };
     const pairs: BracketPair[] = [];
     for (let pairing = 0; pairing < count; pairing += 1) {
@@ -266,7 +289,7 @@ export function assembleBracket(input: {
           kind: "bye",
           round,
           pairing,
-          sides: [slot(source.side_0_user_id, source.side_0_name)],
+          sides: [named(source, 0)],
         });
         continue;
       }
@@ -285,10 +308,7 @@ export function assembleBracket(input: {
                 now: input.live.now,
               })
             : null,
-          sides: [
-            slot(match.side_0_user_id, match.side_0_name),
-            slot(match.side_1_user_id, match.side_1_name ?? ""),
-          ],
+          sides: [named(match, 0), named(match, 1)],
         });
         continue;
       }
@@ -298,19 +318,13 @@ export function assembleBracket(input: {
           round,
           pairing,
           match,
-          sides: [
-            slot(match.side_0_user_id, match.side_0_name),
-            slot(match.side_1_user_id, match.side_1_name ?? ""),
-          ],
+          sides: [named(match, 0), named(match, 1)],
         });
         continue;
       }
       const sides: [BracketSlot, BracketSlot] =
         source && source.side_1_user_id !== null
-          ? [
-              slot(source.side_0_user_id, source.side_0_name),
-              slot(source.side_1_user_id, source.side_1_name ?? ""),
-            ]
+          ? [named(source, 0), named(source, 1)]
           : [fromFeeder(2 * pairing), fromFeeder(2 * pairing + 1)];
       pairs.push({
         kind: "upcoming",
@@ -379,14 +393,14 @@ export function sideScore(
 
 /** A played match in one sentence: "Julia 1, Stijn 1, 5–4 on penalties. Julia won." */
 export function matchSentence(match: MatchRow): string {
-  if (match.bye) return `${match.side_0_name} has a bye, which counts as a win.`;
+  if (match.bye) return `${sideClub(match, 0)} has a bye, which counts as a win.`;
   const a = sideScore(match, 0);
   const b = sideScore(match, 1);
   const pens =
     a.penalties !== null && b.penalties !== null
       ? `, ${a.penalties}–${b.penalties} on penalties`
       : "";
-  return `${match.side_0_name} ${a.goals}, ${match.side_1_name} ${b.goals}${pens}. ${winnerName(match)} won.`;
+  return `${sideClub(match, 0)} ${a.goals}, ${sideClub(match, 1)} ${b.goals}${pens}. ${winnerClub(match)} won.`;
 }
 
 /** `MidweekMatchRow`'s accessible sentence, in every state. */
@@ -602,7 +616,7 @@ export function liveLine(
 export function finalLine(final: MatchRow): string {
   const winner = settledWinner(final);
   const loser: 0 | 1 = winner === 0 ? 1 : 0;
-  const opponent = (loser === 0 ? final.side_0_name : final.side_1_name) ?? "";
+  const opponent = sideClub(final, loser);
   const w = sideScore(final, winner);
   const l = sideScore(final, loser);
   if (w.penalties !== null && l.penalties !== null) {
@@ -977,7 +991,7 @@ export function pastWeeks(input: {
       } else you = "You sat it out.";
       return {
         ...base,
-        text: `${week.champion_name ?? "Somebody"} won it · ${field.length} entrants. ${you}`,
+        text: `${championClub(week) ?? "Somebody"} won it · ${field.length} entrants. ${you}`,
       };
     });
 }

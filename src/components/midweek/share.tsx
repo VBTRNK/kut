@@ -12,7 +12,7 @@ import { MidweekSectionHead } from "./page-head";
 
 /** The note under both images (DR3 HANDOFF "Copy", Sharing): what they carry, and where they're made. */
 export const SHARE_NOTE =
-  "Both show managers’ and Players’ names and Players’ photos. Send them to the club; they’re made on your phone, nothing is uploaded.";
+  "Both show club, manager and Player names and Players’ photos. Send them to the club; they’re made on your phone, nothing is uploaded.";
 
 /** A coarse pointer: share on a phone, download elsewhere (by capability, not width). */
 const COARSE = "(pointer: coarse)";

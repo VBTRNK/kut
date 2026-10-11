@@ -81,7 +81,7 @@ const settled = (side: CallSide) => side.userId !== null;
 function feederText(before: BracketRound | undefined, pairing: number, fallback: string): string {
   const feeder = before?.pairs[pairing];
   if (feeder && feeder.kind !== "bye" && feeder.sides.every((side) => !side.placeholder)) {
-    return `Winner of ${feeder.sides[0].name} v ${feeder.sides[1].name}`;
+    return `Winner of ${feeder.sides[0].account} v ${feeder.sides[1].account}`;
   }
   return fallback;
 }
@@ -124,7 +124,7 @@ function cardFor(
   const sides = pair.sides.map((side, s) =>
     side.placeholder
       ? { userId: null, name: feederText(before, 2 * pair.pairing + s, side.name) }
-      : { userId: side.userId, name: side.name },
+      : { userId: side.userId, name: side.account },
   ) as [CallSide, CallSide];
   const kickedOff = Date.parse(kickoffAt) <= now.getTime();
   return {

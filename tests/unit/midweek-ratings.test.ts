@@ -67,6 +67,7 @@ function bareMatch(events: MatchEvent[], goals: [number, number], winnerSide: 0 
   };
   const side = (keeperSlot: number) => ({
     manager: "M",
+    club: "M",
     auto: false,
     keeperSlot,
     keeperless: false,

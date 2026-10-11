@@ -64,16 +64,16 @@ function Score({
 /** One of the report's moments in its side's lane; `newest` on a live page. */
 export function MidweekMomentRow({
   item,
-  managers,
+  clubs,
   newest = false,
 }: {
   item: TimelineItem;
-  managers: Names;
+  clubs: Names;
   newest?: boolean;
 }) {
   const goal = item.kind === "goal";
   const left = item.side === 0;
-  const whose = goal ? `Goal for ${managers[item.side]}` : `${managers[item.side]}’s chance`;
+  const whose = goal ? `Goal for ${clubs[item.side]}` : `${clubs[item.side]}’s chance`;
   return (
     <li className={ROW}>
       <div className={`${ITEM} ${newest ? NEWEST : ""} ${LANE[item.side]}`}>
@@ -90,7 +90,7 @@ export function MidweekMomentRow({
             {KIND_WORD[item.kind]}
           </span>
           <span className="min-w-0 truncate">
-            <PlayerName side={item.side}>{managers[item.side]}</PlayerName>
+            <PlayerName side={item.side}>{clubs[item.side]}</PlayerName>
           </span>
           <span
             className={`flex-none text-ink-dim tabular-nums @min-[600px]:hidden ${left ? "ml-auto" : "mr-auto"}`}
@@ -106,7 +106,7 @@ export function MidweekMomentRow({
           <ReportText parts={item.parts} />
         </p>
         <p className="sr-only">
-          Score: {managers[0]} {item.score[0]}, {managers[1]} {item.score[1]}.
+          Score: {clubs[0]} {item.score[0]}, {clubs[1]} {item.score[1]}.
         </p>
       </div>
       <p aria-hidden="true" className={SPINE}>
@@ -201,11 +201,11 @@ const DOT_MISSED = [
  */
 export function MidweekShootoutTally({
   kicks,
-  managers,
+  clubs,
   live = false,
 }: {
   kicks: readonly KickItem[];
-  managers: Names;
+  clubs: Names;
   live?: boolean;
 }) {
   const tally = kicks.at(-1)?.tally ?? [0, 0];
@@ -215,13 +215,13 @@ export function MidweekShootoutTally({
         const taken = kicks.filter((kick) => kick.side === s);
         return (
           <div
-            aria-label={`${managers[s]}: ${tally[s]} scored from ${taken.length}`}
+            aria-label={`${clubs[s]}: ${tally[s]} scored from ${taken.length}`}
             className="grid grid-cols-[minmax(0,1fr)_1.75rem_auto] items-center gap-2.5 min-[412px]:grid-cols-[minmax(0,7.5rem)_1.75rem_minmax(0,1fr)]"
             key={s}
             role="group"
           >
             <span aria-hidden="true" className="truncate text-sm">
-              <PlayerName side={s}>{managers[s]}</PlayerName>
+              <PlayerName side={s}>{clubs[s]}</PlayerName>
             </span>
             <span
               aria-hidden="true"
@@ -271,13 +271,13 @@ function Divider({ children }: { children: ReactNode }) {
 export function MidweekLiveFeed({
   timeline,
   kicks,
-  managers,
+  clubs,
   kickoffAt,
   shootout,
 }: {
   timeline: readonly TimelineItem[];
   kicks: readonly KickItem[];
-  managers: Names;
+  clubs: Names;
   kickoffAt: string;
   shootout: boolean;
 }) {
@@ -297,7 +297,7 @@ export function MidweekLiveFeed({
           <MidweekMomentRow
             item={item}
             key={`m${item.minute}-${item.side}`}
-            managers={managers}
+            clubs={clubs}
             newest={!shootout && index === 0}
           />
         ))}

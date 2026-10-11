@@ -250,3 +250,29 @@ Date: 2026-10-11 (Midweek Madness 3.0 S6, VibeTrunk/kut#267). Amends ADR-117
 - **Unchanged:** the night's rating, its line and `★ Best` (the mean of the
   matches, a line keyed on the seed hash) still wait for the week to be
   complete and take this block's place. Names stay the account's here (Q7).
+
+## ADR-151 — Club names on the Midweek pages
+
+Date: 2026-10-12 (Midweek Madness 3.0 S7, VibeTrunk/kut#267, closes #262).
+Amends ADR-111 where it names managers; reads the ADR-145 columns.
+
+- **Per place** (`design/mm3/HANDOFF.md`, Q7): the club where the team plays,
+  wins or goes through: bracket and rows, scoreboards, the feed and shoot-out
+  tally, report text and headline, the Why, results, champion, Home's card,
+  the champion poster. The account where the member acts: `Your night`, calls
+  and their split, the picker, the ratings' per-match chips, the night image.
+- **Trialists keep the account** (DR4-12): `ReportSide` gains `club`, which the
+  renderer uses for the team's mentions; `manager` still names trialists.
+  Phrase choice is keyed on the seed hash, so no line changes.
+- **Tolerant reads:** `clubName(club, account)` and `sideClub(row, side)`
+  return the account when a view lacks the column or the club is blank.
+  `BracketSlot` gains `account` for the calls. The pre-match uses the same rule.
+- **Long names:** rows, the tree and the shoot-out tally cut at one line; the
+  scoreboard clamps at two (`line-clamp-2`, `hyphens-auto`); the Why's
+  headings wrap. Labels carry the whole name. The poster's headline is cut
+  after shrinking.
+- **Live, no snapshot:** renaming a club also renames it on past weeks, and in
+  report text rendered later (the owner chose the simpler option, 2026-10-11).
+- **Also:** the bracket's `Call it →` opens the pairing's pre-match, where a
+  call can be made (DR4-7). The Chronicle and the activity feed name no Midweek
+  member.

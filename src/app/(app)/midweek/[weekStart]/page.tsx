@@ -26,6 +26,7 @@ import {
   weeklyCallsLine,
 } from "@/lib/midweek/calls";
 import {
+  championClub,
   formatClock,
   formatDayDate,
   roundIntervalText,
@@ -212,7 +213,8 @@ export default async function MidweekBracketPage({
         scheduleVersion,
         userId: user.id,
         championId,
-        championName: tournament.champion_name ?? null,
+        championName: championClub(tournament),
+        championAccount: tournament.champion_name ?? null,
         matches: results.matches,
         entries: results.entries,
         ratings: rated,
@@ -262,7 +264,7 @@ export default async function MidweekBracketPage({
       )}
       {evening && seal && <MidweekSeed seedHash={seal} />}
     </>,
-    complete && tournament.champion_name ? `${tournament.champion_name} won it` : "The bracket",
+    complete && championClub(tournament) ? `${championClub(tournament)} won it` : "The bracket",
     clock,
   );
 }

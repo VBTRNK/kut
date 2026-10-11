@@ -265,7 +265,7 @@ export function MidweekWhyList({
           Chances before kick-off
         </p>
         <svg
-          aria-label={`Before kick-off: ${why[0].manager} ${chances[0]}%, ${why[1].manager} ${chances[1]}%`}
+          aria-label={`Before kick-off: ${why[0].club} ${chances[0]}%, ${why[1].club} ${chances[1]}%`}
           className="block h-3 w-full overflow-hidden rounded-md"
           preserveAspectRatio="none"
           role="img"
@@ -275,13 +275,13 @@ export function MidweekWhyList({
           <rect className="fill-team-1-fill" height="10" width={chances[1]} x={chances[0]} />
         </svg>
         <p aria-hidden="true" className="flex justify-between gap-3 text-[13px]">
-          <span>
-            <PlayerName side={0}>{why[0].manager}</PlayerName>{" "}
+          <span className="min-w-0 [overflow-wrap:anywhere]">
+            <PlayerName side={0}>{why[0].club}</PlayerName>{" "}
             <b className="tabular-nums">{chances[0]}%</b>
           </span>
-          <span className="text-right">
+          <span className="min-w-0 text-right [overflow-wrap:anywhere]">
             <b className="tabular-nums">{chances[1]}%</b>{" "}
-            <PlayerName side={1}>{why[1].manager}</PlayerName>
+            <PlayerName side={1}>{why[1].club}</PlayerName>
           </span>
         </p>
       </div>
@@ -289,7 +289,9 @@ export function MidweekWhyList({
         {why.map((side, s) => (
           <section aria-label={`${side.manager}’s five`} className="grid min-w-0 gap-1" key={s}>
             <h3 className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-b border-line pb-1.5 text-base font-black">
-              <PlayerName side={s as 0 | 1}>{side.manager}</PlayerName>
+              <span className="min-w-0 [overflow-wrap:anywhere]">
+                <PlayerName side={s as 0 | 1}>{side.club}</PlayerName>
+              </span>
               <small className="text-[12.5px] font-bold text-ink-faint tabular-nums">
                 {chances[s]}% before kick-off
               </small>

@@ -19,6 +19,9 @@ export type MatchRow = {
   side_0_name: string;
   side_1_user_id: string | null;
   side_1_name: string | null;
+  /** The clubs (ADR-145); absent on a database before that migration. Read them through `sideClub`. */
+  side_0_club?: string | null;
+  side_1_club?: string | null;
   side_0_goals: number | null;
   side_1_goals: number | null;
   /** Set only when a draw went to penalties. */
@@ -59,8 +62,35 @@ export type DrawRow = {
   side_0_name: string;
   side_1_user_id: string | null;
   side_1_name: string | null;
+  /** The clubs (ADR-145); absent on a database before that migration. */
+  side_0_club?: string | null;
+  side_1_club?: string | null;
   kickoff_at: string;
 };
+
+/**
+ * A club's name, or the account's while the view lacks the column or the
+ * club is blank (ADR-145, ADR-151). Clubs are read live, so a rename shows on
+ * past weeks too.
+ */
+export function clubName(club: string | null | undefined, account: string): string {
+  return club?.trim() || account;
+}
+
+/** The club of one side of a match or a drawn pairing; a side that isn't there is `""`. */
+export function sideClub(
+  row: {
+    side_0_name: string;
+    side_1_name: string | null;
+    side_0_club?: string | null;
+    side_1_club?: string | null;
+  },
+  side: 0 | 1,
+): string {
+  return side === 0
+    ? clubName(row.side_0_club, row.side_0_name)
+    : clubName(row.side_1_club, row.side_1_name ?? "");
+}
 
 /** A `kut.midweek_events_public` row, in engine order (`seq`). */
 export type EventRow = {
