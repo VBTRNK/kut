@@ -309,6 +309,9 @@ Part L item).
   `save_midweek_prediction`.
 - **Reveals:** time-gated `midweek_*_public` views (§44.9). Nothing is revealed
   by a job.
+- **Names:** the views carry each member's account name (`*_name`) and club
+  (`side_*_club`, `club_name`, `champion_club`; ADR-145). Pages don't read the
+  club yet.
 - **Lazy trigger:** `src/lib/midweek/run-due.ts`, called from Home and every
   Midweek page.
 - **Reports:** a seeded phrasebook in `src/lib/midweek/report/` (ADR-093).

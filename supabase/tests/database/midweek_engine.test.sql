@@ -48,7 +48,9 @@ select has_view('kut','midweek_admin_overview','the admin overview exists');
 select is((select array_agg(attname::text order by attnum) from pg_attribute
   where attrelid='kut.midweek_tournaments_public'::regclass and attnum>0 and not attisdropped),
   array['tournament_id','week_start','lock_at','seed_hash','status','status_reason','void_note','rounds',
-    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version'],
+    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version',
+    -- appended by ADR-145
+    'champion_club'],
   'the tournament list keeps its columns and appends the champion, then the schedule version (ADR-104)');
 
 select table_privs_are('kut','midweek_entries','authenticated',array[]::text[],'members cannot read entries directly');

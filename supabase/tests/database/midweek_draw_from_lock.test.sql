@@ -30,7 +30,9 @@ select has_view('kut','midweek_draw_public','the draw projection exists');
 select is((select array_agg(attname::text order by attnum) from pg_attribute
   where attrelid='kut.midweek_draw_public'::regclass and attnum>0 and not attisdropped),
   array['match_id','tournament_id','week_start','pairing','bye','side_0_user_id','side_0_name',
-    'side_1_user_id','side_1_name','kickoff_at'],
+    'side_1_user_id','side_1_name','kickoff_at',
+    -- appended by ADR-145
+    'side_0_club','side_1_club'],
   'the draw carries pairings, managers and the kick-off, and no result column');
 select table_privs_are('kut','midweek_draw_public','anon',array[]::text[],'anon cannot read the draw');
 select table_privs_are('kut','midweek_draw_public','authenticated',array['SELECT'],'members read the draw');
@@ -39,13 +41,15 @@ select is((select array_agg(attname::text order by attnum) from pg_attribute
   array['tournament_id','week_start','user_id','manager_name','auto','keeper_slot','keeperless','slot','trialist',
     'player_id','player_name','photo_path','ovr','archetype','injured','ovr_factor_ppm','form_roll_ppm',
     'pick_factor_ppm','fitness_ppm','handicap_ppm','power_ppm','att_ppm','mid_ppm','def_ppm','picks','owners',
-    -- appended by ADR-116
-    'balance_ppm'],
+    -- appended by ADR-116, then ADR-145
+    'balance_ppm','club_name'],
   'the entries keep their columns');
 select is((select array_agg(attname::text order by attnum) from pg_attribute
   where attrelid='kut.midweek_tournaments_public'::regclass and attnum>0 and not attisdropped),
   array['tournament_id','week_start','lock_at','seed_hash','status','status_reason','void_note','rounds',
-    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version'],
+    'final_reveal_at','seed','champion_user_id','champion_name','schedule_version',
+    -- appended by ADR-145
+    'champion_club'],
   'the tournament list keeps its columns');
 select is((select attname::text from pg_attribute where attrelid='kut.midweek_current'::regclass and attnum>0
   and not attisdropped order by attnum desc limit 1),'evening_live','midweek_current appends evening_live last');
