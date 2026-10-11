@@ -31,22 +31,23 @@ text, with the transition rules S1–S3 ran under, is at the tag `docs-archive-2
 Date: 2026-10-09 (S3 spike, VibeTrunk/kut#212). Full text at the tag `docs-archive-2026-10`.
 
 - No read-only role can read the auth tables on hosted (`postgres` has no grant
-  option on schema `auth`), so the backup covers schema `kut` only, like the old
-  local backup. Member accounts are not backed up.
+  option on schema `auth`), so the backup covers schema `kut` only.
 - `.github/workflows/backup.yml` runs nightly at 03:41 UTC as the read-only
   `kut_backup` role through the Session pooler. A privilege audit and a
   denied-insert check come first; the role never holds write or migration
   rights, and never the `postgres` credential (which ADR-144 allows only in
   the `VibeTrunk/supabase` migration workflow).
-- 2026-10-11: the schedule moved from 03:17 to 03:41 UTC (also an odd minute)
-  so that GitHub registers it again: the 03:17 runs started about 6.5 h late.
+- 2026-10-11: moved from 03:17 UTC, whose runs started about 6.5 h late.
 - The dump and its manifest come from one snapshot, are age-encrypted to the
   owner's key and kept 30 days. A restore check in a disposable `kut_restore`
   stack must match the schema and row counts and sign a stand-in member in.
 - Six PUBLIC-executable `kut` SECURITY DEFINER functions are reviewed
   exceptions in the audit. Revoking them is a later migration.
-- The old local backup stays in use until the owner's drill and a scheduled run
-  have passed; then a follow-up PR retires it.
+- 2026-10-11: after scheduled runs and the owner's drill passed, the old local
+  backup and its DPAPI invariant are retired. Its decrypt script and credential
+  store stay in `scripts/legacy/` for the old `.sql.enc` files until 2027-01-01.
+- The agents' start-up check ignores `pull_request` successes: those runs test
+  a fixture and could mask a missing nightly.
 
 ## ADR-142 — Archive-first tidy, deletion tiers and doc size limits
 

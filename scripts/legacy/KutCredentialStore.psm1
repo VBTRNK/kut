@@ -64,7 +64,7 @@ function Get-KutStoredCredential {
   }
   $target = Join-Path (Get-KutCredentialStoreRoot -StoreRoot $StoreRoot) "$Locator.clixml"
   if (-not (Test-Path -LiteralPath $target -PathType Leaf)) {
-    throw "Credential '$Locator' is not stored. Run scripts/bootstrap-kut-credentials.mjs explicitly."
+    throw "Credential '$Locator' is not stored. The bootstrap that wrote it was retired; pass the passphrase by hand."
   }
   $record = Import-Clixml -LiteralPath $target
   if ($record.version -ne 1 -or $record.locator -ne $Locator -or $record.secret -isnot [System.Security.SecureString]) {

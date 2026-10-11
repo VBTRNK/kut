@@ -101,9 +101,10 @@ protection and other hosted changes need their own written instruction.
 - Never flip a definer projection to `security_invoker = true` to please the
   Security Advisor; doing so blacked out the Chronicle (KB-013).
 - Anything data-changing gets a fresh cold-verified backup first.
-- **Start-up check:** run `gh run list -w backup.yml -s success -L 1 --json createdAt`
-  and warn the owner if the last success is over 36 hours old (ADR-141,
-  `docs/BACKUP.md`). A scheduled run can fail to start without any email.
+- **Start-up check:** run `gh run list -w backup.yml -s success -L 10 --json createdAt,event`
+  and warn the owner if the newest success whose event is not `pull_request` is
+  over 36 hours old (ADR-141, `docs/BACKUP.md`). PR runs test a fixture, not
+  production. A scheduled run can fail to start without any email.
 
 ## Agent safety
 
@@ -148,7 +149,6 @@ This block is generated from `policy/PRODUCTION_INVARIANTS.md`. Run
 - Never commit or push without the owner's authorization for that change; no agent rule set auto-allows `git commit` or `git push`. A merge to `main` deploys to production (ADR-140). It authorizes nothing else: migrations, function deployments, secrets, branch protection and other hosted changes each need their own explicit yes.
 - The backup route never holds write or migration rights (ADR-141). The `postgres` credential goes into GitHub only as a secret of the `production` environment in `VibeTrunk/supabase` (main only, the owner as required reviewer) for its `apply-migrations` workflow (ADR-144).
 - Never declare a backup successful unless its decryption key is durably retrievable and an independent restore check passes.
-- Until the old local backup is retired: its credentials come from the Windows DPAPI store under `%LOCALAPPDATA%\VibeTrunk\kut\credentials` (`.env.local` is a one-off bootstrap source, never a runtime fallback); backup plaintext and database passwords never appear in process arguments or durable logs; and a backup or rekey becomes final only after a separate-process decrypt produces the expected SHA-256, never overwriting an existing backup.
 <!-- END:KUT-PRODUCTION-INVARIANTS -->
 
 <!-- BEGIN:nextjs-agent-rules -->

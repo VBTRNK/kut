@@ -52,19 +52,15 @@ catalogue is the migration history; there are no per-release records (ADR-140).
 
 Data-changing tier also requires, before the push:
 
-6. Until the old local backup is retired (ADR-141), also a **fresh**
-   `scripts/backup-kut-hosted.ps1` run, its timestamp recorded in
-   `.private-backups/BACKUP_LOG.md`.
-7. Write the migration to be reversible in SQL where practical — add a column
+6. Write the migration to be reversible in SQL where practical — add a column
    instead of mutating one, or snapshot pre-state into a scratch table in the
    same migration — so a bad outcome is a one-line rollback, not a restore.
 
-Additive tier relies on the GitHub backup the workflow requires (under an hour
-old, ADR-141) and needs no local backup.
+Both tiers rely on the GitHub backup the workflow requires (under an hour old,
+ADR-141); the old local backup is retired.
 
-The restore drill (`docs/BACKUP.md`) is **periodic, not per-migration** — run
-it before the first real invite, then roughly monthly or whenever the schema
-changes shape significantly.
+The restore drill (`docs/BACKUP.md`) is **periodic, not per-migration**:
+roughly monthly, or whenever the schema changes shape significantly.
 
 Git migrations are necessary but are **not** a backup of user accounts,
 wallets, cards, sessions, or market history.
@@ -227,9 +223,6 @@ audit table for photo actions, unlike password resets.
   must first exist as matching reviewed files in KUT and the central catalogue,
   and pass locally before central deployment. Run it through the risk-tiered
   checklist above.
-- Run `scripts/backup-kut-hosted.ps1` on a regular schedule appropriate to the
-  group’s activity (at least weekly once members trade). A **fresh** run is
-  additionally required before a data-changing migration; an additive
-  migration rides on the last scheduled backup. Run the
-  [`docs/BACKUP.md`](BACKUP.md) restore drill once before the first real
-  invite, then periodically — not per migration.
+- The nightly GitHub backup ([`docs/BACKUP.md`](BACKUP.md)) runs on its own;
+  every hosted migration first needs one under an hour old. Run the restore
+  drill there periodically, not per migration.
