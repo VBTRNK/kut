@@ -70,7 +70,16 @@ export function MidweekScoreboard({
         {youSide === s && <Chip tone="you">You</Chip>}
         {/* Home's card leaves the auto squad to the match page: two long names
             and their chips would not fit a 320 px card. */}
-        {auto[s] && !compact && <Chip tone="auto">Auto squad</Chip>}
+        {/* Three columns at 320 px leave a side about 90 px: the chip reads
+            `Auto` there, and screen readers hear the whole phrase. */}
+        {auto[s] && !compact && (
+          <Chip tone="auto">
+            <span aria-hidden="true" className="sm:hidden">
+              Auto
+            </span>
+            <span className="sr-only sm:not-sr-only">Auto squad</span>
+          </Chip>
+        )}
       </p>
     </div>
   );
