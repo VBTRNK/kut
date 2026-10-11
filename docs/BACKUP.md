@@ -19,7 +19,7 @@ trade history.
 
 ## Nightly GitHub backup (ADR-141)
 
-`.github/workflows/backup.yml` runs at 03:17 UTC, on manual dispatch, and as a
+`.github/workflows/backup.yml` runs at 03:41 UTC, on manual dispatch, and as a
 callable workflow. It connects as the read-only `kut_backup` role through the
 Supabase Session pooler, from the `backup` environment (branch `main` only).
 
