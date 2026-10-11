@@ -45,8 +45,10 @@ Always, both tiers:
    order of the steps is in `docs/RELEASING.md`.
 
 The workflow requires a backup under an hour old and checks that nothing is
-pending after the push. Then run the hosted smoke query and update the
-"Latest hosted migration" line in `AGENTS.md` in the next PR. Only that one line changes in `AGENTS.md`, so the
+pending after the push. For the data-changing tier the owner then runs a
+read-only hosted smoke query; for the additive tier the workflow's checks and
+CI are enough (ADR-146). Update the "Latest hosted migration" line in
+`AGENTS.md` in the next PR. Only that one line changes in `AGENTS.md`, so the
 file stays orientation rather than a changelog. The `VibeTrunk/supabase`
 catalogue is the migration history; there are no per-release records (ADR-140).
 

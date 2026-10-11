@@ -137,3 +137,19 @@ Date: 2026-10-11 (Midweek Madness 3.0 S2, VibeTrunk/kut#267, #262).
   written in SQL is unchanged. `my_midweek_predictions` keeps only the account
   name of the called member.
 - Pages read the columns from S7, falling back to the account name.
+
+## ADR-146 — Hosted smoke query only for data-changing migrations
+
+Date: 2026-10-11 (after Midweek Madness 3.0 S2). Amends `docs/OPERATIONS.md`.
+
+- Agents have no hosted credential, so the smoke query after a hosted apply
+  is a manual step for the owner. For an additive migration (new views,
+  columns, functions) it adds little: CI tests the migration on a fresh stack,
+  and the `apply-migrations` workflow (ADR-144) shows the approved plan, the
+  push and that nothing is pending.
+- So the owner runs a read-only smoke query only after a **data-changing**
+  migration (`docs/OPERATIONS.md` tiers). An access change still gets a
+  member smoke test of the page (AGENTS.md).
+- Running a reviewed read-only smoke inside the apply job is filed as
+  VibeTrunk/supabase#87, for when migrations get frequent or a second tool
+  joins.
