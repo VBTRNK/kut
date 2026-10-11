@@ -59,7 +59,9 @@ and recording it in `docs/decisions.md`. Never silently "improve" a formula.
 - Work only in `C:\Users\mfvan\dev\kut` (and `C:\Users\mfvan\dev\supabase`);
   the old OneDrive checkout is frozen until S8. One agent per checkout; a
   second agent gets a `git worktree` under the ignored
-  `.release-evidence/worktrees/` and merges into the PR branch.
+  `.release-evidence/worktrees/` and merges into the PR branch. Shared plan
+  files (`~\.claude\plans`) and handoff files (`~\.agents\handoffs`, see the
+  global instructions) are permitted exceptions.
 - `main` is protected. Branch (`feat/`, `fix/`, `docs/`, ...) and open a PR; the
   owner reviews and squash-merges unless they delegate it. Branches
   auto-delete on merge. Use conventional commit prefixes (`feat:`, `docs+fix:`).
