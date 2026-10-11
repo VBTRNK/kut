@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Side } from "@/game/midweek/match";
 import { formatClock } from "@/lib/midweek/entry";
+import { ordinal } from "@/lib/midweek/live";
 import type { KickItem } from "@/lib/midweek/report/kicks";
 import type { MomentKind, TimelineItem } from "@/lib/midweek/report/types";
 import { PlayerName, ReportText, TEAM_TEXT } from "./player-name";
@@ -41,13 +42,6 @@ const LANE = [
 const NEWEST = "mw-chance-in outline-1 outline-brass";
 const SPINE =
   "hidden justify-items-center gap-0.5 pt-2.5 text-xs font-extrabold text-ink-faint tabular-nums @min-[600px]:col-start-2 @min-[600px]:row-start-1 @min-[600px]:grid";
-
-/** "39th", "1st", "22nd": the minute as screen readers hear it. */
-export function ordinal(n: number): string {
-  const tens = n % 100;
-  if (tens >= 11 && tens <= 13) return `${n}th`;
-  return `${n}${["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
-}
 
 /** A score, the scoring side's digit emphasised. */
 function Score({

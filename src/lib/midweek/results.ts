@@ -2,7 +2,7 @@ import { resolvePhotoUrls } from "@/lib/player-photos";
 import type { MyPredictionRewardRow, MyPredictionRow, PredictionSplitRow } from "./calls";
 import type { createClient } from "@/lib/supabase/server";
 import type { MidweekTournament, MyRewardRow } from "./entry";
-import { maskInPlay } from "./live";
+import { maskInPlay, type RowEvent } from "./live";
 import { loadMatchEnds } from "./live-load";
 import { nightRatings, playedMatches, type NightRatings } from "./night-ratings";
 import type { DrawRow, EntryCardRow, EventRow, MatchRow, PickShareRow } from "./rows";
@@ -72,6 +72,29 @@ export async function loadWeekResults(
     matches: maskInPlay((matches.data ?? []) as MatchRow[], ends, now),
     entries: (entries.data ?? []) as EntryCardRow[],
   };
+}
+
+/**
+ * What the rows of the matches in play may show (DR4-6, ADR-148): their events
+ * so far, in one member read. The view shows each event only from its own
+ * moment (ADR-106), so the goals and kicks counted from it are the score as it
+ * stands; no report is rendered and the service role is not used. Nothing is
+ * read when no match is in play. Unlike the reads above, a failure returns
+ * null and the rows show `Live` without a score: the score is extra here, and
+ * the page's own result still stands.
+ */
+export async function loadLiveRowEvents(
+  supabase: SupabaseServerClient,
+  matches: readonly MatchRow[],
+): Promise<RowEvent[] | null> {
+  const ids = matches.filter((match) => match.in_play).map((match) => match.match_id);
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase
+    .schema("kut")
+    .from("midweek_events_public")
+    .select("match_id, kind, side, outcome")
+    .in("match_id", ids);
+  return error ? null : ((data ?? []) as RowEvent[]);
 }
 
 /**

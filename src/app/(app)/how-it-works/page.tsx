@@ -429,8 +429,8 @@ export default async function HowItWorksPage() {
             </li>
             <li>
               Round 1 comes out at {roundOneAt}, then a round {roundIntervalText(scheduleVersion)}{" "}
-              until the final. Open any match in play to follow it live, chance by chance, and kick
-              by kick in a shoot-out.
+              until the final. Every match in play shows its score so far on the evening and the
+              bracket; open it to follow it live, chance by chance, and kick by kick in a shoot-out.
             </li>
             <li>
               No TFH session the week before means a club break: no Midweek Madness that week.

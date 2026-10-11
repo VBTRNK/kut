@@ -177,3 +177,29 @@ ADR-115; design `design/mm3/HANDOFF.md` DR4-1 to DR4-5.
   (`ShootoutKick.keeper`). Its commentary and the decider show only at full
   time, under their own kick (`ShootoutReport.decider`). A level shoot-out
   stays live after its last kick until the draw's moment.
+
+## ADR-148 — Every row in play live, with its score so far
+
+Date: 2026-10-11 (Midweek Madness 3.0 S4, VibeTrunk/kut#267, #216). Amends
+ADR-115 and ADR-147; design `design/mm3/HANDOFF.md` DR4-6 and DR4-10.
+
+- **Every match in play is live on its row**, on the evening's `This round`
+  and the bracket, list and `lg` tree: `Live`, each side's goals so far, the
+  minute or `pens` with the kicks scored in brackets, and a link to watch it.
+  The `In play · result at full time` row is retired.
+- **The score is counted, not rendered:** one member read of
+  `midweek_events_public` for the matches in play (`loadLiveRowEvents`),
+  counting `kind = 'chance'` goals per side; penalty kicks count only in the
+  brackets, and the settling `toss` never. The view shows each event from its
+  own moment (ADR-106), so no report, service role or extra gate is needed. A
+  failed read degrades to `Live` with no score. Played rows, and weeks from
+  before ADR-104 (no stored end), keep their stored score.
+- **The minute** ticks on the client from public timing, as the scoreboard's
+  clock does (ADR-147), and holds at 90′; `pens` comes with the first kick a
+  poll brings.
+- **Tree groups are two equal grid rows** (`grid-rows-2`), not `flex-1`
+  children: a two-line match beside a one-line bye no longer pulls the
+  bracket line off its quarter point (#216). The focused-tooltip half was the
+  test's pointer: focusing scrolled another factor under it, whose hover won.
+- **Load:** 16 matches in play, local production build: the evening about
+  100 ms, the bracket about 70 ms (medians; budget 500 ms). No cache.

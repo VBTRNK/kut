@@ -300,6 +300,12 @@ Part L item).
     commentary and the decider come only at full time (#263).
   - Nothing shows before its real moment. The match page polls every 10 s
     (5 s in a shoot-out), the evening and bracket every 20 s.
+  - Every row in play, on the evening and the bracket, shows `Live`, the
+    score so far, a ticking minute or `pens` with the kicks scored, and links
+    to watch it (ADR-148). Its score counts the goal events members may see
+    now; no report is rendered for a row.
+  - The `lg` tree stacks each group's two pairings in equal rows, so the
+    bracket line meets both (#216).
 
 **Part L:** 4, 5, 25, 26, 27, 28.
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatClock } from "@/lib/midweek/entry";
 import { pairSentence, sideScore, type BracketPair, type BracketSlot } from "@/lib/midweek/evening";
 import { Chip, LiveMarker } from "./chip";
+import { MidweekRowMinute } from "./match-clock";
 
 /** A call on a bracket row (DR3 HANDOFF §2): the bracket shows calls, it never takes them. */
 export type RowCall = { kind: "picked"; name: string } | { kind: "open" };
@@ -39,6 +40,7 @@ function Side({
   lost,
   bye,
   score,
+  dense,
 }: {
   slot: BracketSlot;
   you: boolean;
@@ -46,6 +48,7 @@ function Side({
   lost: boolean;
   bye: boolean;
   score: { goals: number; penalties: number | null } | null;
+  dense: boolean;
 }) {
   const tone = slot.placeholder
     ? "text-ink-faint"
@@ -59,7 +62,8 @@ function Side({
       <span className={`min-w-[5ch] truncate ${tone}`}>{slot.name}</span>
       {won && <span className="font-black text-moss">✓</span>}
       {you && <Chip tone="you">You</Chip>}
-      {slot.auto && <Chip tone="auto">Auto</Chip>}
+      {/* The tree's box has no room for both chips and a score; `You` wins. */}
+      {slot.auto && !(dense && you) && <Chip tone="auto">Auto</Chip>}
       {bye && <Chip>Bye</Chip>}
       {score && (
         <span className={`ml-auto pl-2 tabular-nums ${won ? "font-black" : "font-bold"}`}>
@@ -78,10 +82,10 @@ function Side({
 /**
  * `MidweekMatchRow` (HANDOFF "Bracket"), neutral, never in team colours
  * (DR2-1). Four states: `Kick-off 20:15` before a pairing starts, naming who
- * meet or where they come from (`Winner of Mila v Eline`); in play, as `Live`
- * with a link to watch it for the member's own match and the final, and as
- * `In play · result at full time` for every other match, with no score
- * (ADR-115); `Full time` with both scores, the winner ticked and a link to the
+ * meet or where they come from (`Winner of Mila v Eline`); every match in
+ * play as `Live` with the score so far beside each side, the minute (`64′`)
+ * or `pens` with the kicks scored in brackets, and a link to watch it (DR4-6,
+ * ADR-148); `Full time` with both scores, the winner ticked and a link to the
  * report; a bye as one dashed row that counts as a win. Each row is a group
  * with one full sentence as its name; `dense` is the desktop tree's box. For a
  * member who is out, a later match carries their call, read-only (ADR-118).
@@ -106,15 +110,23 @@ export function MidweekMatchRow({
     pair.kind === "bye"
       ? `border-dashed bg-transparent ${isYou ? "border-brass" : "border-line/70"}`
       : `bg-panel/55 ${isYou ? "border-brass shadow-[0_0_0_1px_rgb(224_172_74/25%)]" : "border-line/60"}`;
+  const live = pair.kind === "inplay" ? pair.live : null;
   const sides = pair.sides.map((slot, index) => {
     const played = pair.kind === "played";
     const won = played && pair.match.winner_side === index;
     return (
       <Side
         bye={pair.kind === "bye"}
+        dense={dense}
         key={index}
         lost={played && !won}
-        score={played ? sideScore(pair.match, index as 0 | 1) : null}
+        score={
+          played
+            ? sideScore(pair.match, index as 0 | 1)
+            : live
+              ? { goals: live.goals[index], penalties: live.penalties?.[index] ?? null }
+              : null
+        }
         slot={slot}
         won={won}
         you={mine(slot)}
@@ -136,33 +148,31 @@ export function MidweekMatchRow({
         </b>
       </Link>
     );
-  } else if (pair.kind === "inplay" && (isYou || pair.final)) {
+  } else if (pair.kind === "inplay") {
     state = (
       <Link
-        aria-label={`Watch it: ${sentence}`}
-        className={`flex items-center gap-2 border-l border-line/40 hover:bg-brass/10 ${dense ? "px-1.5" : "px-3"}`}
+        aria-label={`Watch it: ${pair.sides[0].name} v ${pair.sides[1].name}`}
+        className={`grid content-center gap-1 border-l border-line/40 hover:bg-brass/10 ${dense ? "justify-items-center px-1.5" : "grid-cols-[auto_auto] items-center gap-x-2 px-3"}`}
         href={`/midweek/${weekStart}/match/${pair.match.match_id}`}
       >
-        <LiveMarker />
+        <span className="grid justify-items-center gap-1">
+          <LiveMarker />
+          {live && (
+            <span className="text-[11.5px] font-bold whitespace-nowrap text-live tabular-nums">
+              {live.penalties ? (
+                "pens"
+              ) : (
+                <MidweekRowMinute clock={live.clock} minute={live.minute} />
+              )}
+            </span>
+          )}
+        </span>
         {!dense && (
           <b aria-hidden="true" className="text-lg leading-none font-black text-brass">
             ›
           </b>
         )}
       </Link>
-    );
-  } else if (pair.kind === "inplay") {
-    state = (
-      <span
-        className={`grid content-center justify-items-end gap-1 text-[11px] font-bold text-ink-faint ${dense ? "pr-1.5" : "pr-3"}`}
-      >
-        <span className="rounded-full border border-dashed border-steel-line px-2 py-px text-[10px] font-black tracking-[0.1em] whitespace-nowrap text-steel uppercase">
-          In play
-        </span>
-        {!dense && (
-          <span className="whitespace-nowrap max-[359px]:hidden">result at full time</span>
-        )}
-      </span>
     );
   } else if (pair.kind === "upcoming") {
     const time = formatClock(pair.kickoffAt);
@@ -193,7 +203,7 @@ export function MidweekMatchRow({
       <div className="grid min-w-0 content-center">
         <div
           aria-hidden="true"
-          className={`grid min-w-0 content-center gap-1 ${dense ? "py-1 pl-2 text-[12.5px] leading-[1.45]" : "py-2.5 pl-3 text-sm"}`}
+          className={`grid min-w-0 grid-cols-[minmax(0,1fr)] content-center gap-1 ${dense ? "py-1 pl-2 text-[12.5px] leading-[1.45]" : "py-2.5 pl-3 text-sm"}`}
         >
           {sides}
         </div>

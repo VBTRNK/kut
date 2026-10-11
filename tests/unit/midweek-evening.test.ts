@@ -889,7 +889,9 @@ describe("the evening in play (ADR-115)", () => {
     const pair = bracket[1].pairs[round2.pairing];
     expect(pair.kind).toBe("inplay");
     expect(pair.kind === "inplay" && pair.final).toBe(false);
-    expect(pairSentence(pair)).toMatch(/, in play\. The result shows at full time\.$/);
+    expect(pairSentence(pair)).toBe(
+      `Live: ${round2.side_0_name} v ${round2.side_1_name}. Watch it.`,
+    );
     expect(bracket[1].played).toBe(false);
     const next = bracket[2].pairs[round2.pairing >> 1];
     expect(next.kind).toBe("upcoming");

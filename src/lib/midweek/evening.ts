@@ -20,6 +20,7 @@ import {
   type MidweekTournament,
   type MyRewardRow,
 } from "./entry";
+import { ordinal, rowLive, type RowEvent, type RowLive } from "./live";
 import type { DrawRow, EntryCardRow, MatchRow } from "./rows";
 
 const AMS = "Europe/Amsterdam";
@@ -159,14 +160,19 @@ export type BracketPair =
       sides: [BracketSlot, BracketSlot];
     }
   | { kind: "bye"; round: number; pairing: number; sides: [BracketSlot] }
-  /** Kicked off, not at full time: no score until it ends (ADR-106). */
+  /**
+   * Kicked off, not at full time: the match row holds no result until it ends
+   * (ADR-106); `live` is the score so far from the events shown (ADR-148), or
+   * null when the page read none.
+   */
   | {
       kind: "inplay";
       round: number;
       pairing: number;
       match: MatchRow;
-      /** The final: everyone watches it live (HANDOFF "Bracket"). */
+      /** The final, which the evening shows to everyone (HANDOFF "Bracket"). */
       final: boolean;
+      live: RowLive | null;
       sides: [BracketSlot, BracketSlot];
     }
   /** Not kicked off yet: the two who meet, or where they come from. */
@@ -201,7 +207,8 @@ export function feederName(round: number, pairing: number, rounds: number): stri
  * ADR-105) and the pairings revealed so far. A pairing not at full time is
  * `upcoming` with its kick-off: round 2 names a match still to be played as
  * "Winner of Mila v Eline", later rounds "Winner, Quarters 1" (HANDOFF
- * "Bracket").
+ * "Bracket"). With `live`, a match in play carries its score so far, counted
+ * from the events members may see now (`loadLiveRowEvents`, ADR-148).
  */
 export function assembleBracket(input: {
   rounds: number;
@@ -210,6 +217,7 @@ export function assembleBracket(input: {
   draw?: readonly DrawRow[];
   matches: readonly MatchRow[];
   autoUserIds: ReadonlySet<string>;
+  live?: { events: readonly RowEvent[]; now: Date };
 }): BracketRound[] {
   const { rounds } = input;
   const lock = new Date(input.lockAt);
@@ -261,6 +269,14 @@ export function assembleBracket(input: {
           pairing,
           match,
           final: round === rounds,
+          live: input.live
+            ? rowLive({
+                match,
+                events: input.live.events,
+                scheduleVersion: input.scheduleVersion,
+                now: input.live.now,
+              })
+            : null,
           sides: [
             slot(match.side_0_user_id, match.side_0_name),
             slot(match.side_1_user_id, match.side_1_name ?? ""),
@@ -368,7 +384,14 @@ export function pairSentence(pair: BracketPair): string {
   if (pair.kind === "played") return matchSentence(pair.match);
   if (pair.kind === "bye") return `${pair.sides[0].name} has a bye, which counts as a win.`;
   if (pair.kind === "inplay") {
-    return `${pair.sides[0].name} v ${pair.sides[1].name}, in play. The result shows at full time.`;
+    const [a, b] = pair.sides.map((side) => side.name);
+    const live = pair.live;
+    if (!live) return `Live: ${a} v ${b}. Watch it.`;
+    const pens = live.penalties
+      ? `, ${live.penalties[0]}–${live.penalties[1]} in the shoot-out`
+      : "";
+    const when = live.penalties ? "penalties" : `${ordinal(live.minute)} minute`;
+    return `Live, ${when}: ${a} ${live.goals[0]}, ${b} ${live.goals[1]}${pens}. Watch it.`;
   }
   return `${pair.sides[0].name} v ${pair.sides[1].name}, kick-off ${formatClock(pair.kickoffAt)}.`;
 }
