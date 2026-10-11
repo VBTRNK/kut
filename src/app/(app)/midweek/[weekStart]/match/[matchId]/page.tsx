@@ -137,7 +137,12 @@ export default async function MidweekReportPage({
         auto={[autoOf(shown.side_0_user_id), autoOf(shown.side_1_user_id)]}
         back={back}
         kickoffAt={shown.reveal_at}
-        kicker={`${capitalise(matchName(shown.round, shown.pairing, rounds))}${yours !== null ? " · your match" : ""} · live`}
+        kicker={
+          // The final is everyone's, so it never says "your match" (DR4-3).
+          shown.round === rounds
+            ? "The final · live"
+            : `${capitalise(matchName(shown.round, shown.pairing, rounds))}${yours !== null ? " · your match" : ""} · live`
+        }
         live={live}
         managers={[shown.side_0_name, shown.side_1_name ?? ""]}
         now={now.toISOString()}
