@@ -194,15 +194,15 @@ function sideNames(input: ReportInput): [Segment[], Segment[]] {
   return raw.map((names, s) =>
     names.map((name, slot): Segment =>
       shared.has(name) && input.sides[s].cards[slot].name !== null
-        ? { text: name, side: s as Side, owner: input.sides[s].manager }
+        ? { text: name, side: s as Side, owner: input.sides[s].club }
         : { text: name, side: s as Side },
     ),
   ) as [Segment[], Segment[]];
 }
 
-/** A manager's name as a segment on their side. */
-const managerOf = (input: ReportInput, side: Side): Segment => ({
-  text: input.sides[side].manager,
+/** A side's club, as a segment on that side. */
+const clubOf = (input: ReportInput, side: Side): Segment => ({
+  text: input.sides[side].club,
   side,
 });
 
@@ -350,6 +350,7 @@ export function renderMatchReport(input: ReportInput): MatchReport {
 
   const why = sides.map((side, s): WhySide => ({
     manager: side.manager,
+    club: side.club,
     auto: side.auto,
     keeperless: side.keeperless,
     shortLines: shortLines(side),
@@ -400,8 +401,8 @@ function renderShootout(
   const secondSide: Side = firstSide === 0 ? 1 : 0;
   const lines: Styled[] = [
     compose(picker.pick("shootout-intro", SHOOTOUT_INTRO), {
-      first: managerOf(input, firstSide),
-      second: managerOf(input, secondSide),
+      first: clubOf(input, firstSide),
+      second: clubOf(input, secondSide),
     }),
   ];
   kicks.forEach((kick, index) => {
@@ -429,7 +430,7 @@ function renderShootout(
   if (toss) {
     lines.push(
       compose(picker.pick("shootout-toss", SHOOTOUT_TOSS), {
-        winner: managerOf(input, outcome.winnerSide),
+        winner: clubOf(input, outcome.winnerSide),
       }),
     );
   }
@@ -513,8 +514,8 @@ function renderHeadline(
   else kind = "narrow";
 
   return compose(picker.pick(`headline:${kind}`, HEADLINES[kind]), {
-    winner: managerOf(input, winner),
-    loser: managerOf(input, loser),
+    winner: clubOf(input, winner),
+    loser: clubOf(input, loser),
     score,
     hero: names[winner][hero],
   });
@@ -538,8 +539,8 @@ function renderFacts(
     const card = fact.slot === null ? null : side.cards[fact.slot];
     let lineKind: FactLineKind;
     const values: Record<string, string | Segment> = {
-      manager: managerOf(input, fact.side),
-      opponent: managerOf(input, fact.side === 0 ? 1 : 0),
+      manager: clubOf(input, fact.side),
+      opponent: clubOf(input, fact.side === 0 ? 1 : 0),
       name: fact.slot === null ? "" : names[fact.side][fact.slot],
       value: "",
       picks: "",

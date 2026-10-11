@@ -16,7 +16,7 @@ import { squadBalance } from "@/game/midweek/shape";
 import { getRarityTier } from "@/game/rating-engine";
 import type { LiveCardPlayer } from "@/components/live-card";
 import { TIER_LABEL, type BracketRound, type BracketSlot } from "./evening";
-import type { EntryCardRow } from "./rows";
+import { clubName, type EntryCardRow } from "./rows";
 
 export type NextPairing = {
   round: number;
@@ -66,7 +66,7 @@ export type PreCard = {
 
 export type PreSide = {
   userId: string;
-  /** The club, or the account's default while the view lacks it (ADR-145). */
+  /** The club, or the account name while the view lacks it (ADR-145, ADR-151). */
   club: string;
   /** The account name: `Sophie's five` (DR4-11). */
   account: string;
@@ -119,7 +119,7 @@ export function preMatchSide(entries: readonly EntryCardRow[], userId: string): 
   });
   return {
     userId,
-    club: first.club_name?.trim() || `${first.manager_name}'s Club`,
+    club: clubName(first.club_name, first.manager_name),
     account: first.manager_name,
     auto: first.auto,
     lines,

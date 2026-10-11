@@ -200,7 +200,7 @@ describe("a five before kick-off (Q2, DR4-7)", () => {
     ]);
   });
 
-  it("names one trialist without a number, and falls back to the account's club", () => {
+  it("names one trialist without a number, and falls back to the account's name", () => {
     const side = preMatchSide(
       [card(0, { club_name: null }), trialist(1, 900_000)].map((row) => ({
         ...row,
@@ -210,7 +210,7 @@ describe("a five before kick-off (Q2, DR4-7)", () => {
       })),
       "S",
     )!;
-    expect(side.club).toBe("Sanne's Club");
+    expect(side.club).toBe("Sanne");
     expect(side.cards.map((c) => c.name)).toContain("Sanne's trialist");
   });
 

@@ -11,6 +11,7 @@ import type { ReportSide } from "@/lib/midweek/report/types";
 function sideOf(archetypes: Archetype[], balancePpm: number | null): ReportSide {
   return {
     manager: "M",
+    club: "M",
     auto: false,
     keeperSlot: 0,
     keeperless: false,

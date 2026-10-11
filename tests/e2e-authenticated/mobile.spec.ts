@@ -8,6 +8,7 @@ import {
   COMPLETED_WEEK,
   endFixtureEvening,
   FIXTURE_PHOTO,
+  LONG_CLUB,
   moveFixtureEveningTo,
   resetMidweekMember,
   setWeekArchetype,
@@ -558,6 +559,39 @@ test.describe("Midweek Madness results (PR 8)", () => {
     }
     await expectNoHorizontalOverflow(page);
   });
+
+  test(
+    "a 79-character club is cut in the rows, whole in their labels, and clamped on the scoreboard (#262, DR4-9)",
+    { tag: "@narrow" },
+    async ({ page }) => {
+      await signIn(page, "release_member");
+      await page.goto(`/midweek/${COMPLETED_WEEK}`);
+      // The row's report link names the whole club; its own text is cut to one line.
+      const report = page
+        .getByRole("link", { name: new RegExp(`^Match report: .*${LONG_CLUB}`) })
+        .first();
+      await expect(report).toBeVisible();
+      const cut = page.getByText(/^Sportclub Elinewijk/).first();
+      await expect(cut).toBeVisible();
+      expect(await cut.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(true);
+      await expectNoHorizontalOverflow(page);
+
+      // The report: the scoreboard names it in full to a screen reader and shows at
+      // most two lines; the Why's heading wraps it in full.
+      await report.click();
+      const board = page.getByRole("group", { name: new RegExp(`^Final score: .*${LONG_CLUB}`) });
+      await expect(board).toBeVisible();
+      const name = board.getByText(/^Sportclub Elinewijk/).first();
+      const lines = await name.evaluate(
+        (node) => node.clientHeight / parseFloat(getComputedStyle(node).lineHeight),
+      );
+      expect(lines).toBeLessThanOrEqual(2.05);
+      await expect(
+        page.getByRole("heading", { level: 3, name: new RegExp(`^${LONG_CLUB}`) }),
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    },
+  );
 
   test("past weeks list every finished week, each opening its bracket", async ({ page }) => {
     await signIn(page, "release_member");
@@ -1597,7 +1631,7 @@ test.describe("Midweek Madness share images (F8, ADR-120)", () => {
           await preview.evaluate((img: HTMLImageElement) => [img.naturalWidth, img.naturalHeight]),
         ).toEqual([1080, 1350]);
       }
-      await expect(block.getByText(/^Both show managers’ and Players’ names/)).toBeVisible();
+      await expect(block.getByText(/^Both show club, manager and Player names/)).toBeVisible();
       await expectNoHorizontalOverflow(page);
 
       await block.getByRole("button", { name: "Share" }).first().click();

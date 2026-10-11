@@ -28,6 +28,7 @@ import { callCards, weeklyCallsLine } from "@/lib/midweek/calls";
 import { toLiveCardPlayer, type OwnedCardRow } from "@/lib/live-card-player";
 import {
   allStillOwned,
+  championClub,
   formatClock,
   formatDayDate,
   formatDayMonth,
@@ -70,7 +71,7 @@ import {
   loadWeekResults,
 } from "@/lib/midweek/results";
 import { shareImages } from "@/lib/midweek/share";
-import type { MatchRow } from "@/lib/midweek/rows";
+import { sideClub, type MatchRow } from "@/lib/midweek/rows";
 import { resolvePhotoUrls } from "@/lib/player-photos";
 import type { createClient } from "@/lib/supabase/server";
 
@@ -147,7 +148,7 @@ export async function lastWeekView(
       rewards: rewardsResponse.data ?? [],
       entered: (entryResponse.data ?? []).length > 0,
       isChampion: tournament.champion_user_id === userId,
-      championName: tournament.champion_name ?? null,
+      championName: championClub(tournament),
     }),
     href: `/midweek/${tournament.week_start}`,
   };
@@ -578,7 +579,7 @@ function LiveMatchBlock({
   now: string;
   scheduleVersion: number;
 }) {
-  const managers = [match.side_0_name, match.side_1_name ?? ""] as const;
+  const clubs = [sideClub(match, 0), sideClub(match, 1)] as const;
   const side1 = match.side_1_user_id ?? "";
   const kicks = kickItems(live?.live.kicks ?? []);
   const lastKick = kicks.at(-1);
@@ -601,14 +602,14 @@ function LiveMatchBlock({
           penalties: live?.live.penalties ?? null,
           clock: { kickoffAt: match.reveal_at, scheduleVersion, at: now },
         }}
-        managers={managers}
+        clubs={clubs}
         penalties={null}
         winnerSide={null}
         youSide={match.side_0_user_id === userId ? 0 : side1 === userId ? 1 : null}
       />
       {live?.live.shootout && live.live.penalties ? (
         <>
-          <MidweekShootoutTally kicks={kicks} live managers={managers} />
+          <MidweekShootoutTally kicks={kicks} live clubs={clubs} />
           {lastKick && (
             <div className="@container">
               <ol aria-label="The latest kick" className="grid gap-2">
@@ -627,7 +628,7 @@ function LiveMatchBlock({
             <MidweekMomentRow
               item={latest}
               key={`m${latest.minute}-${latest.side}`}
-              managers={managers}
+              clubs={clubs}
               newest
             />
           </ol>
@@ -654,7 +655,7 @@ function FinalScoreboard({
     <MidweekScoreboard
       auto={[autoUserIds.has(match.side_0_user_id), autoUserIds.has(side1)]}
       goals={[a.goals, b.goals]}
-      managers={[match.side_0_name, match.side_1_name ?? ""]}
+      clubs={[sideClub(match, 0), sideClub(match, 1)]}
       penalties={a.penalties !== null && b.penalties !== null ? [a.penalties, b.penalties] : null}
       winnerSide={settledWinner(match)}
       youSide={match.side_0_user_id === userId ? 0 : side1 === userId ? 1 : null}
@@ -830,7 +831,7 @@ export async function WeekComplete({
   const totals = nightTotals(results.matches, rounds);
   const seed = tournament.seed ?? null;
   const seal = tournament.seed_hash ?? "";
-  const championName = tournament.champion_name ?? "The champion";
+  const championName = championClub(tournament) ?? "The champion";
   // The member's ratings for the block and their image, the champion's for the poster.
   const rated = await loadNightRatingsFor(supabase, tournament, results, [
     userId,
@@ -843,7 +844,8 @@ export async function WeekComplete({
     scheduleVersion: scheduleVersionOf(tournament),
     userId,
     championId,
-    championName: tournament.champion_name ?? null,
+    championName: championClub(tournament),
+    championAccount: tournament.champion_name ?? null,
     matches: results.matches,
     entries: results.entries,
     ratings: rated,
@@ -890,7 +892,7 @@ export async function WeekComplete({
             <div className="max-w-[760px]">
               <FiveCards
                 cards={championCards.map((row) => entryCardFace(row, photoUrls))}
-                label={`${championName}’s five`}
+                label={`${tournament.champion_name ?? "The champion"}’s five`}
               />
             </div>
           )}

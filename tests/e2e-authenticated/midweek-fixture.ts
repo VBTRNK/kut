@@ -45,6 +45,13 @@ const PLAYERS = [
   ["05", "Engine Fixture", "playmaker"],
 ] as const;
 
+/**
+ * Fixture Manager B's club (ADR-145): 79 characters, one short of what
+ * Settings allows, so every Midweek surface has a name to cut or wrap (#262).
+ */
+export const LONG_CLUB =
+  "Sportclub Elinewijk Zondagmiddag Veteranen Zeven Tegen Zeven Haarlem-Noord 1923";
+
 /** The completed week's Monday, and its lock (a Wednesday 20:00 CET). */
 export const COMPLETED_WEEK = "2001-01-15";
 const COMPLETED_LOCK = "2001-01-17T19:00:00.000Z";
@@ -252,8 +259,8 @@ async function seedCompletedWeek(database: Client, memberId: string) {
       [id("4", n), `e2e-midweek-${n}@users.kut.local`],
     );
     await database.query(
-      "insert into kut.profiles (id, display_name, role) values ($1, $2, 'user')",
-      [id("4", n), name],
+      "insert into kut.profiles (id, display_name, club_name, role) values ($1, $2, $3, 'user')",
+      [id("4", n), name, n === "02" ? LONG_CLUB : null],
     );
     await database.query(
       "insert into kut.user_cards(id, edition_id, owner_id, source) values ($1, $2, $3, 'pack')",

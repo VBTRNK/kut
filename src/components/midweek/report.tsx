@@ -17,7 +17,7 @@ export { ordinal };
  * is open (DR2-1): side 0 violet on the left, side 1 teal on the right (DR3-10).
  */
 
-export type Managers = readonly [string, string];
+export type Clubs = readonly [string, string];
 
 /**
  * `MidweekScoreboard`: always side 0 on the left and side 1 on the right, from
@@ -30,7 +30,7 @@ export type Managers = readonly [string, string];
  * (`MidweekMatchClock`); Home's compact card keeps the minute under the score.
  */
 export function MidweekScoreboard({
-  managers,
+  clubs,
   goals,
   penalties,
   winnerSide,
@@ -39,7 +39,7 @@ export function MidweekScoreboard({
   compact = false,
   live = null,
 }: {
-  managers: Managers;
+  clubs: Clubs;
   goals: readonly [number, number];
   penalties: readonly [number, number] | null;
   /** Ignored while `live`. */
@@ -51,18 +51,18 @@ export function MidweekScoreboard({
   live?: LiveScore | null;
 }) {
   const label = live
-    ? `Live, ${live.penalties ? "penalties" : `${ordinal(live.minute)} minute`}: ${managers[0]} ${goals[0]}, ${managers[1]} ${goals[1]}` +
+    ? `Live, ${live.penalties ? "penalties" : `${ordinal(live.minute)} minute`}: ${clubs[0]} ${goals[0]}, ${clubs[1]} ${goals[1]}` +
       (live.penalties ? `, penalties ${live.penalties[0]}–${live.penalties[1]}.` : ".")
-    : `Final score: ${managers[0]} ${goals[0]}, ${managers[1]} ${goals[1]}` +
+    : `Final score: ${clubs[0]} ${goals[0]}, ${clubs[1]} ${goals[1]}` +
       (penalties && winnerSide !== null
-        ? `; ${managers[winnerSide]} won ${Math.max(...penalties)}–${Math.min(...penalties)} on penalties.`
+        ? `; ${clubs[winnerSide]} won ${Math.max(...penalties)}–${Math.min(...penalties)} on penalties.`
         : ".");
   const side = (s: Side) => (
     <div className={`grid min-w-0 gap-1.5 ${s === 1 ? "justify-items-end text-right" : ""}`}>
       <p
-        className={`leading-[1.2] font-black [overflow-wrap:anywhere] ${compact ? "text-[15px] sm:text-[17px]" : "text-[17px] sm:text-[22px]"}`}
+        className={`line-clamp-2 leading-[1.2] font-black hyphens-auto [overflow-wrap:anywhere] ${compact ? "text-[15px] sm:text-[17px]" : "text-[17px] sm:text-[22px]"}`}
       >
-        <PlayerName side={s}>{managers[s]}</PlayerName>
+        <PlayerName side={s}>{clubs[s]}</PlayerName>
       </p>
       <p className={`flex flex-wrap gap-1 ${s === 1 ? "justify-end" : ""}`}>
         {!live &&
@@ -125,16 +125,16 @@ export function MidweekScoreboard({
  */
 export function MidweekLaneTimeline({
   timeline,
-  managers,
+  clubs,
 }: {
   timeline: readonly TimelineItem[];
-  managers: Managers;
+  clubs: Clubs;
 }) {
   return (
     <div className="@container">
       <ol aria-label="Key moments" className="grid gap-2 @min-[600px]:gap-1.5">
         {timeline.map((item) => (
-          <MidweekMomentRow item={item} key={`m${item.minute}-${item.side}`} managers={managers} />
+          <MidweekMomentRow item={item} key={`m${item.minute}-${item.side}`} clubs={clubs} />
         ))}
       </ol>
     </div>
@@ -147,13 +147,7 @@ export function MidweekLaneTimeline({
  * of commentary under it (`shootoutStory`), the decider outlined in brass, and
  * a draw's line last when a draw settled it.
  */
-export function MidweekShootout({
-  shootout,
-  managers,
-}: {
-  shootout: ShootoutReport;
-  managers: Managers;
-}) {
+export function MidweekShootout({ shootout, clubs }: { shootout: ShootoutReport; clubs: Clubs }) {
   const story = shootoutStory(shootout);
   return (
     <section aria-labelledby="shootout-h" className="grid gap-3">
@@ -163,7 +157,7 @@ export function MidweekShootout({
         </h2>
         <p className="text-[13px] text-ink-faint">{shootout.kicks.length} kicks</p>
       </div>
-      <MidweekShootoutTally kicks={story.kicks} managers={managers} />
+      <MidweekShootoutTally kicks={story.kicks} clubs={clubs} />
       <p className="border-l-2 border-line/70 pl-3.5 text-[14.5px] leading-[1.55] text-pretty text-ink-dim">
         <ReportText parts={story.intro} />
       </p>

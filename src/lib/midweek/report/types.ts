@@ -26,8 +26,10 @@ export type ReportCard = {
 };
 
 export type ReportSide = {
-  /** The manager: the entrant's display name. */
+  /** The manager: the entrant's display name. A trialist is named after it (DR4-12). */
   manager: string;
+  /** The entrant's club (ADR-145), which the text uses for the team. */
+  club: string;
   auto: boolean;
   keeperSlot: number;
   keeperless: boolean;
@@ -126,6 +128,8 @@ export type ShortLine = { line: "Attack" | "Midfield" | "Defence"; short: number
 
 export type WhySide = {
   manager: string;
+  /** The club, which the heading and the odds bar name. */
+  club: string;
   auto: boolean;
   keeperless: boolean;
   /** Empty when no line fell short, and for a week before the rule. */

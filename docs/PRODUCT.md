@@ -332,9 +332,12 @@ Part L item).
   `save_midweek_prediction`.
 - **Reveals:** time-gated `midweek_*_public` views (§44.9). Nothing is revealed
   by a job.
-- **Names:** the views carry each member's account name (`*_name`) and club
-  (`side_*_club`, `club_name`, `champion_club`; ADR-145). Only the pre-match
-  reads the club so far.
+- **Names (ADR-151):** the views carry the account name (`*_name`) and the
+  club (`side_*_club`, `club_name`, `champion_club`; ADR-145). Clubs show where
+  the team plays, wins or goes through: bracket, scoreboards, feed, report
+  text, results, champion, share images. Accounts show where the member acts
+  (calls, `Your night`, picker) and name trialists. `clubName`/`sideClub`
+  (`rows.ts`) fall back to the account.
 - **Lazy trigger:** `src/lib/midweek/run-due.ts`, called from Home and every
   Midweek page.
 - **Reports:** a seeded phrasebook in `src/lib/midweek/report/` (ADR-093).

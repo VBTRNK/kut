@@ -2,6 +2,7 @@ import { roundStartAt } from "@/game/midweek/schedule";
 import { BRAND } from "@/lib/brand";
 import type { createClient } from "@/lib/supabase/server";
 import {
+  championClub,
   formatClock,
   formatDayDate,
   isLockedTonight,
@@ -21,7 +22,7 @@ import type { Segment } from "./report/types";
 import type { LiveScore } from "./live";
 import { loadLiveMatch } from "./live-load";
 import { loadWeekResults } from "./results";
-import type { EntryCardRow, EventRow, MatchRow } from "./rows";
+import { sideClub, type EntryCardRow, type EventRow, type MatchRow } from "./rows";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -80,7 +81,8 @@ export async function loadMidweekEntryState(
  * chance ("39′ Gijs H. finishes…"), as it stood at page load (Q11).
  */
 export type HomeMatch = {
-  managers: readonly [string, string];
+  /** The clubs (Q7). */
+  clubs: readonly [string, string];
   goals: readonly [number, number];
   penalties: readonly [number, number] | null;
   winnerSide: 0 | 1 | null;
@@ -240,7 +242,7 @@ async function homeMatch(
     const latest = live.timeline.at(-1);
     const lastKick = live.kicks.at(-1);
     return {
-      managers: [match.side_0_name, match.side_1_name ?? ""],
+      clubs: [sideClub(match, 0), sideClub(match, 1)],
       goals: live.score,
       penalties: null,
       winnerSide: null,
@@ -270,7 +272,7 @@ async function homeMatch(
   const a = sideScore(match, 0);
   const b = sideScore(match, 1);
   return {
-    managers: [input.sides[0].manager, input.sides[1].manager],
+    clubs: [input.sides[0].club, input.sides[1].club],
     goals: [a.goals, b.goals],
     penalties: a.penalties !== null && b.penalties !== null ? [a.penalties, b.penalties] : null,
     winnerSide: settledWinner(match),
@@ -316,7 +318,7 @@ async function finalEntryPoint(
       line: `+${coins} ${BRAND.currency} over the night.`,
     };
   }
-  const title = `${tournament.champion_name ?? "Somebody"} won Midweek Madness`;
+  const title = `${championClub(tournament) ?? "Somebody"} won Midweek Madness`;
   if (rows.length > 0) {
     const furthest = Math.max(...rows.map((row) => row.round_no));
     return {

@@ -8,7 +8,7 @@ import { MidweekRowMinute } from "./match-clock";
 /** A call on a bracket row (DR3 HANDOFF §2): the bracket shows calls, it never takes them. */
 export type RowCall = { kind: "picked"; name: string } | { kind: "open" };
 
-function CallChip({ call, dense }: { call: RowCall; dense: boolean }) {
+function CallChip({ call, dense, href }: { call: RowCall; dense: boolean; href: string }) {
   return (
     <p
       className={`flex flex-wrap items-center gap-x-2 gap-y-1 ${dense ? "pb-1 pl-2" : "pb-2.5 pl-3"}`}
@@ -25,7 +25,7 @@ function CallChip({ call, dense }: { call: RowCall; dense: boolean }) {
       {call.kind === "open" && (
         <Link
           className="text-xs font-bold whitespace-nowrap text-brass hover:underline"
-          href="/midweek#calls"
+          href={href}
         >
           Call it &rarr;
         </Link>
@@ -236,7 +236,18 @@ export function MidweekMatchRow({
         >
           {sides}
         </div>
-        {call && <CallChip call={call} dense={dense} />}
+        {call && (
+          <CallChip
+            call={call}
+            dense={dense}
+            // An open call is on the pairing's pre-match (DR4-7), where it can be made.
+            href={
+              pair.kind === "upcoming" && pair.preMatch
+                ? preMatchHref(weekStart, pair.round, pair.pairing)
+                : "/midweek#calls"
+            }
+          />
+        )}
       </div>
       {state}
     </div>

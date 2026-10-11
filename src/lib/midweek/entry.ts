@@ -14,6 +14,7 @@ import { MIDWEEK } from "@/game/midweek/config";
 import { scheduleFor } from "@/game/midweek/schedule";
 import { BRAND } from "@/lib/brand";
 import type { CompeteStatus } from "@/lib/nav/routes";
+import { clubName } from "./rows";
 
 const AMS = "Europe/Amsterdam";
 
@@ -94,9 +95,19 @@ export type MidweekTournament = {
   seed?: string | null;
   champion_user_id?: string | null;
   champion_name?: string | null;
+  /** The champion's club (ADR-145), shown exactly when the champion is; absent before that migration. */
+  champion_club?: string | null;
   /** ADR-104; absent before its migration. Read it through `scheduleVersionOf`. */
   schedule_version?: number | null;
 };
+
+/** The champion's club, else the account name, else null while there is no champion. */
+export function championClub(week: {
+  champion_name?: string | null;
+  champion_club?: string | null;
+}): string | null {
+  return week.champion_name ? clubName(week.champion_club, week.champion_name) : null;
+}
 
 /** A `kut.my_midweek_squad` row: the caller's own saved slot, 1–5. */
 export type MySquadRow = {
