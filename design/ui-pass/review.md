@@ -5,10 +5,10 @@ private Claude Design canvas "FLUT UI pass review (DR5)",
 <https://claude.ai/artifact/FBoo1Hbs7bPwYQNR2aXpHN>, has the screenshots and
 sketches; only the owner can open it.
 
-**Status: awaiting the owner's picks.** The owner picks a Midweek structure
-(C) and a match report direction (E), and answers F1 to F9. The answers
-become DR5-1 onward. Nothing is built from this note; S2 generates the mocks
-from the picks.
+**Status: answered by the owner, 12 Oct 2026** (see "Owner decisions" at the
+end). The revised match report mock (E3 on the canvas) awaits the owner's
+look. Nothing is built from this note; S2 generates the mocks from the
+decisions.
 
 ## How the review was made
 
@@ -156,7 +156,7 @@ explanations and stay.
 
 **Directions,** both with the same calm rules:
 
-- names in ink;
+- names in ink (amended by DR5-4: team colour, regular weight);
 - team colour only on the scoreboard, side headings, a 3 px lane rail and the
   shoot-out tally;
 - moments as rows, not boxes;
@@ -177,7 +177,7 @@ Both keep every phrasebook line and number (ADR-093).
 | #   | Earlier decision                         | Recommended                                                                                                         |
 | --- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | F1  | ADR-043, type roles and the kicker       | Serif only for the page title and the report headline; kickers retired; B becomes the rule                          |
-| F2  | DR1-5, names in team colour everywhere   | Names in ink 600; team colour on the scoreboard, side headings, lane rails and shoot-out tally                      |
+| F2  | DR1-5, names in team colour everywhere   | Names in ink 600; team colour on the scoreboard, side headings, lane rails and shoot-out tally (amended: DR5-4)     |
 | F3  | DR4-1 and DR2, moments as tinted boxes   | Keep lanes and newest first; each moment a row with a side rail, no box                                             |
 | F4  | DR3, the night's rating list             | Row = mini card, name, disc, line in Small; per-match chips go (each report's Teams tab has them)                    |
 | F5  | ADR-114, Home's Open a pack button       | A tile while something is due; the primary button only when nothing is                                              |
@@ -198,4 +198,33 @@ Both keep every phrasebook line and number (ADR-093).
 
 ## Owner decisions (DR5)
 
-None yet. S1 pauses here for the owner's picks in C and E and answers to F.
+The owner's answers of 12 Oct 2026:
+
+- **DR5-1. Midweek is C2:** one Now block that changes with the evening and
+  four tiles in fixed places. The picker moves to `/midweek/pick` (F7).
+- **DR5-2. The match report is E2:** two tabs, Match and Teams, with the calm
+  rules.
+  - **Proposed with the mock:** from 1024 px the tabs go, and Match and Teams
+    sit side by side.
+  - **Awaiting the owner's look:** the revised mock (E3), before anything is
+    built.
+- **DR5-3 (F1).** Serif only for the page title and a report's headline;
+  kickers retired; the rules in B apply.
+- **DR5-4 (F2, amended by the owner). Names stay in team colour throughout a
+  report, at regular weight instead of bold.**
+  - **Why:** two clubs can field the same Player against each other.
+    Bracketed owners ("Cedric (Club A) shoots, Cedric (Club B) blocks") were
+    worse.
+  - **Where:** the rule covers the headline, the facts, the moments and the
+    kicks.
+  - **Lanes:** each moment also keeps a 3 px rail on its side.
+- **DR5-5 (F3).** Moments are rows with a side rail, not boxes.
+  - **Kept:** the lanes, and newest first while live (the newest item
+    outlined, kicks arriving on top).
+  - **Kept:** oldest first at full time.
+- **DR5-6 (F4).** The night's rating rows are simpler, and the per-match
+  chips go.
+- **DR5-7 (F5).** Open a pack is a tile while something is due.
+- **DR5-8 (F6).** The privacy line is one sentence by the save bar.
+- **DR5-9 (F8).** Market tabs Buy · Selling · Offers (#237).
+- **DR5-10 (F9).** The plusses rule moves behind How plusses work ›.
