@@ -20,5 +20,5 @@ const tabs: RouteEntry[] = [
 ];
 
 export function AdminTabs() {
-  return <SectionTabs label="Admin" tabs={tabs} variant="row" />;
+  return <SectionTabs label="Admin" tabs={tabs} />;
 }

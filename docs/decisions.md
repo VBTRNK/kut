@@ -299,3 +299,26 @@ Date: 2026-10-12 (VibeTrunk/kut#286). Extends ADR-079 to direct reads.
   populated base reads, photos, invoker/definer projections and existing scopes.
 - Access-only migration `20261021000000_active_member_base_reads.sql`: central
   catalogue first, then ADR-144's approved workflow and a member page smoke.
+
+## ADR-153 — The DR5 type scale, primitives and section tabs
+
+Date: 2026-10-12 (flut-ui-pass S4, VibeTrunk/kut#294). Amends ADR-043 (type
+roles, the kicker), DR1-5 (as DR5-4) and ADR-107 (Compete's section badge).
+
+- **Six roles** in `globals.css`: Title (the serif: page titles and a report's
+  headline only), Figure, Heading, Body, Small, Label (12 px, the floor).
+  Weights 400, 600, 800. Weight 900 and tracked capitals stay on the card face
+  and the crest lockup (Q5). No kicker.
+- **Primitives** in `src/components/ui/`, as `design/ui-pass/HANDOFF.md` lists
+  them. Each page adopts them in its own session (S5–S10).
+- **`SectionNav`** replaces `SectionTabs`' segmented variant on Compete, Market
+  and Collection; `SectionTabs` keeps Admin's row. A badge shows only on a tab
+  you are not on: a count as a `Tag`, Compete's status as a dot with its words
+  for screen readers, so Pick now reaches Standings and Players.
+- **Chrome:** `AppNav` is on the scale; 12 px tab-bar labels fit at 320 px.
+  Compete's `Pick`/`Live` chip is sentence case and sits beside its icon.
+- **Ratchet:** `check-type-scale.mjs` (in `policy:check`) counts off-scale text
+  sizes in `src/` outside the card face (931 on main, 914 now) and fails unless
+  its ceiling equals the count. S11 takes it to zero.
+- `BottomSheet` gains `everyWidth` for the one filter sheet (Q7). How it works
+  gets topic tiles and an anchor per topic; sessions move cut text there.

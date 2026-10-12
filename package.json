@@ -17,7 +17,7 @@
     "test:e2e": "playwright test",
     "test:e2e:authenticated": "playwright test --config playwright.authenticated.config.ts",
     "test:db": "supabase test db",
-    "policy:check": "node scripts/policy/sync-production-invariants.mjs && node scripts/policy/check-doc-budgets.mjs",
+    "policy:check": "node scripts/policy/sync-production-invariants.mjs && node scripts/policy/check-doc-budgets.mjs && node scripts/policy/check-type-scale.mjs",
     "policy:sync": "node scripts/policy/sync-production-invariants.mjs --write",
     "verify:fast": "npm run policy:check && npm run format:check && npm run lint && npm run typecheck && npm run test",
     "verify:full": "npm run verify:fast && npm run test:db && npm run test:integration && npm run test:e2e && npm run build",

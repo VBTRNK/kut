@@ -224,8 +224,12 @@ describe("Compete's status", () => {
     ]);
   });
 
-  it("leaves Pick off the section tabs: the picker is where it asks", () => {
-    expect(buildCompeteTabs("pick").every((tab) => tab.status === undefined)).toBe(true);
+  it("puts Pick on Midweek too; SectionNav hides it on the picker itself (ADR-153)", () => {
+    expect(buildCompeteTabs("pick").map((tab) => tab.status)).toEqual([
+      "pick",
+      undefined,
+      undefined,
+    ]);
     expect(buildCompeteTabs(null).every((tab) => tab.status === undefined)).toBe(true);
   });
 

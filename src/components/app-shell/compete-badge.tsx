@@ -6,11 +6,12 @@ const TONE: Record<CompeteStatus, string> = {
 };
 
 const SHAPE = {
-  // On the bottom bar's icon, anchored to its right edge, so it can never push
-  // the fifth tab past a 320 px screen.
-  bar: "absolute -top-[7px] -right-[18px] border-2 border-board-deep px-[5px] py-px text-[8.5px]",
-  // After the label: the desktop bar and the Midweek section tab.
-  inline: "px-[7px] py-px text-[10px]",
+  // Beside the bottom bar's icon, the two centred together. At 12 px (the
+  // Label floor) the word no longer fits on the icon's corner inside a 64 px
+  // tab at 320 px, so it sits next to it (ADR-153).
+  bar: "px-1.5",
+  // After the label on the desktop bar.
+  inline: "px-2",
 };
 
 /**
@@ -31,7 +32,7 @@ export function CompeteBadge({
   const chip = (
     <span
       aria-hidden="true"
-      className={`rounded-full leading-[1.3] font-black tracking-[0.04em] whitespace-nowrap uppercase ${SHAPE[variant]} ${TONE[status]}`}
+      className={`rounded-full text-label font-extrabold whitespace-nowrap ${SHAPE[variant]} ${TONE[status]}`}
     >
       {COMPETE_STATUS[status].text}
     </span>

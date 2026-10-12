@@ -3,7 +3,7 @@ import { formatDate } from "@/lib/format";
 import { requireUser } from "@/lib/auth/user";
 import { getNavContext } from "@/lib/nav/context";
 import { buildMarketTabs } from "@/lib/nav/routes";
-import { SectionTabs } from "@/components/app-shell/section-tabs";
+import { SectionNav } from "@/components/ui/section-nav";
 import { createClient } from "@/lib/supabase/server";
 import { RespondToOfferForms, WithdrawOfferForm } from "./offer-response-forms";
 
@@ -177,7 +177,7 @@ export default async function TradeOffersPage({ searchParams }: OffersPageProps)
           </p>
           {/* The Buy tab replaces the old "Back to the market" link. */}
           <div className="mt-5">
-            <SectionTabs label="Market" tabs={marketTabs} />
+            <SectionNav label="Market" tabs={marketTabs} />
           </div>
         </header>
 

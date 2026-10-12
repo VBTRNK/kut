@@ -79,6 +79,34 @@
   --font-serif: var(--font-instrument), Georgia, "Times New Roman", serif;
 }
 
+/* The type scale (DR5-3, ADR-153): six roles, each a text utility with its own
+   line height. Every text size outside the card face is one of them; the
+   `type-scale` policy check counts the sizes that are not yet and only lets
+   that count fall. Title steps up to 40 px from `sm` as `sm:text-title-lg`,
+   the same role. Weights are 400, 600 and 800; 900 is the card face's. */
+@theme {
+  /* Instrument Serif: the page title and a report's headline, nothing else. */
+  --text-title: 2rem;
+  --text-title--line-height: 1.1;
+  --text-title-lg: 2.5rem;
+  --text-title-lg--line-height: 1.05;
+  /* Archivo 800, tabular: scores and the one big number on a tile, never words. */
+  --text-figure: 2.5rem;
+  --text-figure--line-height: 1;
+  /* Section and block headings, 600. */
+  --text-heading: 1.25rem;
+  --text-heading--line-height: 1.3;
+  /* Everything read; 600 to name a thing. */
+  --text-body: 1rem;
+  --text-body--line-height: 1.5;
+  /* Context, meta and times, in ink-dim: what the kicker used to do. */
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.45;
+  /* Tags, chips and column heads, 600, sentence case: the floor. */
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.35;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

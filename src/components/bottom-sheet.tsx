@@ -9,9 +9,10 @@ import { useEffect, useRef, type ReactNode, type RefObject } from "react";
  * account sheet would have been a near-copy — the same mistake that produced two
  * Album/Manage toggles and two Collection headers before ADR-053 merged them.
  *
- * Deliberately mobile-only. Desktop keeps its dropdowns: a sheet is the right
- * idiom for a thumb, an anchored panel is the right idiom for a pointer, and
- * that divergence is the point rather than an inconsistency to iron out.
+ * Mobile-only by default: the account menu keeps its dropdown on a desktop,
+ * where an anchored panel is the idiom for a pointer. `everyWidth` keeps the
+ * sheet at every width, as a centred panel from `sm`: the DR5 filter sheet is
+ * the one place filters live, phone or desktop (Q7, ADR-153).
  */
 type BottomSheetProps = {
   /** Accessible name for the dialog. */
@@ -20,10 +21,18 @@ type BottomSheetProps = {
   onClose: () => void;
   /** Focused when the sheet closes, so keyboard users are not dropped at the top. */
   returnFocusRef?: RefObject<HTMLElement | null>;
+  everyWidth?: boolean;
   children: ReactNode;
 };
 
-export function BottomSheet({ label, open, onClose, returnFocusRef, children }: BottomSheetProps) {
+export function BottomSheet({
+  label,
+  open,
+  onClose,
+  returnFocusRef,
+  everyWidth = false,
+  children,
+}: BottomSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,7 +58,7 @@ export function BottomSheet({ label, open, onClose, returnFocusRef, children }: 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-40 sm:hidden">
+    <div className={`fixed inset-0 z-40 ${everyWidth ? "" : "sm:hidden"}`}>
       <button
         aria-label={`Close ${label.toLowerCase()}`}
         className="absolute inset-0 h-full w-full bg-board-deep/75 backdrop-blur-sm"
@@ -64,7 +73,11 @@ export function BottomSheet({ label, open, onClose, returnFocusRef, children }: 
       <div
         aria-label={label}
         aria-modal="true"
-        className="absolute inset-x-0 bottom-0 max-h-[80vh] space-y-5 overflow-y-auto rounded-t-3xl border-t border-line bg-panel p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] shadow-2xl shadow-board/80"
+        className={`absolute inset-x-0 bottom-0 max-h-[80vh] space-y-5 overflow-y-auto rounded-t-3xl border-t border-line bg-panel p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] shadow-2xl shadow-board/80 ${
+          everyWidth
+            ? "sm:inset-x-auto sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl sm:border"
+            : ""
+        }`}
         ref={panelRef}
         role="dialog"
         tabIndex={-1}

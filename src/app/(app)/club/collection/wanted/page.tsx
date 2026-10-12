@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth/user";
 import { createClient } from "@/lib/supabase/server";
 import { VIEW_TABS } from "@/components/album/collection-header";
-import { SectionTabs } from "@/components/app-shell/section-tabs";
+import { SectionNav } from "@/components/ui/section-nav";
 import { setCardWant, setTradeAvailability } from "../discovery-actions";
 import { CopyMessageButton } from "./copy-message-button";
 
@@ -91,7 +91,7 @@ export default async function WantedPage() {
             stay private; another member sees your name only when you make a matching copy
             available.
           </p>
-          <SectionTabs activeKey="trading" label="Collection view" tabs={VIEW_TABS} />
+          <SectionNav active="trading" label="Collection view" tabs={VIEW_TABS} />
         </header>
 
         <div className="grid gap-4 md:grid-cols-2">
