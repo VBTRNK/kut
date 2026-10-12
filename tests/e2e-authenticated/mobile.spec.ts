@@ -1228,7 +1228,7 @@ test.describe("Midweek Madness rows live (MM 3.0 S4, ADR-148)", () => {
         .first()
         .click();
       await expect(page).toHaveURL(/\/match\/[0-9a-f-]{36}$/);
-      await expect(page.getByText(/ · live$/)).toBeVisible();
+      await expect(page.getByText(/ · live( · your match)?$/)).toBeVisible();
 
       // From lg the tree carries the same live rows, inside the screen.
       await page.setViewportSize({ width: 1440, height: 900 });
@@ -1497,7 +1497,7 @@ test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
       await withDatabase((database) => moveFixtureEveningTo(database, matchId, beforeRoundTwo(4)));
       await page.goto(url);
       await expect(page).toHaveURL(/\/match\/[0-9a-f-]{36}$/, { timeout: 20_000 });
-      await expect(page.getByText(/ · live$/)).toBeVisible();
+      await expect(page.getByText(/ · live( · your match)?$/)).toBeVisible();
     },
   );
 
@@ -1608,7 +1608,7 @@ test.describe("Midweek Madness ratings at full time (MM 3.0 S6, ADR-150)", () =>
       await withDatabase((database) => moveFixtureEveningTo(database, first.id, length - 20));
       const before = (await (await page.goto(report(first.id)))!.text()).replace(/<!-- -->/g, "");
       expect(before).not.toMatch(/out of 10 for this match|ends_at/);
-      await expect(page.getByText(/ · live$/)).toBeVisible();
+      await expect(page.getByText(/ · live( · your match)?$/)).toBeVisible();
       await expect(page.getByText(RATED)).toHaveCount(0);
 
       // Round 2 is a minute in: round 1 has ended, and round 2's page is still unrated.
