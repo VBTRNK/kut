@@ -276,3 +276,26 @@ Amends ADR-111 where it names managers; reads the ADR-145 columns.
 - **Also:** the bracket's `Call it →` opens the pairing's pre-match, where a
   call can be made (DR4-7). The Chronicle and the activity feed name no Midweek
   member.
+
+## ADR-152 — Active membership on base-table and player-photo reads
+
+Date: 2026-10-12 (VibeTrunk/kut#286). Extends ADR-079 to direct reads.
+
+- The shared project's `authenticated` role includes other tools' accounts.
+  Local policy/grant inspection at `69b3c38` confirmed broad reads and disabled
+  accounts' own-row reads lacked membership checks. Hosted parity is unverified.
+- One restrictive SELECT policy on each of the 31 ungated member-readable
+  tables ANDs `kut.is_active_member()` with existing visibility rules. No
+  grant, write policy, function or view changes; denied reads return zero rows.
+- Own-profile reads remain for login's disabled-account check. Admin-only
+  policies already require enabled admins; rating rules and comeback inputs
+  already require membership. Midweek base tables have no authenticated read
+  grant. Definer projections retain their gates and owner rights (KB-013).
+- The private `player-photos` SELECT policy also requires active membership;
+  other buckets and photo write policies are unchanged. Previously issued
+  signed URLs remain valid until expiry (the app uses one hour).
+- Active admins pass the same predicate; service role retains BYPASSRLS.
+  pgTAP covers profileless/disabled accounts, members, admins and service role,
+  populated base reads, photos, invoker/definer projections and existing scopes.
+- Access-only migration `20261021000000_active_member_base_reads.sql`: central
+  catalogue first, then ADR-144's approved workflow and a member page smoke.
