@@ -1,152 +1,97 @@
-import Link from "next/link";
-import { LiveCard } from "@/components/live-card";
+import { Block } from "@/components/ui/block";
+import { InfoLink } from "@/components/ui/links";
+import { Tag } from "@/components/ui/tag";
 import { MIDWEEK } from "@/game/midweek/config";
-import type { NightRatings, RatedCard } from "@/lib/midweek/night-ratings";
-import { RATING } from "@/lib/midweek/report/ratings";
-import { MidweekTrialistCard } from "./bits";
+import type { MatchRated, NightRatings, RatedCard } from "@/lib/midweek/night-ratings";
 import { MidweekMiniCard } from "./mini-card";
-import { MidweekSectionHead } from "./page-head";
 import { MidweekRatingDisc } from "./rating-disc";
-import { MidweekRatingToggle } from "./rating-toggle";
 
-/** The rule under the block, every number from `RATING` (DR3 HANDOFF "Copy"). */
-export const RATING_RULE =
-  `Every card starts at ${RATING.base} and gains for goals, assists, saves and blocks, more for ` +
-  `the harder ones; a win adds ${RATING.result} and a defeat takes ${RATING.result} off. A miss ` +
-  `never costs the shooter. The night’s rating is the mean of the card’s matches; a bye isn’t a match.`;
-
+/** `Mean of 2 matches`, the night block's aside. */
 export const ratingsSubline = (matchCount: number) =>
-  `Out of 10, the mean of ${matchCount} ${matchCount === 1 ? "match" : "matches"}`;
+  `Mean of ${matchCount} ${matchCount === 1 ? "match" : "matches"}`;
 
-function BestChip() {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-px text-[10px] font-black tracking-[0.08em] whitespace-nowrap text-ink uppercase">
-      ★ Best of your five
-    </span>
-  );
-}
+type RatedRow = {
+  slot: number;
+  name: string;
+  /** The card's line for the night; null for one match, which has none. */
+  line: string | null;
+  meta: string;
+  mini: RatedCard["mini"];
+  rating: number;
+  best: boolean;
+};
 
-function MatchChips({ card }: { card: RatedCard }) {
+/**
+ * The rating rows (DR5-6): mini card, name, the card's line (or its meta) in
+ * Small, the disc, and `★ Best` on the top card of the night, never a mark
+ * for the lowest. Each report's Teams tab has a card's per-match rating.
+ */
+function RatingRows({ rows, context }: { rows: readonly RatedRow[]; context: string }) {
   return (
-    <ul className="mt-2 hidden min-w-0 gap-1.5 group-data-[open=true]:grid">
-      {card.matches.map((match) => (
-        <li className="min-w-0" key={match.href}>
-          <Link
-            className="grid min-h-11 w-full grid-cols-[minmax(0,1fr)_30px_8px] items-center gap-2 rounded-2xl border border-line bg-board-deep/40 py-1 pr-2 pl-3 text-[12.5px] font-bold text-ink-dim hover:border-brass"
-            href={match.href}
-          >
-            <span className="[overflow-wrap:anywhere]">{match.label}</span>
-            <MidweekRatingDisc
-              context={`against ${match.opponent}`}
-              rating={match.rating}
-              size="xs"
-            />
-            <span aria-hidden="true" className="font-black text-brass">
-              &rsaquo;
+    <ol className="grid gap-1.5">
+      {rows.map((row) => (
+        <li
+          className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl bg-panel-2/80 p-2"
+          key={row.slot}
+        >
+          {row.mini ? (
+            <MidweekMiniCard {...row.mini} small />
+          ) : (
+            <MidweekMiniCard ovr={MIDWEEK.trialist.ovr} small variant="trialist" />
+          )}
+          <span className="grid min-w-0 gap-0.5">
+            <span className="flex flex-wrap items-center gap-1.5 text-body font-semibold">
+              <span className="min-w-0 [overflow-wrap:anywhere]">{row.name}</span>
+              {row.best && <Tag>★ Best</Tag>}
             </span>
-          </Link>
+            <span className="text-small text-pretty text-ink-dim">{row.line ?? row.meta}</span>
+          </span>
+          <MidweekRatingDisc context={context} rating={row.rating} />
         </li>
       ))}
-    </ul>
+    </ol>
   );
 }
 
 /**
- * `MidweekRatingList` (DR3 HANDOFF §1, ADR-117): a member's five once the week
- * is complete, best first with `★ Best of your five` on the top card, never a
- * mark for the lowest. Below `lg` one row per card (mini card, name, meta, the
- * line, the disc on the right); from `lg` the five LiveCards in a row with the
- * disc and name under each. `Show each match` opens a chip per match, linking
- * to its report.
+ * `MidweekRatingList` (DR3, ADR-117, DR5-6): a member's five once the week is
+ * complete, best first, each with its line for the night. The rule is behind
+ * `How ratings work ›` (pre-decided cut).
  */
-export function MidweekRatingList({
-  ratings,
-  defaultOpen,
-  id = "ratings",
-}: {
-  ratings: NightRatings;
-  defaultOpen: boolean;
-  id?: string;
-}) {
-  const headId = `${id}-h`;
-  const listId = `${id}-cards`;
+export function MidweekRatingList({ ratings }: { ratings: NightRatings }) {
   return (
-    <section aria-labelledby={headId} className="grid scroll-mt-24 gap-3" id={id}>
-      <MidweekSectionHead id={headId} title="Your five’s ratings">
-        <p className="text-[13px] text-ink-faint">{ratingsSubline(ratings.matchCount)}</p>
-      </MidweekSectionHead>
-      <MidweekRatingToggle
-        controls={listId}
-        defaultOpen={defaultOpen}
-        link={
-          <Link
-            className="text-sm font-bold text-brass hover:underline"
-            href="/how-it-works#midweek-ratings"
-          >
-            How ratings work &rarr;
-          </Link>
-        }
-      >
-        <div id={listId}>
-          <ol className="grid lg:hidden">
-            {ratings.cards.map((card) => (
-              <li
-                className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 border-b border-line/35 py-3 first:pt-1"
-                key={card.slot}
-              >
-                {card.mini ? (
-                  <MidweekMiniCard {...card.mini} />
-                ) : (
-                  <MidweekMiniCard ovr={MIDWEEK.trialist.ovr} variant="trialist" />
-                )}
-                <div className="grid min-w-0 gap-0.5">
-                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] leading-tight font-black [overflow-wrap:anywhere]">
-                    {card.name}
-                    {card.best && <BestChip />}
-                  </p>
-                  <p className="text-xs text-ink-faint">{card.meta}</p>
-                  <p className="mt-1 font-serif text-[17px] leading-[1.3] text-pretty text-ink">
-                    {card.line}
-                  </p>
-                </div>
-                <MidweekRatingDisc context="for the night" rating={card.rating} />
-                <div className="col-span-2 col-start-2 hidden min-w-0 group-data-[open=true]:block">
-                  <MatchChips card={card} />
-                </div>
-              </li>
-            ))}
-          </ol>
-          <ol className="hidden grid-cols-5 items-start gap-x-5 gap-y-2.5 lg:grid">
-            {ratings.cards.map((card) => (
-              <li className="row-span-4 grid min-w-0 grid-rows-subgrid" key={card.slot}>
-                {card.face ? (
-                  <LiveCard player={card.face} />
-                ) : (
-                  <MidweekTrialistCard
-                    slot={card.slot + 1}
-                    state="trialist"
-                    trialistOvr={MIDWEEK.trialist.ovr}
-                  />
-                )}
-                <div className="flex items-center gap-2.5">
-                  <MidweekRatingDisc context="for the night" rating={card.rating} size="lg" />
-                  <div className="grid min-w-0 justify-items-start gap-1">
-                    <p className="text-[14.5px] leading-tight font-black [overflow-wrap:anywhere]">
-                      {card.name}
-                    </p>
-                    {card.best && <BestChip />}
-                  </div>
-                </div>
-                <p className="font-serif text-base leading-[1.3] text-pretty text-ink">
-                  {card.line}
-                </p>
-                <MatchChips card={card} />
-              </li>
-            ))}
-          </ol>
-        </div>
-      </MidweekRatingToggle>
-      <p className="text-[12.5px] leading-normal text-ink-faint">{RATING_RULE}</p>
-    </section>
+    <Block
+      aside={<p className="text-small text-ink-dim">{ratingsSubline(ratings.matchCount)}</p>}
+      id="ratings-h"
+      title="Your five’s ratings"
+    >
+      <RatingRows context="for the night" rows={ratings.cards} />
+      <InfoLink href="/how-it-works#midweek-ratings">How ratings work</InfoLink>
+    </Block>
+  );
+}
+
+/**
+ * `MidweekMatchRatings` (DR4-8, ADR-150, DR5-6): during the evening, the
+ * member's five rated for their latest finished match, best first, with the
+ * way to its report. No ★ and no lines: those wait for the night's end, when
+ * `MidweekRatingList` takes this block's place.
+ */
+export function MidweekMatchRatings({ rated }: { rated: MatchRated }) {
+  return (
+    <Block
+      aside={<p className="text-small text-ink-dim">{rated.round} · out of 10</p>}
+      id="match-ratings-h"
+      title={`Against ${rated.opponent}`}
+    >
+      <RatingRows
+        context="for this match"
+        rows={rated.cards.map((card) => ({ ...card, line: null, best: false }))}
+      />
+      <div className="flex flex-wrap justify-between gap-x-4">
+        <InfoLink href="/how-it-works#midweek-ratings">How ratings work</InfoLink>
+        <InfoLink href={rated.href}>Report</InfoLink>
+      </div>
+    </Block>
   );
 }

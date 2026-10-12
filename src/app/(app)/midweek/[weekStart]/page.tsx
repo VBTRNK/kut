@@ -1,246 +1,68 @@
-import { CompeteTabs } from "@/components/app-shell/compete-tabs";
-import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
-import { MidweekNotice } from "@/components/midweek/bits";
-import { MidweekBracket } from "@/components/midweek/bracket";
-import { MidweekCalls } from "@/components/midweek/calls-list";
-import { MidweekJumpLinks } from "@/components/midweek/jump-links";
-import { MidweekLivePoller } from "@/components/midweek/live-poller";
-import { MIDWEEK_PAGE, MidweekPageHead } from "@/components/midweek/page-head";
-import { MidweekPickShares, type PickShareView } from "@/components/midweek/pick-shares";
-import { MidweekRatingList } from "@/components/midweek/rating-list";
+import { redirect } from "next/navigation";
+import { HubTiles } from "@/components/midweek/hub";
 import { MidweekSeed } from "@/components/midweek/seed";
-import { MidweekShare } from "@/components/midweek/share";
-import { MIDWEEK } from "@/game/midweek/config";
-import { predictionCoins } from "@/game/midweek/rewards";
+import { COLUMN, PAGE, PageHeader } from "@/components/ui/page";
 import { seedHash } from "@/game/midweek/rng";
-import { roundStartAt } from "@/game/midweek/schedule";
-import { getRarityTier } from "@/game/rating-engine";
-import { requireUser } from "@/lib/auth/user";
-import {
-  callCards,
-  callJumpLink,
-  callRecords,
-  rowCalls,
-  weeklyCallsLine,
-} from "@/lib/midweek/calls";
-import {
-  championClub,
-  formatClock,
-  formatDayDate,
-  roundIntervalText,
-  scheduleVersionOf,
-  skipOrVoidNotice,
-} from "@/lib/midweek/entry";
-import { assembleBracket, isWeekStart, myNight, yourNextRound } from "@/lib/midweek/evening";
-import {
-  loadCalls,
-  loadLiveRowEvents,
-  loadMyRewards,
-  loadNightRatingsFor,
-  loadPickShares,
-  loadTournamentByWeek,
-  loadWeekResults,
-} from "@/lib/midweek/results";
-import { runDueMidweek } from "@/lib/midweek/run-due";
-import { shareImages } from "@/lib/midweek/share";
-import { createClient } from "@/lib/supabase/server";
+import { weekResult } from "../views";
+import { openWeek } from "./week";
 
-export const metadata = { title: "Midweek Madness bracket" };
-
-const BACK = { href: "/midweek", label: "Midweek Madness" };
+export const metadata = { title: "Midweek Madness week" };
 
 /**
- * `/midweek/[weekStart]`: one week's bracket (Bracket-FromLock,
- * Bracket-Evening, Bracket-Complete). From the lock round 1 shows as drawn,
- * with every kick-off (ADR-105, ADR-113); while the evening runs the sticky
- * clock leads and jump links take you to your match. After the week is
- * complete, the member's ratings lead (Bracket-Complete, DR3, ADR-117; this is
- * how they outlive Thursday), and the pick shares and the seed follow. Past weeks stay readable when
- * Midweek Madness is switched off, as history (HANDOFF question 6, ADR-097),
- * and a void week shows only its notice (§44.9).
+ * `/midweek/[weekStart]`, a week (DR5-11, DR5-14, E2-Week-Past): the hub
+ * after its final without the Now. The week's date as the Title, who won it
+ * in the Small line, your night (coins and finish), the final in a line with
+ * the champion's five, and four tiles: your night (ratings and the share
+ * images), the bracket, your calls and who picked whom. The fairness seal
+ * folds away at the foot. Past weeks stay readable when Midweek Madness is
+ * switched off, as history (ADR-097); a void or skipped week shows only its
+ * notice (§44.9). While the week is still being played its page is the hub,
+ * so an old link to a week in play lands there.
  */
-export default async function MidweekBracketPage({
+export default async function MidweekWeekPage({
   params,
 }: {
   params: Promise<{ weekStart: string }>;
 }) {
-  const user = await requireUser();
-  await runDueMidweek();
   const { weekStart } = await params;
-  if (!isWeekStart(weekStart)) notFound();
-  const supabase = await createClient();
-  const tournament = await loadTournamentByWeek(supabase, weekStart);
-  if (!tournament) notFound();
+  const week = await openWeek(weekStart, null);
+  if (week.blocked) return week.blocked;
+  const { supabase, tournament, userId, date } = week;
+  if (tournament.status !== "complete") redirect("/midweek");
 
-  const lockAt = tournament.lock_at;
-  const kicker = `Midweek Madness · ${formatDayDate(lockAt)}`;
-  const shell = (children: ReactNode, title = "The bracket", poller: ReactNode = null) => (
-    <main className={MIDWEEK_PAGE}>
-      <section className="mx-auto grid max-w-6xl gap-8 py-4 sm:gap-11 sm:py-8">
-        <CompeteTabs />
-        <MidweekPageHead back={BACK} kicker={kicker} title={title} />
-        {poller}
-        {children}
-      </section>
-    </main>
-  );
-
-  const notice = skipOrVoidNotice(tournament, MIDWEEK.minEntrants);
-  if (notice) {
-    return shell(
-      <MidweekNotice tone={notice.tone}>
-        <b>{notice.lead}</b> {notice.rest}
-      </MidweekNotice>,
-    );
-  }
-
-  const scheduleVersion = scheduleVersionOf(tournament);
-  const roundOne = formatClock(roundStartAt(new Date(lockAt), 1, scheduleVersion).toISOString());
-  const rounds = tournament.rounds;
-  if (tournament.status === "open" || !rounds) {
-    return shell(
-      <MidweekNotice tone="info">
-        <b>The bracket is drawn at the lock</b>, {formatDayDate(lockAt)} at {formatClock(lockAt)}.
-        Round 1 kicks off at {roundOne}, then a round {roundIntervalText(scheduleVersion)}.
-      </MidweekNotice>,
-    );
-  }
-
-  const now = new Date();
-  const results = await loadWeekResults(supabase, tournament.tournament_id, now);
-  const evening = tournament.status === "simulated";
-  // Every match in play shows its score so far and links to watch it (ADR-148).
-  const rowEvents = evening ? await loadLiveRowEvents(supabase, results.matches) : null;
-  const bracket = assembleBracket({
-    rounds,
-    lockAt,
-    scheduleVersion,
-    draw: results.draw,
-    matches: results.matches,
-    autoUserIds: new Set(results.entries.filter((row) => row.auto).map((row) => row.user_id)),
-    live: rowEvents ? { events: rowEvents, now } : undefined,
-  });
-  const night = myNight({
-    userId: user.id,
-    rounds,
-    lockAt,
-    scheduleVersion,
-    matches: results.matches,
-  });
-  // Calls (ADR-118): read-only here. While the evening runs, a member who is out
-  // sees their call on each later row and a jump link to the first round still
-  // open; once complete, the list of their calls.
-  const calls = night.rows.some((row) => row.kind === "out")
-    ? await loadCalls(supabase, tournament.tournament_id)
-    : null;
-  const cards =
-    evening && calls
-      ? callCards({ bracket, night, predictions: calls.predictions, splits: calls.splits, now })
-      : null;
-  const callLink = cards ? callJumpLink(cards, rounds) : null;
-  let poller: ReactNode = null;
-  if (evening) {
-    // While a match is in play the bracket asks for itself every 20 seconds,
-    // otherwise once at the next kick-off (ADR-115). The sticky evening clock
-    // is retired (DR5 Q3, ADR-154).
-    const inPlay = bracket.some((round) => round.pairs.some((pair) => pair.kind === "inplay"));
-    const nextKickoff =
-      bracket.find((round) => Date.parse(round.kickoffAt) > now.getTime())?.kickoffAt ?? null;
-    poller = <MidweekLivePoller at={now.toISOString()} nextAt={nextKickoff} poll={inPlay} />;
-  }
-  const complete = tournament.status === "complete";
-  const championId = tournament.champion_user_id ?? null;
-  const [shares, rated, rewards] = complete
-    ? await Promise.all([
-        loadPickShares(supabase, tournament.tournament_id),
-        // The member's ratings, and the champion's for the poster, in one read.
-        loadNightRatingsFor(supabase, tournament, results, [
-          user.id,
-          ...(championId ? [championId] : []),
-        ]),
-        loadMyRewards(supabase, tournament.tournament_id),
-      ])
-    : [[], new Map(), []];
-  const ratings = rated.get(user.id) ?? null;
-  // The chip's tier comes from the locked OVR of an entered copy, never today's rating.
-  const lockedOvr = new Map(
-    results.entries.flatMap((row) => (row.player_id ? [[row.player_id, row.ovr] as const] : [])),
-  );
-  const shareRows: PickShareView[] = shares.map((share) => {
-    const ovr = lockedOvr.get(share.player_id);
-    return {
-      playerId: share.player_id,
-      name: share.player_name,
-      rarity: ovr === undefined ? null : getRarityTier(ovr),
-      picks: share.picks,
-      owners: share.owners,
-      pickFactorPpm: share.pick_factor_ppm,
-    };
-  });
+  const { club, blocks, tiles } = await weekResult({ supabase, tournament, next: null, userId });
   const seed = tournament.seed ?? null;
   const seal = tournament.seed_hash ?? "";
-  const records = complete && calls ? callRecords(calls.predictions, results.matches, rounds) : [];
-  const right = records.filter((record) => record.correct === true).length;
-  const share = complete
-    ? shareImages({
-        lockAt,
-        rounds,
-        scheduleVersion,
-        userId: user.id,
-        championId,
-        championName: championClub(tournament),
-        championAccount: tournament.champion_name ?? null,
-        matches: results.matches,
-        entries: results.entries,
-        ratings: rated,
-        coins:
-          rewards.reduce((sum, row) => sum + Number(row.amount), 0) +
-          (calls?.reward ? Number(calls.reward.amount) : right * predictionCoins(rounds)),
-        calls: { right, picks: records.length },
-      })
-    : null;
-  const blocks = [
-    ...(callLink ? [{ href: `#round-${callLink.round}`, label: callLink.label }] : []),
-    ...(ratings ? [{ href: "#ratings", label: "Your ratings" }] : []),
-    ...(records.length > 0 ? [{ href: "#calls", label: "Your calls" }] : []),
-  ];
 
-  return shell(
-    <>
-      <MidweekJumpLinks
-        blocks={blocks}
-        rounds={bracket}
-        yours={evening ? yourNextRound(bracket, user.id) : null}
-      />
-      {ratings && <MidweekRatingList defaultOpen ratings={ratings} />}
-      {records.length > 0 && (
-        <MidweekCalls
-          coins={predictionCoins(rounds)}
-          line={weeklyCallsLine(right, records.length, predictionCoins(rounds))}
-          records={records}
+  return (
+    <main className={PAGE}>
+      <div className={`${COLUMN} lg:max-w-5xl`}>
+        <PageHeader
+          back={{ href: "/midweek/past", label: "Past weeks" }}
+          sub={club ? `Midweek Madness · ${club} won it` : "Midweek Madness"}
+          title={date}
         />
-      )}
-      {share && <MidweekShare night={share.night} poster={share.poster} />}
-      <MidweekBracket
-        calls={cards ? rowCalls(cards) : undefined}
-        rounds={bracket}
-        weekStart={weekStart}
-        you={user.id}
-      />
-      {complete && shareRows.length > 0 && (
-        <MidweekPickShares ownerCountMin={MIDWEEK.ownerCountMin} rows={shareRows} />
-      )}
-      {complete && seal && (
-        <MidweekSeed
-          seed={seed}
-          seedHash={seal}
-          seedMatches={seed !== null && seedHash(seed) === seal}
-        />
-      )}
-      {evening && seal && <MidweekSeed seedHash={seal} />}
-    </>,
-    complete && championClub(tournament) ? `${championClub(tournament)} won it` : "The bracket",
-    poller,
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start lg:gap-8">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6">{blocks}</div>
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3">
+            <HubTiles
+              tiles={[
+                tiles.night,
+                tiles.bracket,
+                ...(tiles.calls ? [tiles.calls] : []),
+                tiles.picks,
+              ]}
+            />
+            {seal && (
+              <MidweekSeed
+                seed={seed}
+                seedHash={seal}
+                seedMatches={seed !== null && seedHash(seed) === seal}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

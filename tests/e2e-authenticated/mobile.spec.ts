@@ -101,27 +101,16 @@ async function expectTeamColours(page: Page) {
 }
 
 /**
- * The ratings block (F7, ADR-117): five night ratings in neutral discs, one
- * best chip, `Show each match` opening a chip per match, all inside the screen.
+ * The night's ratings (F7, ADR-117, DR5-6): five rows in neutral discs, one
+ * `★ Best`, and the way to the rule, all inside the screen.
  */
-async function expectRatings(page: Page, { open }: { open: boolean }) {
+async function expectRatings(page: Page) {
   const block = page.getByRole("region", { name: "Your five’s ratings" });
   await expect(block).toBeVisible();
-  await expect(block.getByText(/^Out of 10, the mean of \d+ match(es)?$/)).toBeVisible();
-  await expect(
-    block.getByText(/^rated \d+\.\d out of 10 for the night$/).filter({ visible: true }),
-  ).toHaveCount(5);
-  await expect(block.getByText("★ Best of your five").filter({ visible: true })).toHaveCount(1);
-  const chips = block.getByRole("link", { name: / v .+ rated \d+\.\d out of 10 against / });
-  const toggle = block.getByRole("button", { name: /^(Show|Hide) each match$/ });
-  await expect(toggle).toHaveAttribute("aria-expanded", String(open));
-  if (!open) {
-    await expect(chips.filter({ visible: true })).toHaveCount(0);
-    await toggle.click();
-    await expect(toggle).toHaveAccessibleName("Hide each match");
-  }
-  expect(await chips.filter({ visible: true }).count()).toBeGreaterThanOrEqual(5);
-  await expect(block.getByRole("link", { name: "How ratings work →" })).toBeVisible();
+  await expect(block.getByText(/^Mean of \d+ match(es)?$/)).toBeVisible();
+  await expect(block.getByText(/^rated \d+\.\d out of 10 for the night$/)).toHaveCount(5);
+  await expect(block.getByText("★ Best")).toHaveCount(1);
+  await expect(block.getByRole("link", { name: "How ratings work" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 }
 
@@ -410,7 +399,7 @@ test.describe("Compete (ADR-107)", () => {
     await expect(page).toHaveURL(/\/midweek$/);
     await page.goto(`/club/midweek/${COMPLETED_WEEK}`);
     await expect(page).toHaveURL(new RegExp(`/midweek/${COMPLETED_WEEK}$`));
-    await expect(page.getByRole("navigation", { name: "Compete" })).toBeVisible();
+    await expect(page.getByText(/^Midweek Madness · .+ won it$/)).toBeVisible();
 
     // The Collection strip is gone (Q12): Compete's badge and Home's card replace it.
     await page.goto("/club/collection");
@@ -459,14 +448,23 @@ test.describe("Midweek Madness results (PR 8)", () => {
       await page.getByRole("link", { name: /^Last week/ }).click();
       await expect(page).toHaveURL(new RegExp(`/midweek/${COMPLETED_WEEK}$`));
 
-      await expect(page.getByRole("heading", { level: 1, name: /won it$/ })).toBeVisible();
-      await expect(page.getByRole("navigation", { name: "Jump to" })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "Final", exact: true })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "Who picked whom" })).toBeVisible();
+      // The week page (E2-Week-Past): who won it, your night, the final and its tiles.
+      await expect(page.getByText(/^Midweek Madness · .+ won it$/)).toBeVisible();
+      await expect(page.getByRole("region", { name: "The final" })).toBeVisible();
       await expect(page.getByText("✓ Matches the seal.")).toBeAttached();
       await expectNoHorizontalOverflow(page);
+      await page.getByRole("link", { name: /^Who picked whom/ }).click();
+      await expect(page.getByRole("heading", { level: 1, name: "Who picked whom" })).toBeVisible();
+      await expect(page.getByRole("table")).toBeVisible();
+      await expectNoHorizontalOverflow(page);
 
-      // release_member's own path is marked, and a played match opens its report.
+      // The bracket, latest round first: release_member's own path is marked,
+      // and a played match opens its report.
+      await page.goto(`/midweek/${COMPLETED_WEEK}`);
+      await page.getByRole("link", { name: /^Bracket Won by / }).click();
+      await expect(page).toHaveURL(new RegExp(`/midweek/${COMPLETED_WEEK}/bracket$`));
+      await expect(page.getByRole("heading", { name: "Final", exact: true })).toBeVisible();
+      await expectNoHorizontalOverflow(page);
       await expect(page.getByText("You", { exact: true }).first()).toBeVisible();
       await page
         .getByRole("link", { name: /^Match report: / })
@@ -487,7 +485,7 @@ test.describe("Midweek Madness results (PR 8)", () => {
   test("on a 1440 px desktop a match report puts the Why beside the story", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await signIn(page, "release_member");
-    await page.goto(`/midweek/${COMPLETED_WEEK}`);
+    await page.goto(`/midweek/${COMPLETED_WEEK}/bracket`);
     await page
       .getByRole("link", { name: /^Match report: / })
       .first()
@@ -501,60 +499,27 @@ test.describe("Midweek Madness results (PR 8)", () => {
     await expectMatchPageWhy(page);
   });
 
-  test("the complete bracket leads with your ratings, and each chip opens its rated report", async ({
+  test("your night lists your five's ratings, and How ratings work lands on the rule", async ({
     page,
   }) => {
     await signIn(page, "release_member");
     await page.goto(`/midweek/${COMPLETED_WEEK}`);
-    await expect(page.getByRole("navigation", { name: "Jump to" })).toContainText("Your ratings");
-    await expectRatings(page, { open: true });
-
-    const block = page.getByRole("region", { name: "Your five’s ratings" });
-    const chip = block
-      .getByRole("link", { name: / rated \d+\.\d out of 10 against / })
-      .filter({ visible: true })
-      .first();
-    const shown = (await chip.innerText()).match(/\d+\.\d/)![0];
-    await chip.click();
-    await expect(page).toHaveURL(new RegExp(`/midweek/${COMPLETED_WEEK}/match/[0-9a-f-]{36}$`));
-    // The Why list adds a rating per card for this match, the chip's number among them.
-    await expect(page.getByText(/^rated \d+\.\d out of 10 for this match$/)).toHaveCount(10);
-    await expect(page.getByText(`rated ${shown} out of 10 for this match`).first()).toBeAttached();
-    await expect(page.getByText("Rating: how it played, out of 10")).toBeVisible();
-    await expect(page.getByText(/The circle on the right is how the card played/)).toBeVisible();
-    await expectNoHorizontalOverflow(page);
-
-    await page.goto("/how-it-works#midweek-ratings");
-    await expect(page.getByRole("heading", { name: "Ratings", exact: true })).toBeVisible();
-    await expectNoHorizontalOverflow(page);
-  });
-
-  test("on a 1440 px desktop the ratings show the five cards in a row", async ({ page }) => {
+    await page.getByRole("link", { name: /^Your night / }).click();
+    await expect(page).toHaveURL(new RegExp(`/midweek/${COMPLETED_WEEK}/night$`));
+    await expectRatings(page);
     await page.setViewportSize({ width: 1440, height: 900 });
-    await signIn(page, "release_member");
-    await page.goto(`/midweek/${COMPLETED_WEEK}`);
-    await expectRatings(page, { open: true });
-    const block = page.getByRole("region", { name: "Your five’s ratings" });
-    const discs = block
-      .getByText(/^rated \d+\.\d out of 10 for the night$/)
-      .filter({ visible: true });
-    const tops = await discs.evaluateAll((nodes) =>
-      nodes.map((node) => Math.round(node.parentElement!.getBoundingClientRect().top)),
-    );
-    // One row of five: the discs line up, give or take the best chip's extra line.
-    expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(12);
-    await page
-      .getByRole("link", { name: /^Match report: / })
-      .first()
-      .click();
-    await expect(page.getByText(/^rated \d+\.\d out of 10 for this match$/)).toHaveCount(10);
+    await expectRatings(page);
+
+    await page.getByRole("link", { name: "How ratings work" }).click();
+    await expect(page).toHaveURL(/\/how-it-works#midweek-ratings$/);
+    await expect(page.getByRole("heading", { name: "Ratings", exact: true })).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 
   test("from lg, every bracket line meets the match it leads to (KB-031)", async ({ page }) => {
     await signIn(page, "release_member");
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(`/midweek/${COMPLETED_WEEK}`);
+    await page.goto(`/midweek/${COMPLETED_WEEK}/bracket`);
     const tree = page.getByTestId("bracket-tree");
     await expect(tree).toBeVisible();
     // The fixture's five entrants leave byes beside matches in round 1, the
@@ -595,7 +560,7 @@ test.describe("Midweek Madness results (PR 8)", () => {
     { tag: "@narrow" },
     async ({ page }) => {
       await signIn(page, "release_member");
-      await page.goto(`/midweek/${COMPLETED_WEEK}`);
+      await page.goto(`/midweek/${COMPLETED_WEEK}/bracket`);
       // The row's report link names the whole club; its own text is cut to one line.
       const report = page
         .getByRole("link", { name: new RegExp(`^Match report: .*${LONG_CLUB}`) })
@@ -700,10 +665,10 @@ test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
       ).toBeVisible();
       // Nothing is played yet: no full-time row, no report link.
       await expect(page.getByRole("link", { name: /^Match report: / })).toHaveCount(0);
-      const jump = page.getByRole("navigation", { name: "Jump to" });
-      await expect(jump.getByRole("link", { name: /^Your match · R\d \d\d:\d\d$/ })).toBeVisible();
       await expect(page.getByText(/^Kick-off \d\d:\d\d$/).first()).toBeVisible();
-      await expect(page.getByText(/^Winner(,| of) /).first()).toBeVisible();
+      // On a phone a round shows from 15 minutes before its kick-off (DR5-14).
+      await expect(page.locator("#round-1")).toBeVisible();
+      await expect(page.locator("#round-2")).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
     },
   );
@@ -739,8 +704,6 @@ test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
     await expectNoHorizontalOverflow(page);
     await page.goto(`/midweek/${weekStart}/bracket`);
     await expect(page.getByRole("group", { name: / won\.$/ }).first()).toBeVisible();
-
-    await page.goto(`/midweek/${weekStart}`);
     await expect(page.getByRole("link", { name: /^Match report: / }).first()).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await page
@@ -770,7 +733,7 @@ test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
     // The ratings and the share images are behind the Your night tile.
     await page.getByRole("link", { name: /^Your night / }).click();
     await expect(page).toHaveURL(/\/night$/);
-    await expectRatings(page, { open: true });
+    await expectRatings(page);
     await expect(page.getByRole("region", { name: "Share the night" })).toBeVisible();
     await page.goto("/midweek");
     await page.getByRole("link", { name: /^Past weeks/ }).click();
@@ -800,7 +763,6 @@ test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
     const tree = page.getByTestId("bracket-tree");
     await expect(tree).toBeVisible();
     await expect(tree.getByText(/^Kick-off \d\d:\d\d$/).first()).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Jump to" })).toBeHidden();
     await expectNoHorizontalOverflow(page);
   });
 });
@@ -886,10 +848,9 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
     await expect(page.getByRole("group", { name: / won\.$/ })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
 
+    // While the week is played, its own page is the hub.
     await page.goto(`/midweek/${weekStart}`);
-    await expect(page.getByRole("navigation", { name: "Jump to" })).toBeVisible();
-    await expect(page.getByRole("link", { name: /^Match report: / })).toHaveCount(0);
-    await expectNoHorizontalOverflow(page);
+    await expect(page).toHaveURL(/\/midweek$/);
 
     // Every match in play is watched live (ADR-147).
     await page.goto(`/midweek/${weekStart}/match/${match.id}`);
@@ -1186,7 +1147,6 @@ test.describe("Midweek Madness rows live (MM 3.0 S4, ADR-148)", () => {
       // Compile the routes before their timing matters.
       await page.goto("/midweek");
       await page.goto(`/midweek/${weekStart}/bracket`);
-      await page.goto(`/midweek/${weekStart}`);
       // Round 2 kicked off 150 seconds ago: about the 48th minute.
       await withDatabase((database) => moveFixtureEveningTo(database, matches[0].id, 150));
 
@@ -1197,7 +1157,7 @@ test.describe("Midweek Madness rows live (MM 3.0 S4, ADR-148)", () => {
         page.getByRole("link", { name: new RegExp(`^Bracket .+ · ${matches.length} live$`) }),
       ).toBeVisible();
 
-      for (const url of [`/midweek/${weekStart}/bracket`, `/midweek/${weekStart}`]) {
+      for (const url of [`/midweek/${weekStart}/bracket`]) {
         const before = await goalsSoFar(ids);
         const html = (await (await page.goto(url))!.text()).replace(/<!-- -->/g, "");
         const after = await goalsSoFar(ids);
@@ -1235,7 +1195,7 @@ test.describe("Midweek Madness rows live (MM 3.0 S4, ADR-148)", () => {
 
       // From lg the tree carries the same live rows, inside the screen.
       await page.setViewportSize({ width: 1440, height: 900 });
-      await page.goto(`/midweek/${weekStart}`);
+      await page.goto(`/midweek/${weekStart}/bracket`);
       const tree = page.getByTestId("bracket-tree");
       await expect(tree.getByRole("group", { name: LIVE_ROW })).toHaveCount(matches.length);
       await expectNoHorizontalOverflow(page);
@@ -1309,11 +1269,11 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     await expect(page.getByRole("link", { name: /^Calls \d+ open$/ })).toBeVisible();
     await page.getByRole("link", { name: "Make your calls" }).click();
     await expect(page).toHaveURL(new RegExp(`/midweek/${weekStart}/calls$`));
-    const block = page.getByRole("region", { name: "Call the winners" });
+    const block = page.getByRole("list", { name: "Calls" });
     await expect(block).toBeVisible();
     await expect(
-      block.getByText(
-        new RegExp(`^\\+\\d+ ${BRAND.currency} a correct pick · paid after the final$`),
+      page.getByText(
+        new RegExp(`· \\+\\d+ ${BRAND.currency} a correct pick · paid after the final$`),
       ),
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
@@ -1344,26 +1304,26 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     // Saved for real: a reload shows the pick.
     await page.reload();
     const saved = page
-      .getByRole("region", { name: /^(Call the winners|Your calls)$/ })
+      .getByRole("list", { name: "Calls" })
       .getByRole("button", { name: new RegExp(`^${firstName}`) })
       .first();
     await expect(saved).toHaveAttribute("aria-pressed", "true");
 
     // The bracket shows the call and never takes one.
-    await page.goto(`/midweek/${weekStart}`);
+    await page.goto(`/midweek/${weekStart}/bracket`);
     await expect(
-      page.getByText(`✓ Your call: ${firstName}`).filter({ visible: true }).first(),
+      page.getByText(`Your call: ${firstName}`).filter({ visible: true }).first(),
     ).toBeVisible();
     await expect(page.getByRole("button", { name: new RegExp(`^${firstName}`) })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`/midweek/${weekStart}/calls`);
-    await expect(page.getByRole("region", { name: "Call the winners" })).toBeVisible();
+    await expect(page.getByRole("list", { name: "Calls" })).toBeVisible();
     await expectNoHorizontalOverflow(page);
-    await page.goto(`/midweek/${weekStart}`);
+    await page.goto(`/midweek/${weekStart}/bracket`);
     await expect(
-      page.getByText(`✓ Your call: ${firstName}`).filter({ visible: true }).first(),
+      page.getByText(`Your call: ${firstName}`).filter({ visible: true }).first(),
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
@@ -1371,7 +1331,9 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     await withDatabase((database) => advanceFixtureEvening(database, 2));
     await page.goto(`/midweek/${weekStart}/calls`);
     await expect(page.getByText(`Closed at kick-off. You picked ${firstName}.`)).toBeVisible();
-    await expect(page.getByText("How the club called it").first()).toBeVisible();
+    await expect(
+      page.getByRole("img", { name: /^\d+ picked .+, \d+ picked .+$/ }).first(),
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     // After the final the week is paid: the weekly line, and the calls kept on the bracket.
@@ -1381,7 +1343,7 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     await expect(page.getByRole("link", { name: /^Calls [01] of 1 right$/ })).toBeVisible();
     await page.goto(`/midweek/${weekStart}/night`);
     await expect(page.getByText(/^You called [01] of 1 right/)).toBeVisible();
-    await page.getByRole("link", { name: "Your calls →" }).click();
+    await page.getByRole("link", { name: /^Your calls / }).click();
     await expect(page).toHaveURL(new RegExp(`/midweek/${weekStart}/calls$`));
     await expect(page.getByRole("region", { name: "Your calls" })).toContainText(
       `You picked ${firstName}.`,
@@ -1431,24 +1393,27 @@ test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
       await signIn(page, "release_member");
       // Compile the routes before their timing matters.
       await page.goto(url);
-      await page.goto(`/midweek/${weekStart}`);
+      await page.goto(`/midweek/${weekStart}/bracket`);
 
       // A minute into round 1: the pairing waits on a feeder in play.
       await withDatabase((database) => moveFixtureEveningTo(database, matchId, 60));
       await page.goto(url);
       await expect(page.getByRole("heading", { level: 1, name: "Not settled yet" })).toBeVisible();
-      await expect(page.getByRole("link", { name: /^Watch .+ v .+ →$/ })).toBeVisible();
+      await expect(page.getByRole("link", { name: /^Watch .+ v .+$/ })).toBeVisible();
       await expect(page.getByRole("region", { name: /: the five$/ })).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
-      await page.goto(`/midweek/${weekStart}`);
+      await page.goto(`/midweek/${weekStart}/bracket`);
       await expect(page.getByRole("link", { name: /^Pre-match: Winner of / })).toHaveCount(0);
 
       // Round 1 has ended (8:55 at the longest) and round 2 is 90 seconds away.
       await withDatabase((database) => moveFixtureEveningTo(database, matchId, beforeRoundTwo(90)));
-      for (const where of [`/midweek/${weekStart}/bracket`, `/midweek/${weekStart}`]) {
+      for (const where of [`/midweek/${weekStart}/bracket`]) {
         await page.goto(where);
         await expect(
-          page.getByRole("link", { name: /^Pre-match: .+ v .+, kick-off \d\d:\d\d$/ }).first(),
+          // A member who is out also hears the row's call: `… kick-off 20:15. Call open`.
+          page
+            .getByRole("link", { name: /^Pre-match: .+ v .+, kick-off \d\d:\d\d(\. .+)?$/ })
+            .first(),
           where,
         ).toBeVisible();
         await expectNoHorizontalOverflow(page);
@@ -1464,8 +1429,9 @@ test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
       }
       await page.goto(`/midweek/${weekStart}/night`);
       const night = page.getByRole("list", { name: "Your night" });
-      if ((await night.getByText(/^Next: .+\.$/).count()) > 0) {
-        await expect(night.getByRole("link", { name: "Pre-match →" })).toBeVisible();
+      const nextRow = night.getByRole("link", { name: /^Next: / });
+      if ((await nextRow.count()) > 0) {
+        await expect(nextRow).toHaveAttribute("href", /\/next\/2\/\d+$/);
       }
 
       const html = (await (await page.goto(url))!.text()).replace(/<!-- -->/g, "");
@@ -1473,9 +1439,8 @@ test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
       // Nothing of the match before kick-off: no win chance, no day roll, no id.
       expect(html).not.toMatch(/win_?chance|day_?rolls?_?ppm|dayRoll|match_id/i);
       await expect(page.getByText(/\d%/)).toHaveCount(0);
-      await expect(
-        page.getByRole("group", { name: /^.+ v .+, kick-off \d\d:\d\d\.$/ }),
-      ).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: /^.+ v .+$/ })).toBeVisible();
+      await expect(page.getByText(/ · kick-off \d\d:\d\d, /)).toBeVisible();
       await expect(page.getByRole("timer")).toBeVisible();
       const fives = page.getByRole("region", { name: /: the five$/ });
       await expect(fives).toHaveCount(2);
@@ -1528,16 +1493,16 @@ test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
 
     await page.goto(`/midweek/${weekStart}/calls`);
     await page
-      .getByRole("region", { name: "Call the winners" })
-      .getByRole("link", { name: "Pre-match →" })
+      .getByRole("list", { name: "Calls" })
+      .getByRole("link", { name: "Pre-match", exact: true })
       .first()
       .click();
     await expect(page).toHaveURL(/\/next\/\d+\/\d+$/);
-    const calls = page.getByRole("region", { name: "Call the winners" });
+    const calls = page.getByRole("list", { name: "Calls" });
     const card = calls.getByRole("group", { name: /, kick-off \d\d:\d\d\. Who wins\?$/ });
     await expect(card).toHaveCount(1);
     await expect(page.getByRole("region", { name: /: the five$/ })).toHaveCount(2);
-    await expect(calls.getByRole("link", { name: "Pre-match →" })).toHaveCount(0);
+    await expect(calls.getByRole("link", { name: "Pre-match", exact: true })).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
 
     // The server passes kick-off while this page still shows the call open:
@@ -1627,12 +1592,12 @@ test.describe("Midweek Madness ratings at full time (MM 3.0 S6, ADR-150)", () =>
         await expectNoHorizontalOverflow(page);
 
         await page.goto(`/midweek/${weekStart}/night`);
-        const block = page.getByRole("region", { name: /^Your five against / });
+        const block = page.getByRole("region", { name: /^Against / });
         if (mine) {
           await expect(block).toBeVisible();
           await expect(block.getByText(RATED)).toHaveCount(5);
-          await expect(block.getByText(/ · out of 10 for this match$/)).toBeVisible();
-          await expect(block.getByRole("link", { name: "Report →" })).toHaveAttribute(
+          await expect(block.getByText(/ · out of 10$/)).toBeVisible();
+          await expect(block.getByRole("link", { name: "Report", exact: true })).toHaveAttribute(
             "href",
             report(mine.id),
           );
@@ -1688,7 +1653,7 @@ test.describe("Midweek Madness share images (F8, ADR-120)", () => {
         });
       });
       await signIn(page, "release_member");
-      await page.goto(`/midweek/${COMPLETED_WEEK}`);
+      await page.goto(`/midweek/${COMPLETED_WEEK}/night`);
       const block = page.getByRole("region", { name: "Share the night" });
       await expect(block).toBeVisible();
       for (const name of ["Preview: The champion poster", "Preview: Your night"]) {
@@ -1698,7 +1663,6 @@ test.describe("Midweek Madness share images (F8, ADR-120)", () => {
           await preview.evaluate((img: HTMLImageElement) => [img.naturalWidth, img.naturalHeight]),
         ).toEqual([1080, 1350]);
       }
-      await expect(block.getByText(/^Both show club, manager and Player names/)).toBeVisible();
       await expectNoHorizontalOverflow(page);
 
       await block.getByRole("button", { name: "Share" }).first().click();
@@ -1725,7 +1689,7 @@ test.describe("Midweek Madness share images (F8, ADR-120)", () => {
     const page = await context.newPage();
     try {
       await signIn(page, "release_member");
-      await page.goto(`/midweek/${COMPLETED_WEEK}`);
+      await page.goto(`/midweek/${COMPLETED_WEEK}/night`);
       const block = page.getByRole("region", { name: "Share the night" });
       await expect(block.getByRole("img", { name: "Preview: The champion poster" })).toBeVisible({
         timeout: 15_000,

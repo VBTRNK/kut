@@ -29,7 +29,6 @@ import {
   roundName,
   roundShort,
   treeGroupRows,
-  yourNextRound,
 } from "@/lib/midweek/evening";
 import type { DrawRow, EntryCardRow, MatchRow } from "@/lib/midweek/rows";
 
@@ -288,14 +287,6 @@ describe("the bracket", () => {
     expect(pairSentence(round1.pairs.find((p) => p.kind === "upcoming")!)).toBe(
       `${roundOneMatch.side_0_name} v ${roundOneMatch.side_1_name}, kick-off 20:30.`,
     );
-  });
-
-  it("jumps to the member's next match until they have none left", () => {
-    const byeUser = draw.find((row) => row.bye)!.side_0_user_id;
-    expect(yourNextRound(bracketOf([]), byeUser)?.round).toBe(2);
-    expect(yourNextRound(bracketOf([]), roundOneMatch.side_0_user_id)?.round).toBe(1);
-    expect(yourNextRound(bracketOf(rows), nine.championUserId)).toBeNull();
-    expect(yourNextRound(bracketOf([]), "nobody")).toBeNull();
   });
 });
 

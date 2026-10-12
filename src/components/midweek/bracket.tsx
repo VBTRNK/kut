@@ -1,10 +1,7 @@
+import { Block } from "@/components/ui/block";
+import { Tag } from "@/components/ui/tag";
 import { formatClock } from "@/lib/midweek/entry";
-import {
-  matchName,
-  treeGroupRows,
-  type BracketPair,
-  type BracketRound,
-} from "@/lib/midweek/evening";
+import { treeGroupRows, type BracketPair, type BracketRound } from "@/lib/midweek/evening";
 import { MidweekMatchRow, type RowCall } from "./match-row";
 
 /** Pairs 2k and 2k + 1, whose winners meet next (§44.6). */
@@ -69,90 +66,77 @@ const ROW_SPAN: Record<number, string> = {
   32: "row-span-32",
 };
 
-function RoundTime({ round }: { round: BracketRound }) {
-  return <>Kick-off {formatClock(round.kickoffAt)}</>;
-}
+/** A round is listed on a phone from 15 minutes before its kick-off (DR5-14). */
+const SOON_MS = 15 * 60_000;
 
 /**
- * `MidweekBracket`. Below `lg`, the rounds as sections in order, each pair of
- * pairings joined by a bracket line naming the match its winners meet in.
- * From `lg`, the same data as a tree, one column per round (DR2-4). Every
- * round shows its kick-off, and every pairing its state: kick-off, live with
- * the score so far (ADR-148), full time, or a bye (ADR-113). Your path is
- * brass in both; names are neutral.
+ * `MidweekBracket` (DR5-14). Below `lg`, a block per round, the latest round
+ * first, each saying `Live`, `Played` or its kick-off; a round more than 15
+ * minutes from its kick-off is left out until then. From `lg`, every round as
+ * a tree, one column per round (DR2-4, DR4-10), on the type scale. Every
+ * pairing shows its state: kick-off, live with the score so far (ADR-148),
+ * full time, or a bye (ADR-113). Your path is brass in both; names are
+ * neutral.
  *
- * HANDOFF drew the tree `aria-hidden` beside a list that is `display: none`
- * from `lg`, which leaves a screen reader nothing at that width. So the tree
- * keeps round headings and the same labelled match rows (ADR-098). `calls`
- * puts a member's calls on their rows, keyed `round/pairing` (ADR-118).
+ * The tree keeps round headings and the same labelled match rows, so a
+ * screen reader has the bracket at every width (ADR-098). `calls` puts a
+ * member's calls on their rows, keyed `round/pairing` (ADR-118).
  */
 export function MidweekBracket({
   rounds,
   you,
   weekStart,
+  now,
   calls,
 }: {
   rounds: readonly BracketRound[];
   you: string | null;
   weekStart: string;
+  now: Date;
   calls?: ReadonlyMap<string, RowCall>;
 }) {
   const total = rounds.length;
   const callOf = (pair: BracketPair) => calls?.get(`${pair.round}/${pair.pairing}`) ?? null;
+  const listed = [...rounds]
+    .reverse()
+    .filter((round) => Date.parse(round.kickoffAt) <= now.getTime() + SOON_MS);
   return (
     <>
-      <div className="grid gap-7 lg:hidden">
-        {rounds.map((round) => (
-          <section
-            aria-labelledby={`round-${round.round}-h`}
-            className="grid scroll-mt-36 gap-3 sm:scroll-mt-40"
-            id={`round-${round.round}`}
-            key={round.round}
-          >
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="display text-[26px]" id={`round-${round.round}-h`}>
-                {round.name}
-              </h2>
-              <p className="text-xs font-extrabold text-ink-faint tabular-nums">
-                <RoundTime round={round} />
-              </p>
-            </div>
-            <ol className="grid gap-3.5">
-              {groups(round.pairs).map((group, index) => {
-                const mine = group.some((pair) => hasYou(pair, you));
-                const single = group.length === 1;
-                return (
-                  <li
-                    className={`relative grid gap-1.5 ${
-                      single
-                        ? ""
-                        : `pr-[22px] after:absolute after:top-[18px] after:right-1.5 after:bottom-[18px] after:w-2.5 after:rounded-r-lg after:border-2 after:border-l-0 after:content-[''] ${mine ? "after:border-brass" : "after:border-line"}`
-                    }`}
-                    key={index}
-                  >
-                    {group.map((pair) => (
+      <div className="grid gap-4 lg:hidden">
+        {listed.map((round) => {
+          const live = round.pairs.some((pair) => pair.kind === "inplay");
+          const started = Date.parse(round.kickoffAt) <= now.getTime();
+          return (
+            <div className="scroll-mt-6" id={`round-${round.round}`} key={round.round}>
+              <Block
+                aside={
+                  live ? (
+                    <Tag tone="live">Live</Tag>
+                  ) : (
+                    <p className="text-small text-ink-dim tabular-nums">
+                      {started ? "Played" : `Kick-off ${formatClock(round.kickoffAt)}`}
+                    </p>
+                  )
+                }
+                id={`round-${round.round}-h`}
+                title={round.name}
+              >
+                <ol className="grid gap-2 sm:grid-cols-2">
+                  {round.pairs.map((pair) => (
+                    <li key={pair.pairing}>
                       <MidweekMatchRow
                         call={callOf(pair)}
-                        key={pair.pairing}
                         pair={pair}
                         weekStart={weekStart}
                         you={you}
                       />
-                    ))}
-                    {!single && round.round < total && (
-                      <p className="pr-0.5 text-right text-[11px] font-extrabold text-ink-faint">
-                        Winners meet in{" "}
-                        <b className={mine ? "text-brass" : "text-ink-dim"}>
-                          {matchName(round.round + 1, index, total)}
-                        </b>
-                      </p>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-        ))}
+                    </li>
+                  ))}
+                </ol>
+              </Block>
+            </div>
+          );
+        })}
       </div>
 
       <div
@@ -166,11 +150,11 @@ export function MidweekBracket({
             key={round.round}
           >
             <div className="row-start-1 mb-3 grid gap-0.5 border-b border-line/50 pb-2">
-              <h2 className="display text-2xl leading-none" id={`tree-round-${round.round}-h`}>
+              <h2 className="text-heading font-semibold" id={`tree-round-${round.round}-h`}>
                 {round.name}
               </h2>
-              <p className="text-xs font-extrabold text-ink-faint tabular-nums">
-                <RoundTime round={round} />
+              <p className="text-small text-ink-dim tabular-nums">
+                Kick-off {formatClock(round.kickoffAt)}
               </p>
             </div>
             {groups(round.pairs).map((group, index) => {

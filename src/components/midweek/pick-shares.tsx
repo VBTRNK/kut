@@ -1,3 +1,4 @@
+import { Block } from "@/components/ui/block";
 import type { RarityTier } from "@/game/rating-engine";
 import { factorText } from "@/lib/midweek/evening";
 import { FEW_OWNERS_LABEL } from "@/lib/midweek/report/render";
@@ -15,9 +16,9 @@ export type PickShareView = {
 function Table({ rows }: { rows: readonly PickShareView[] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full border-collapse text-small">
         <thead>
-          <tr className="border-b border-line/60 text-left text-[10.4px] font-extrabold tracking-[0.12em] text-ink-faint uppercase">
+          <tr className="border-b border-line/60 text-left text-label font-semibold text-ink-faint">
             <th className="px-1.5 py-2" scope="col">
               Player
             </th>
@@ -37,8 +38,8 @@ function Table({ rows }: { rows: readonly PickShareView[] }) {
             const factor = factorText(row.pickFactorPpm);
             return (
               <tr className="border-b border-line/30" key={row.playerId}>
-                <td className="px-1.5 py-[9px]">
-                  <span className="flex items-center gap-2.5 font-extrabold">
+                <td className="px-1.5 py-2">
+                  <span className="flex items-center gap-2.5 font-semibold">
                     {row.rarity ? (
                       <span
                         aria-hidden="true"
@@ -56,8 +57,8 @@ function Table({ rows }: { rows: readonly PickShareView[] }) {
                     {row.name}
                   </span>
                 </td>
-                <td className="px-1.5 py-[9px] text-right tabular-nums">{row.picks}</td>
-                <td className="px-1.5 py-[9px] text-[13px] text-ink-dim">
+                <td className="px-1.5 py-2 text-right tabular-nums">{row.picks}</td>
+                <td className="px-1.5 py-2 text-ink-dim">
                   {row.owners === null ? (
                     <span className="text-steel italic">{FEW_OWNERS_LABEL}</span>
                   ) : (
@@ -65,10 +66,10 @@ function Table({ rows }: { rows: readonly PickShareView[] }) {
                   )}
                 </td>
                 <td
-                  className={`px-1.5 py-[9px] text-right font-black tabular-nums ${factor.trend === "up" ? "text-moss" : factor.trend === "down" ? "text-brick" : ""}`}
+                  className={`px-1.5 py-2 text-right font-semibold tabular-nums ${factor.trend === "up" ? "text-moss" : factor.trend === "down" ? "text-brick" : ""}`}
                 >
                   {factor.trend !== "flat" && (
-                    <i aria-hidden="true" className="mr-[3px] text-[10px] not-italic">
+                    <i aria-hidden="true" className="mr-[3px] not-italic">
                       {factor.trend === "up" ? "▲" : "▼"}
                     </i>
                   )}
@@ -91,7 +92,7 @@ function Table({ rows }: { rows: readonly PickShareView[] }) {
 /**
  * `MidweekPickShares`, "Who picked whom", once the week is complete (§44.9):
  * sorted by pick factor, biggest boost first; an owner count only at three
- * owners or more (ADR-091). Two columns from `lg`.
+ * owners or more (ADR-091). One table in a block, Label heads (DR5-14).
  */
 export function MidweekPickShares({
   rows,
@@ -103,21 +104,14 @@ export function MidweekPickShares({
   const sorted = [...rows].sort(
     (a, b) => b.pickFactorPpm - a.pickFactorPpm || a.name.localeCompare(b.name),
   );
-  const half = Math.ceil(sorted.length / 2);
   return (
-    <section aria-labelledby="pick-shares-h" className="grid gap-4">
-      <h2 className="display text-3xl" id="pick-shares-h">
-        Who picked whom
-      </h2>
-      <p className="max-w-2xl text-[13px] leading-relaxed text-ink-dim">
+    <Block>
+      <p className="text-small text-pretty text-ink-dim">
         How many managers picked each Player, out of the entrants who own one. The fewer who picked
-        a Player, the bigger the boost. Auto squads don&rsquo;t count. Owners are shown only when at
-        least {ownerCountMin} entrants own the Player.
+        a Player, the bigger the boost. Auto squads don&rsquo;t count. Owners show from{" "}
+        {ownerCountMin}.
       </p>
-      <div className="grid items-start gap-x-10 lg:grid-cols-2">
-        <Table rows={sorted.slice(0, half)} />
-        {sorted.length > half && <Table rows={sorted.slice(half)} />}
-      </div>
-    </section>
+      <Table rows={sorted} />
+    </Block>
   );
 }

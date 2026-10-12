@@ -8,11 +8,8 @@ import {
   renderShareImage,
   reportShareFailure,
 } from "@/lib/midweek/share-draw";
-import { MidweekSectionHead } from "./page-head";
-
-/** The note under both images (DR3 HANDOFF "Copy", Sharing): what they carry, and where they're made. */
-export const SHARE_NOTE =
-  "Both show club, manager and Player names and Players’ photos. Send them to the club; they’re made on your phone, nothing is uploaded.";
+import { Block } from "@/components/ui/block";
+import { FOCUS } from "@/components/ui/page";
 
 /** A coarse pointer: share on a phone, download elsewhere (by capability, not width). */
 const COARSE = "(pointer: coarse)";
@@ -25,11 +22,6 @@ function subscribeCoarse(onChange: () => void) {
 type Drawn = { blob: Blob; url: string } | "failed" | null;
 type Done = "shared" | "downloaded" | "failed" | null;
 
-const ITEMS = {
-  poster: { title: "The champion poster" },
-  night: { title: "Your night", sub: "Your path, your five and their ratings" },
-} as const;
-
 function download(url: string, fileName: string) {
   const link = document.createElement("a");
   link.href = url;
@@ -39,17 +31,7 @@ function download(url: string, fileName: string) {
   link.remove();
 }
 
-function ShareItem({
-  image,
-  phone,
-  title,
-  sub,
-}: {
-  image: ShareImage;
-  phone: boolean;
-  title: string;
-  sub: string;
-}) {
+function ShareItem({ image, phone, title }: { image: ShareImage; phone: boolean; title: string }) {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState<{ image: ShareImage; attempt: number; drawn: Drawn } | null>(
     null,
@@ -126,75 +108,47 @@ function ShareItem({
   }
 
   const preview = (
-    <div className="grid aspect-[4/5] w-full overflow-hidden rounded-[10px] border border-line/60 bg-board-deep">
+    <div className="grid aspect-[4/5] w-full overflow-hidden rounded-lg border border-line/60 bg-board-deep">
       {ready ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img alt={`Preview: ${title}`} className="h-full w-full object-contain" src={drawn.url} />
       ) : (
-        <span className="self-center justify-self-center px-2 text-center text-xs text-ink-faint">
+        <span className="self-center justify-self-center px-2 text-center text-label text-ink-faint">
           {drawn === "failed" ? "No preview" : "Drawing…"}
         </span>
       )}
     </div>
   );
-  const button =
-    "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] px-4 text-sm font-black whitespace-nowrap disabled:opacity-55";
+  const button = `inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-line bg-panel px-3 text-small font-semibold whitespace-nowrap text-ink hover:border-brass-line disabled:opacity-50 ${FOCUS}`;
 
   return (
-    <li className="grid min-w-0 grid-cols-[110px_minmax(0,1fr)] items-start gap-x-4 gap-y-2 rounded-2xl border border-line/60 bg-panel/55 p-3 sm:row-span-5 sm:w-[190px] sm:grid-cols-1 sm:grid-rows-subgrid sm:border-0 sm:bg-transparent sm:p-0">
-      <div className="row-span-4 sm:row-span-1">{preview}</div>
-      <p className="col-start-2 text-[14.5px] leading-tight font-extrabold text-ink [overflow-wrap:anywhere] sm:col-start-1">
-        {title}
-      </p>
-      <p className="col-start-2 text-[12.5px] text-ink-faint [overflow-wrap:anywhere] sm:col-start-1">
-        {sub}
-      </p>
+    <li className="row-span-4 grid min-w-0 grid-rows-subgrid gap-y-2 rounded-xl bg-panel-2/80 p-2.5">
+      {preview}
+      <p className="text-small font-semibold [overflow-wrap:anywhere]">{title}</p>
       {/* One height for both sets of buttons, so the page doesn't move when
             hydration finds a coarse pointer and swaps Download for Share. */}
-      <div className="col-start-2 grid min-h-[86px] content-start sm:col-start-1">
+      <div className="grid min-h-[100px] content-start gap-2">
         {phone ? (
-          <div className="grid justify-items-start gap-1.5">
-            <button
-              className={`${button} bg-brass text-ink-on-accent hover:brightness-110`}
-              disabled={!ready || sharing}
-              onClick={share}
-              type="button"
-            >
+          <>
+            <button className={button} disabled={!ready || sharing} onClick={share} type="button">
               <span aria-hidden="true">⇪</span> {sharing ? "Sharing…" : "Share"}
             </button>
-            <button
-              className="min-h-9 text-sm font-bold text-brass hover:underline disabled:opacity-55"
-              disabled={!ready}
-              onClick={save}
-              type="button"
-            >
+            <button className={button} disabled={!ready} onClick={save} type="button">
               Save image
             </button>
-          </div>
+          </>
         ) : (
-          <button
-            className={`${button} border border-line bg-panel/70 text-ink hover:border-brass sm:w-full`}
-            disabled={!ready}
-            onClick={save}
-            type="button"
-          >
+          <button className={button} disabled={!ready} onClick={save} type="button">
             <span aria-hidden="true">↓</span> {done === "downloaded" ? "Downloaded" : "Download"}
           </button>
         )}
         {drawn === "failed" && (
-          <button
-            className="min-h-11 justify-self-start text-sm font-bold text-brass hover:underline"
-            onClick={retry}
-            type="button"
-          >
+          <button className={button} onClick={retry} type="button">
             Retry
           </button>
         )}
       </div>
-      <p
-        aria-live="polite"
-        className="col-start-2 text-[12.5px] leading-snug [overflow-wrap:anywhere] sm:col-start-1"
-      >
+      <p aria-live="polite" className="text-small text-pretty [overflow-wrap:anywhere]">
         {done === "shared" && <span className="text-moss">Shared.</span>}
         {done === "downloaded" && (
           <span className="text-moss">
@@ -214,8 +168,9 @@ function ShareItem({
 }
 
 /**
- * `MidweekShare` (DR3 HANDOFF §3, ADR-120): `Share the night`, with the
- * champion poster and, for a member who entered, "my night". Both are drawn
+ * `MidweekShare` (DR3 HANDOFF §3, ADR-120, DR5-14): `Share the night`, with
+ * the champion poster and, for a member who entered, "my night", side by side
+ * with no note under them (pre-decided cut). Both are drawn
  * on a canvas in the browser from data the page already has, as previews on
  * mount; a tap shares or saves the same PNG. Phones (a coarse pointer that can
  * share files) get the system share sheet, everything else a download.
@@ -236,26 +191,20 @@ export function MidweekShare({
 
   if (images.length === 0) return null;
   return (
-    <section aria-labelledby="share-h" className="grid scroll-mt-24 gap-3.5" id="share">
-      <MidweekSectionHead id="share-h" title="Share the night">
-        <p className="text-[13px] text-ink-faint">Images for the club&rsquo;s group chat</p>
-      </MidweekSectionHead>
-      <ul className="grid gap-2.5 sm:auto-cols-[190px] sm:grid-flow-col sm:grid-rows-[repeat(5,auto)] sm:justify-start sm:gap-x-5 sm:gap-y-2">
-        {images.map((image) => (
-          <ShareItem
-            image={image}
-            key={image.fileName}
-            phone={phone}
-            sub={
-              image.kind === "poster"
-                ? `${image.champion}, the final and the five`
-                : ITEMS.night.sub
-            }
-            title={image.kind === "poster" ? ITEMS.poster.title : ITEMS.night.title}
-          />
-        ))}
-      </ul>
-      <p className="text-[12.5px] leading-normal text-ink-faint">{SHARE_NOTE}</p>
-    </section>
+    <div className="scroll-mt-6" id="share">
+      <Block id="share-h" title="Share the night">
+        {/* A subgrid, so both images' rows line up whatever their words. */}
+        <ul className="grid grid-cols-2 grid-rows-[repeat(4,auto)] gap-x-3 gap-y-2 sm:grid-cols-[repeat(2,minmax(0,200px))]">
+          {images.map((image) => (
+            <ShareItem
+              image={image}
+              key={image.fileName}
+              phone={phone}
+              title={image.kind === "poster" ? "The champion poster" : "Your night"}
+            />
+          ))}
+        </ul>
+      </Block>
+    </div>
   );
 }

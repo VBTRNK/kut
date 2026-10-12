@@ -3,12 +3,10 @@ import { BRAND } from "@/lib/brand";
 import {
   callCards,
   callError,
-  callJumpLink,
   callsHeading,
   callsRight,
   settledStatus,
   weeklyCallsLine,
-  type CallCard,
   type MyPredictionRow,
   type PredictionSplitRow,
 } from "@/lib/midweek/calls";
@@ -296,34 +294,5 @@ describe("call copy", () => {
     expect(callError(null, kickoff, null)).toBe(
       "Couldn’t save. Check your connection and tap again.",
     );
-  });
-
-  it("leads the bracket's jump links with the earliest round still open", () => {
-    const card = (round: number, state: CallCard["state"]): CallCard => ({
-      round,
-      pairing: 0,
-      label: "x",
-      kickoffAt: LOCK,
-      sides: [
-        { userId: null, name: "" },
-        { userId: null, name: "" },
-      ],
-      state,
-      live: false,
-      pick: null,
-      savedAt: null,
-      winner: null,
-      split: null,
-    });
-    expect(callJumpLink([card(4, "open"), card(4, "open"), card(5, "notyet")], 5)).toEqual({
-      round: 4,
-      label: "Call the semis · 2 open",
-    });
-    expect(callJumpLink([card(2, "open")], 5)).toEqual({
-      round: 2,
-      label: "Call round 2 · 1 open",
-    });
-    expect(callJumpLink([card(5, "open")], 5)?.label).toBe("Call the final · 1 open");
-    expect(callJumpLink([card(5, "closed")], 5)).toBeNull();
   });
 });

@@ -468,16 +468,15 @@ function FinalScoreboard({
   );
 }
 
-// ---- Wednesday night and Thursday: the champion (owner decision D4) --------------
+// ---- After the final: the champion and your night (owner decision D4) -----------
 
 /**
- * After the final, until Thursday 23:59 (D4, Q4): the title names the
- * champion; the Now block is the member's night (coins, finish) and next
- * week's picker while it is open; the final and the champion's five as mini
- * cards under it. The ratings, the share images, the calls and the seed are
- * behind the tiles.
+ * A complete week's result, as the hub after its final and the week's own
+ * page both show it (D4, Q4, DR5-14): your night (coins and finish, with next
+ * week's picker while `next` is open), the final in a line with the
+ * champion's five as mini cards, and the tiles to the pages behind it.
  */
-export async function ChampionHub({
+export async function weekResult({
   supabase,
   tournament,
   next,
@@ -485,8 +484,8 @@ export async function ChampionHub({
 }: {
   supabase: SupabaseServerClient;
   tournament: MidweekTournament;
-  /** Next week's open tournament, when it exists. */
-  next: MidweekCurrent | null;
+  /** Next week's picker, while it is open. */
+  next: { line: string; href: string } | null;
   userId: string;
 }) {
   const rounds = tournament.rounds as number;
@@ -514,6 +513,82 @@ export async function ChampionHub({
   const right = calls.predictions.filter((row) => row.correct === true).length;
   const callCoins = calls.reward ? Number(calls.reward.amount) : right * predictionCoins(rounds);
   const club = championClub(tournament);
+
+  const blocks = (
+    <>
+      {night.entered ? (
+        <NowResult
+          coins={`+${coins + callCoins}`}
+          coinsNote={picks > 0 ? `${coins} for wins, ${callCoins} for calls` : "paid"}
+          finish={finish.value}
+          finishNote={finish.note}
+          next={next}
+        />
+      ) : (
+        <NowNote
+          action={
+            next && (
+              <Button href={next.href} wide>
+                Pick next week’s five
+              </Button>
+            )
+          }
+          title="Your night"
+        >
+          You weren&rsquo;t in this one.{next ? ` ${next.line}` : ""}
+        </NowNote>
+      )}
+      {final && (
+        <ChampionBlock
+          cards={champion?.cards.map((card) => card.mini as Mini) ?? []}
+          href={`${base}/match/${final.match_id}`}
+          label={`${tournament.champion_name ?? "The champion"}’s five`}
+          line={`${club ?? "The champion"}. ${finalLine(final)}`}
+        />
+      )}
+    </>
+  );
+  const tiles = {
+    night: {
+      title: "Your night",
+      state: night.entered ? `+${night.coins} · your ratings` : "You sat it out",
+      href: `${base}/night`,
+    },
+    bracket: {
+      title: "Bracket",
+      state: club ? `Won by ${club}` : "Every round played",
+      href: `${base}/bracket`,
+    },
+    calls:
+      picks > 0
+        ? { title: "Calls", state: `${right} of ${picks} right`, href: `${base}/calls` }
+        : null,
+    picks: { title: "Who picked whom", state: "Owners and picks", href: `${base}/picks` },
+  } satisfies Record<string, HubTile | null>;
+  return { club, blocks, tiles };
+}
+
+// ---- Wednesday night and Thursday: the champion (owner decision D4) --------------
+
+/**
+ * After the final, until Thursday 23:59 (D4, Q4): the title names the
+ * champion; the Now block is the member's night (coins, finish) and next
+ * week's picker while it is open; the final and the champion's five as mini
+ * cards under it. The ratings, the share images, the calls and the seed are
+ * behind the tiles.
+ */
+export async function ChampionHub({
+  supabase,
+  tournament,
+  next,
+  userId,
+}: {
+  supabase: SupabaseServerClient;
+  tournament: MidweekTournament;
+  /** Next week's open tournament, when it exists. */
+  next: MidweekCurrent | null;
+  userId: string;
+}) {
   const pickNext =
     next && next.lock_at && next.status === "open"
       ? {
@@ -521,60 +596,18 @@ export async function ChampionHub({
           href: "/midweek/pick",
         }
       : null;
+  const { club, blocks, tiles } = await weekResult({
+    supabase,
+    tournament,
+    next: pickNext,
+    userId,
+  });
 
   return (
     <HubFrame
-      now={
-        <>
-          {night.entered ? (
-            <NowResult
-              coins={`+${coins + callCoins}`}
-              coinsNote={picks > 0 ? `${coins} for wins, ${callCoins} for calls` : "paid"}
-              finish={finish.value}
-              finishNote={finish.note}
-              next={pickNext}
-            />
-          ) : (
-            <NowNote
-              action={
-                pickNext && (
-                  <Button href={pickNext.href} wide>
-                    Pick next week’s five
-                  </Button>
-                )
-              }
-              title="Your night"
-            >
-              You weren&rsquo;t in this one.{pickNext ? ` ${pickNext.line}` : ""}
-            </NowNote>
-          )}
-          {final && (
-            <ChampionBlock
-              cards={champion?.cards.map((card) => card.mini as Mini) ?? []}
-              href={`${base}/match/${final.match_id}`}
-              label={`${tournament.champion_name ?? "The champion"}’s five`}
-              line={`${club ?? "The champion"}. ${finalLine(final)}`}
-            />
-          )}
-        </>
-      }
+      now={blocks}
       sub={`Midweek Madness · ${formatDayDate(tournament.lock_at)}`}
-      tiles={[
-        {
-          title: "Your night",
-          state: night.entered ? `+${night.coins} · your ratings` : "You sat it out",
-          href: `${base}/night`,
-        },
-        {
-          title: "Bracket",
-          state: club ? `Won by ${club}` : "Every round played",
-          href: `${base}/bracket`,
-        },
-        picks > 0
-          ? { title: "Calls", state: `${right} of ${picks} right`, href: `${base}/calls` }
-          : { title: "Who picked whom", state: "Owners and picks", href: `${base}/picks` },
-        PAST_TILE,
-      ]}
+      tiles={[tiles.night, tiles.bracket, tiles.calls ?? tiles.picks, PAST_TILE]}
       title={club ? `${club} are champions` : "Midweek Madness"}
     />
   );

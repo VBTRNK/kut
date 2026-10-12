@@ -60,7 +60,8 @@ async function tileGeometry(page: Page) {
   if (page.viewportSize()!.width >= 640 && boxes.length === 2) {
     expect(Math.abs(boxes[0][0].width - boxes[1][0].width)).toBeLessThanOrEqual(1);
     expect(Math.abs(boxes[0][0].height - boxes[1][0].height)).toBeLessThanOrEqual(1);
-    for (let row = 0; row < 5; row++)
+    expect(boxes[0]).toHaveLength(boxes[1].length);
+    for (let row = 0; row < boxes[0].length; row++)
       expect(Math.abs(boxes[0][row].top - boxes[1][row].top)).toBeLessThanOrEqual(1);
   }
   await noOverflow(page);
@@ -102,7 +103,7 @@ for (const version of ["older", "newer"] as const) {
     });
     try {
       await signIn(page);
-      await page.goto(`/midweek/${week}`);
+      await page.goto(`/midweek/${week}/night`);
       await previews(page);
       const diagnostics = await page.evaluate(
         () => (window as unknown as { __shareDiagnostics: unknown[] }).__shareDiagnostics,
@@ -140,7 +141,7 @@ test("hung fonts and failed photos still export using fallbacks", async ({ page 
   });
   try {
     await signIn(page);
-    await page.goto(`/midweek/${COMPLETED_WEEK}`);
+    await page.goto(`/midweek/${COMPLETED_WEEK}/night`);
     await previews(page);
   } finally {
     await database(async (client) => {
@@ -200,7 +201,7 @@ for (const stage of ["canvas-context", "draw", "png-export", "png-timeout"] as c
       }
     }, stage);
     await signIn(page);
-    await page.goto(`/midweek/${COMPLETED_WEEK}`);
+    await page.goto(`/midweek/${COMPLETED_WEEK}/night`);
     const failed = page
       .locator("#share li")
       .filter({ has: page.getByRole("button", { name: "Retry", exact: true }) });
@@ -259,7 +260,7 @@ test("file sharing, cancellation, action errors and download fallback", async ({
     });
   });
   await signIn(page);
-  await page.goto(`/midweek/${COMPLETED_WEEK}`);
+  await page.goto(`/midweek/${COMPLETED_WEEK}/night`);
   await previews(page);
   const tile = page.locator("#share li").first();
   const share = tile.getByRole("button", { name: "Share", exact: true });
@@ -302,103 +303,72 @@ test("file sharing, cancellation, action errors and download fallback", async ({
 // Each case owns its page and completed evening. Keep the same assertions and
 // preview deadline; splitting the navigation budget does not repair Topic A.
 for (const long of [false, true])
-  for (const surface of ["week", "night"] as const)
-    for (const width of [320, 412, 640, 1280]) {
-      test(`share rows and rating links align: ${surface}, ${width}px, ${long ? "long" : "short"} names`, async ({
-        page,
-      }) => {
-        test.setTimeout(90_000);
-        let week = "";
-        await database(async (client) => {
-          week = (await startFixtureEvening(client)).weekStart;
-          await advanceFixtureEvening(client, 180, { runWorker: true });
-        });
-        const originals: { id: string; display_name: string }[] = [];
-        try {
-          await database(async (client) => {
-            originals.push(
-              ...(
-                await client.query(
-                  "select p.id, p.display_name from kut.profiles p join kut.midweek_entries e on e.user_id=p.id join kut.midweek_tournaments t on t.id=e.tournament_id where t.week_start=$1",
-                  [week],
-                )
-              ).rows,
-            );
-            for (const row of originals)
-              await client.query("update kut.profiles set display_name = $2 where id = $1", [
-                row.id,
-                long ? "An exceptionally long fictional opponent name without truncation" : "A",
-              ]);
-          });
-          await signIn(page);
-          const route = surface === "week" ? `/midweek/${week}` : `/midweek/${week}/night`;
-          await page.setViewportSize({ width, height: 900 });
-          await page.goto(route);
-          await previews(page);
-          await tileGeometry(page);
-          const download = page.waitForEvent("download");
-          await page
-            .locator("#share li")
-            .first()
-            .getByRole("button", { name: "Save image" })
-            .click();
-          await download;
-          await tileGeometry(page);
-          const block = page.locator("#ratings");
-          const toggle = block.getByRole("button", { name: /^(Show|Hide) each match$/ });
-          if ((await toggle.getAttribute("aria-expanded")) === "false") await toggle.click();
-          await expect(toggle).toHaveAttribute("aria-expanded", "true");
-          const lists = await block.locator("ul:visible").evaluateAll((nodes) =>
-            nodes.map((list) =>
-              [...list.querySelectorAll("a")].map((link) => {
-                const box = link.getBoundingClientRect();
-                const disc = link.children[1].getBoundingClientRect();
-                const arrow = link.children[2].getBoundingClientRect();
-                return {
-                  width: box.width,
-                  height: box.height,
-                  disc: disc.right,
-                  arrow: arrow.right,
-                  top: box.top,
-                  href: link.getAttribute("href"),
-                  label: link.textContent,
-                };
-              }),
-            ),
-          );
-          expect(lists).toHaveLength(5);
-          for (const rows of lists)
-            for (const row of rows) {
-              expect(Math.abs(row.width - rows[0].width)).toBeLessThanOrEqual(1);
-              expect(Math.abs(row.disc - rows[0].disc)).toBeLessThanOrEqual(1);
-              expect(Math.abs(row.arrow - rows[0].arrow)).toBeLessThanOrEqual(1);
-              expect(row.height).toBeGreaterThanOrEqual(44);
-              expect(row.href).toMatch(new RegExp(`^/midweek/${week}/match/[0-9a-f-]{36}$`));
-              if (long)
-                expect(row.label).toContain(
-                  "An exceptionally long fictional opponent name without truncation",
-                );
-            }
-          if (width >= 1024)
-            expect(
-              Math.max(...lists.map((rows) => rows[0].top)) -
-                Math.min(...lists.map((rows) => rows[0].top)),
-            ).toBeLessThanOrEqual(1);
-          await toggle.click();
-          await expect(toggle).toHaveAttribute("aria-expanded", "false");
-          await expect(block.locator("ul:visible")).toHaveCount(0);
-          await noOverflow(page);
-        } finally {
-          await database(async (client) => {
-            for (const row of originals)
-              await client.query("update kut.profiles set display_name = $2 where id = $1", [
-                row.id,
-                row.display_name,
-              ]);
-          });
-        }
+  for (const width of [320, 412, 640, 1280]) {
+    test(`share tiles and rating rows align: ${width}px, ${long ? "long" : "short"} names`, async ({
+      page,
+    }) => {
+      test.setTimeout(90_000);
+      let week = "";
+      await database(async (client) => {
+        week = (await startFixtureEvening(client)).weekStart;
+        await advanceFixtureEvening(client, 180, { runWorker: true });
       });
-    }
+      const originals: { id: string; display_name: string }[] = [];
+      try {
+        await database(async (client) => {
+          originals.push(
+            ...(
+              await client.query(
+                "select p.id, p.display_name from kut.profiles p join kut.midweek_entries e on e.user_id=p.id join kut.midweek_tournaments t on t.id=e.tournament_id where t.week_start=$1",
+                [week],
+              )
+            ).rows,
+          );
+          for (const row of originals)
+            await client.query("update kut.profiles set display_name = $2 where id = $1", [
+              row.id,
+              long ? "An exceptionally long fictional opponent name without truncation" : "A",
+            ]);
+        });
+        await signIn(page);
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(`/midweek/${week}/night`);
+        await previews(page);
+        await tileGeometry(page);
+        const download = page.waitForEvent("download");
+        await page.locator("#share li").first().getByRole("button", { name: "Save image" }).click();
+        await download;
+        await tileGeometry(page);
+        // The rating rows (DR5-6): one per card, the discs in one column, each a
+        // comfortable height, whatever the names.
+        const rows = await page
+          .getByRole("region", { name: "Your five’s ratings" })
+          .locator("ol > li")
+          .evaluateAll((items) =>
+            items.map((item) => {
+              const box = item.getBoundingClientRect();
+              const disc = item.lastElementChild!.getBoundingClientRect();
+              return { width: box.width, height: box.height, disc: disc.right };
+            }),
+          );
+        expect(rows).toHaveLength(5);
+        for (const row of rows) {
+          expect(Math.abs(row.width - rows[0].width)).toBeLessThanOrEqual(1);
+          expect(Math.abs(row.disc - rows[0].disc)).toBeLessThanOrEqual(1);
+          expect(row.height).toBeGreaterThanOrEqual(44);
+        }
+        await noOverflow(page);
+      } finally {
+        await database(async (client) => {
+          for (const row of originals)
+            await client.query("update kut.profiles set display_name = $2 where id = $1", [
+              row.id,
+              row.display_name,
+            ]);
+        });
+      }
+    });
+  }
 
 test("poster-only layout and loading rows stay aligned", async ({ page }) => {
   await page.addInitScript(() => {
@@ -410,7 +380,7 @@ test("poster-only layout and loading rows stay aligned", async ({ page }) => {
   await signIn(page, "release_admin");
   for (const width of [320, 412, 640, 1280]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto(`/midweek/${COMPLETED_WEEK}`);
+    await page.goto(`/midweek/${COMPLETED_WEEK}/night`);
     await expect(page.locator("#share li")).toHaveCount(1);
     await tileGeometry(page);
     await previews(page, 1);
@@ -473,7 +443,7 @@ test("desktop rows align through loading, isolated failure, retry and feedback",
       });
       for (const width of [640, 1280]) {
         await page.setViewportSize({ width, height: 900 });
-        await page.goto(`/midweek/${week}`);
+        await page.goto(`/midweek/${week}/night`);
         await expect(page.locator("#share li")).toHaveCount(2);
         await expect(page.getByText("Drawing…", { exact: true })).toHaveCount(2);
         await tileGeometry(page);
@@ -568,7 +538,7 @@ for (const delayed of [false, true]) {
     });
     try {
       await signIn(page);
-      await page.goto(`/midweek/${COMPLETED_WEEK}`);
+      await page.goto(`/midweek/${COMPLETED_WEEK}/night`);
       if (!delayed) await previews(page);
       await expect
         .poll(() =>
@@ -579,7 +549,7 @@ for (const delayed of [false, true]) {
           ),
         )
         .toBe(2);
-      await page.getByRole("link", { name: "How ratings work →" }).click();
+      await page.getByRole("link", { name: "How ratings work" }).click();
       await expect(page).toHaveURL(/how-it-works/);
       if (delayed)
         await page.evaluate(() =>

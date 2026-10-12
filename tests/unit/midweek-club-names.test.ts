@@ -301,14 +301,17 @@ describe("the bracket row", () => {
       }),
     );
 
-  it("shows the clubs, and `Call it` leads to the pairing's pre-match, where a call is made", () => {
+  it("shows the clubs, and the row leads to the pairing's pre-match, where a call is made", () => {
     const upcoming = html(rounds[1].pairs[0]);
-    expect(upcoming).toContain("Saints 0");
+    expect(upcoming).toContain("Saints");
     expect(upcoming).not.toContain("Sanne0");
-    expect(upcoming).toMatch(/href="\/midweek\/2026-10-12\/next\/2\/0"[^>]*>Call it/);
+    expect(upcoming).toMatch(/href="\/midweek\/2026-10-12\/next\/2\/0"/);
+    expect(upcoming).toContain("Call open");
   });
 
-  it("keeps `Call it` on the evening for a pairing without a pre-match", () => {
-    expect(html(rounds[0].pairs[0])).toMatch(/href="\/midweek#calls"[^>]*>Call it/);
+  it("says a call is open on any row, with no way to call it but the pre-match", () => {
+    const row = html(rounds[0].pairs[0]);
+    expect(row).toContain("Call open");
+    expect(row).not.toContain("/midweek#calls");
   });
 });

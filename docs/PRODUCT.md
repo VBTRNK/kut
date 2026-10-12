@@ -289,38 +289,37 @@ Part L item).
     matches after round 1, at most 30 a night (ADR-118, ADR-149).
   - Every entrant gets one `midweek_result` message (ADR-109).
 - **After the night.**
-  - Cards get ratings from 1 to 10 (ADR-117). These are display only and
-    never touch OVR. A match's ratings show from its full time, on its report
-    and under `Your night` (ADR-150); the night's rating and line come once
-    the week is complete.
-  - Share images: a champion poster and "my night", drawn in the browser
-    (ADR-120).
+  - Ratings from 1 to 10 (ADR-117), display only. A match's show from its
+    full time on its report and `Your night` (ADR-150); the night's rating
+    and line once the week is complete, a row per card (ADR-155).
+  - Share images on `Your night`: a champion poster (for everyone) and "my
+    night", drawn in the browser (ADR-120).
 - **Pages** under Compete (ADR-107, ADR-154; a Pick or Live dot, ADR-153):
   - `/midweek`, the hub: a Now block for the moment and four fixed tiles;
     after the final the title names the champion until Thursday 23:59;
   - `/midweek/pick` (from the lock, your locked five); `/midweek/past`;
-  - `/midweek/[weekStart]` with `bracket`, `night`, `calls`, `picks`,
+  - `/midweek/[weekStart]`, a finished week: who won it, your night, the
+    final and tiles; in play it redirects to the hub (ADR-155). Under it
+    `bracket` (a block per round on a phone, latest first, each from 15
+    minutes before kick-off; the tree from `lg`), `night`, `calls`, `picks`,
     `match/[matchId]` and `next/[round]/[pairing]` (pre-match).
-  - The admin page has the switch, a rehearsal and void.
 - **Live** (ADR-115, ADR-147). Every match in play is watchable on its page:
   - a clock ticking each second on the corrected device clock, held at 90′;
   - the feed newest on top: kicks, then the report's moments;
   - each kick reads `Pen 3`, the outcome and tally, taker v keeper; its
     commentary and the decider come only at full time (#263).
   - Nothing shows before its real moment. The match page polls every 10 s
-    (5 s in a shoot-out), the hub and the week's pages every 20 s.
-  - Every row in play, on the evening and the bracket, shows `Live`, the
-    score so far, a ticking minute or `pens` with the kicks scored, and links
-    to watch it (ADR-148). Its score counts the goal events members may see
-    now; no report is rendered for a row.
+    (5 s in a shoot-out), the hub and other pages every 20 s.
+  - Every bracket row in play shows the score so far and a ticking minute or
+    `Pens`, and links to watch it (ADR-148). Its score counts the goal events
+    members may see now; no report is rendered for a row.
   - The `lg` tree stacks each group's two pairings in equal rows, so the
     bracket line meets both (#216).
-- **Pre-match** (ADR-149). Once both feeders of a later pairing have ended,
-  its row, `Your night` and the call card link to a pre-match: both clubs, a
+- **Pre-match** (ADR-149, ADR-155). Once both feeders of a later pairing have
+  ended, its row, `Your night` and the call link to a pre-match: a
   countdown, both fives with the week's Power and plusses per line, and the
-  call card for a member who is out. No win chance or day roll before
-  kick-off; at kick-off it becomes the live match. The evening lists the next
-  round above `This round` as soon as one of its pairings is settled.
+  call above them for a member who is out. No win chance or day roll before
+  kick-off; at kick-off it becomes the live match.
 
 **Part L:** 4, 5, 25, 26, 27, 28.
 

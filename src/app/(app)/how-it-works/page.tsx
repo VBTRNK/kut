@@ -473,7 +473,14 @@ export default async function HowItWorksPage() {
             <strong className="text-ink">trialists</strong>: Common All-rounders at OVR{" "}
             {MIDWEEK.trialist.ovr}, handicapped so a real card always beats one.
           </p>
-          <h3 className="pt-2 font-black text-ink">What makes a card strong</h3>
+          <h3 className="scroll-mt-6 pt-2 font-black text-ink" id="power">
+            What makes a card strong
+          </h3>
+          <p>
+            A card&rsquo;s <strong className="text-ink">Power</strong> is its strength this week,
+            fixed at the lock from its OVR, form, pick and fitness; 1.00 is an ordinary card. The
+            pre-match shows both fives&rsquo; Power before kick-off.
+          </p>
           <ul className="ml-5 list-disc space-y-1">
             <li>
               <strong className="text-ink">OVR</strong> counts, but only a little: the gap between a
@@ -617,17 +624,16 @@ export default async function HowItWorksPage() {
             </li>
           </ul>
           <p>
-            During the night, the evening shows your five&rsquo;s ratings for the match you just
-            played. After the final the night&rsquo;s ratings are on the champion page until
-            Thursday night and on that week&rsquo;s bracket for good. Every match report shows each
-            card&rsquo;s rating for that match from its full time.
+            During the night, Your night shows your five&rsquo;s ratings for the match you just
+            played. After the final it shows the night&rsquo;s ratings, for good. Every match report
+            shows each card&rsquo;s rating for that match from its full time.
           </p>
           <h3 className="scroll-mt-6 pt-2 font-black text-ink" id="midweek-calls">
             Calls, once you&rsquo;re out
           </h3>
           <p>
             Once your own match is lost, you can call the winners of the matches still to come, on
-            the Midweek page or a match&rsquo;s pre-match. A match opens once both matches before it
+            the Calls page or a match&rsquo;s pre-match. A match opens once both matches before it
             have ended and closes at its kick-off. Until then, tap a name to call it, the other name
             to change it, or the same name again to clear it.
           </p>

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 /** The Midweek pages' frame: the app's board ground and padding. */
 export const MIDWEEK_PAGE = "board-ground min-h-screen p-5 text-ink sm:p-10";
@@ -37,25 +36,5 @@ export function MidweekPageHead({
         <p className="hidden max-w-2xl text-[15px] leading-relaxed text-ink-dim sm:block">{lede}</p>
       )}
     </header>
-  );
-}
-
-/** A section heading with something on the right (a status, a link). */
-export function MidweekSectionHead({
-  id,
-  title,
-  children,
-}: {
-  id: string;
-  title: string;
-  children?: ReactNode;
-}) {
-  return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-      <h2 className="display text-3xl" id={id}>
-        {title}
-      </h2>
-      {children}
-    </div>
   );
 }
