@@ -464,7 +464,10 @@ never misses one side's message.
 - **Membership** is invite-only (ADR-006): a token is claimable once and stored
   as a hash, sign-up takes a username (ADR-028), and sign-in is by password,
   with no Supabase Auth redirect flow.
-- **Members-only:** every page and projection (ADR-020, ADR-079); no public
+- **Members-only:** every page and projection (ADR-020, ADR-079); base-table
+  member reads also require `is_active_member()` (ADR-152), including own rows
+  after an account is disabled. Denied reads return zero rows. The own-profile
+  read remains available for login to detect a disabled account. No public
   roster. Never exposed: emails, tokens, others' ledgers, admin notes.
 - **Card ownership** is private (the album, wants, collections). Exceptions:
   - a listing shows its seller;
@@ -472,8 +475,9 @@ never misses one side's message.
     and the opt-out is the consent (ADR-091);
   - an owner count appears only at 3 or more owners.
 - **Photos.** A member sets their own Player's photo and archetype on
-  `/settings/card` (ADR-027). Photos live in a private Storage bucket. The
-  silhouette is the default.
+  `/settings/card` (ADR-027). Photos live in a private Storage bucket; reads
+  require active membership (ADR-152). App-issued signed URLs last up to one
+  hour; existing URLs retain their original expiry. The silhouette is the default.
 - **Share images** (ADR-120) are the one deliberate exception to §53. They
   carry names and photos, are drawn in the browser and sent only by the member;
   nothing is hosted.
@@ -486,7 +490,7 @@ never misses one side's message.
 - `is_active_member`, `is_admin`, `claim_invitation`, `set_own_player_photo`,
   `set_own_player_archetype`, `set_own_club_name`.
 - `src/lib/invites/`, `src/lib/auth/`, `src/lib/player-photos.ts`.
-- Tests: `member_only_projections.test.sql`.
+- Tests: `member_only_projections.test.sql`, `active_member_base_reads.test.sql`.
 
 ## FLUT name and domain
 
