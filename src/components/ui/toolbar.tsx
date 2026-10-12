@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, Ref } from "react";
 import { IconSearch } from "@/components/icons";
 import { FOCUS } from "./page";
 
@@ -53,10 +53,16 @@ export function SearchField({
 export function FilterButton({
   on = 0,
   type = "button",
+  ref,
   ...rest
-}: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children"> & { on?: number }) {
+}: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children"> & {
+  on?: number;
+  /** For the sheet to hand focus back to on close. */
+  ref?: Ref<HTMLButtonElement>;
+}) {
   return (
     <button
+      ref={ref}
       className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-small font-semibold ${
         on ? "border-brass-line bg-brass-bg text-brass" : "border-line bg-panel text-ink"
       } ${FOCUS}`}

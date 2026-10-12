@@ -285,29 +285,30 @@ Part L item).
   - Wins pay by round, summing to **250** for the champion (ADR-096), paid
     lazily after the final in the transaction that completes the week.
   - Members who are already out may **call** the winners of later matches, on
-    the evening or the match's pre-match. Correct calls pay 30 divided by the
+    the Calls page or the match's pre-match. Correct calls pay 30 divided by the
     matches after round 1, at most 30 a night (ADR-118, ADR-149).
   - Every entrant gets one `midweek_result` message (ADR-109).
 - **After the night.**
   - Cards get ratings from 1 to 10 (ADR-117). These are display only and
     never touch OVR. A match's ratings show from its full time, on its report
-    and on the evening under `Your night` (ADR-150); the night's rating and
-    line come once the week is complete.
+    and under `Your night` (ADR-150); the night's rating and line come once
+    the week is complete.
   - Share images: a champion poster and "my night", drawn in the browser
     (ADR-120).
-- **Pages.** `/midweek` (picker, evening, champion), `/midweek/[weekStart]`,
-  `/midweek/[weekStart]/match/[matchId]`,
-  `/midweek/[weekStart]/next/[round]/[pairing]` (pre-match), `/midweek/past`,
-  all under the
-  Compete tab (ADR-107); its Midweek section tab shows a Pick or Live dot
-  from Standings and Players (ADR-153). The admin page has the switch, a rehearsal and void.
+- **Pages** under Compete (ADR-107, ADR-154; a Pick or Live dot, ADR-153):
+  - `/midweek`, the hub: a Now block for the moment and four fixed tiles;
+    after the final the title names the champion until Thursday 23:59;
+  - `/midweek/pick` (from the lock, your locked five); `/midweek/past`;
+  - `/midweek/[weekStart]` with `bracket`, `night`, `calls`, `picks`,
+    `match/[matchId]` and `next/[round]/[pairing]` (pre-match).
+  - The admin page has the switch, a rehearsal and void.
 - **Live** (ADR-115, ADR-147). Every match in play is watchable on its page:
   - a clock ticking each second on the corrected device clock, held at 90′;
   - the feed newest on top: kicks, then the report's moments;
   - each kick reads `Pen 3`, the outcome and tally, taker v keeper; its
     commentary and the decider come only at full time (#263).
   - Nothing shows before its real moment. The match page polls every 10 s
-    (5 s in a shoot-out), the evening and bracket every 20 s.
+    (5 s in a shoot-out), the hub and the week's pages every 20 s.
   - Every row in play, on the evening and the bracket, shows `Live`, the
     score so far, a ticking minute or `pens` with the kicks scored, and links
     to watch it (ADR-148). Its score counts the goal events members may see
@@ -423,8 +424,9 @@ The `edition_type` check still lacks a `groundmaster` value.
 - Every message opens its subject through `/messages/[id]/open`, which also
   marks it read (ADR-114).
 - **Home:**
-  - leads with a "now" stack of what's due: the Midweek evening, picking, the
-    open report, the rehab check-in, the champion card;
+  - leads with a "now" stack of what's due: the Midweek block (brass while
+    your five isn't picked or your match plays, ADR-154), the open report,
+    the rehab check-in;
   - then top risers and the club activity feed, which excludes superadmin
     activity (ADR-038, ADR-039, ADR-054).
 - No push, email or realtime delivery exists.

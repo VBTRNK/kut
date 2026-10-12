@@ -62,7 +62,7 @@ export function MidweekLivePoller({
 
   if (!poll && !foot) return null;
   return (
-    <p className="text-[11px] font-bold text-ink-faint tabular-nums">
+    <p className="text-small text-ink-faint tabular-nums">
       Updated {clockFormat.format(new Date(at))}
       {foot && (poll ? ` · checks every ${intervalMs / 1000} seconds` : " · goes live at kick-off")}
     </p>

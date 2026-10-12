@@ -318,7 +318,9 @@ async function finalEntryPoint(
       line: `+${coins} ${BRAND.currency} over the night.`,
     };
   }
-  const title = `${championClub(tournament) ?? "Somebody"} won Midweek Madness`;
+  const club = championClub(tournament);
+  // Named as the hub names them after the final (DR5-16, Q4).
+  const title = club ? `${club} are champions` : "The final is played";
   if (rows.length > 0) {
     const furthest = Math.max(...rows.map((row) => row.round_no));
     return {
@@ -332,7 +334,7 @@ async function finalEntryPoint(
 }
 
 /** The caller's saved five as minis, or null when the read failed. */
-async function savedMinis(
+export async function savedMinis(
   supabase: SupabaseServerClient,
   squad: MySquadRow[],
   injuredPlayerIds: ReadonlySet<string>,

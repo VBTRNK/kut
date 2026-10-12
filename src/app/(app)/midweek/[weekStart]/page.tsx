@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { MidweekNotice } from "@/components/midweek/bits";
 import { MidweekBracket } from "@/components/midweek/bracket";
 import { MidweekCalls } from "@/components/midweek/calls-list";
-import { MidweekClock } from "@/components/midweek/clock";
 import { MidweekJumpLinks } from "@/components/midweek/jump-links";
 import { MidweekLivePoller } from "@/components/midweek/live-poller";
 import { MIDWEEK_PAGE, MidweekPageHead } from "@/components/midweek/page-head";
@@ -33,14 +32,7 @@ import {
   scheduleVersionOf,
   skipOrVoidNotice,
 } from "@/lib/midweek/entry";
-import {
-  assembleBracket,
-  eveningStops,
-  isWeekStart,
-  myNight,
-  roundsYouAreIn,
-  yourNextRound,
-} from "@/lib/midweek/evening";
+import { assembleBracket, isWeekStart, myNight, yourNextRound } from "@/lib/midweek/evening";
 import {
   loadCalls,
   loadLiveRowEvents,
@@ -83,14 +75,12 @@ export default async function MidweekBracketPage({
 
   const lockAt = tournament.lock_at;
   const kicker = `Midweek Madness · ${formatDayDate(lockAt)}`;
-  const shell = (children: ReactNode, title = "The bracket", clock: ReactNode = null) => (
+  const shell = (children: ReactNode, title = "The bracket", poller: ReactNode = null) => (
     <main className={MIDWEEK_PAGE}>
-      {clock}
-      <section
-        className={`mx-auto grid max-w-6xl gap-8 sm:gap-11 ${clock ? "pb-4 sm:pb-8" : "py-4 sm:py-8"}`}
-      >
+      <section className="mx-auto grid max-w-6xl gap-8 py-4 sm:gap-11 sm:py-8">
         <CompeteTabs />
         <MidweekPageHead back={BACK} kicker={kicker} title={title} />
+        {poller}
         {children}
       </section>
     </main>
@@ -149,29 +139,15 @@ export default async function MidweekBracketPage({
       ? callCards({ bracket, night, predictions: calls.predictions, splits: calls.splits, now })
       : null;
   const callLink = cards ? callJumpLink(cards, rounds) : null;
-  let clock: ReactNode = null;
+  let poller: ReactNode = null;
   if (evening) {
-    const entered = bracket[0].pairs.some((pair) =>
-      pair.sides.some((side) => side.userId === user.id),
-    );
     // While a match is in play the bracket asks for itself every 20 seconds,
-    // otherwise once at the next kick-off (ADR-115).
+    // otherwise once at the next kick-off (ADR-115). The sticky evening clock
+    // is retired (DR5 Q3, ADR-154).
     const inPlay = bracket.some((round) => round.pairs.some((pair) => pair.kind === "inplay"));
     const nextKickoff =
       bracket.find((round) => Date.parse(round.kickoffAt) > now.getTime())?.kickoffAt ?? null;
-    clock = (
-      <MidweekClock
-        updated={<MidweekLivePoller at={now.toISOString()} nextAt={nextKickoff} poll={inPlay} />}
-        stops={eveningStops({
-          lockAt,
-          scheduleVersion,
-          rounds,
-          now,
-          matches: results.matches,
-          youThrough: roundsYouAreIn(night, entered, rounds),
-        })}
-      />
-    );
+    poller = <MidweekLivePoller at={now.toISOString()} nextAt={nextKickoff} poll={inPlay} />;
   }
   const complete = tournament.status === "complete";
   const championId = tournament.champion_user_id ?? null;
@@ -265,6 +241,6 @@ export default async function MidweekBracketPage({
       {evening && seal && <MidweekSeed seedHash={seal} />}
     </>,
     complete && championClub(tournament) ? `${championClub(tournament)} won it` : "The bracket",
-    clock,
+    poller,
   );
 }

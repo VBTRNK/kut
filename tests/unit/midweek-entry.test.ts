@@ -15,8 +15,8 @@ import {
   isMidweekVisible,
   isPickingOpen,
   joinNames,
-  keeperCheck,
   lastWeekSummary,
+  lastWeekTileState,
   lockClock,
   nextEntryWeekLabel,
   optOutConfirmText,
@@ -260,33 +260,6 @@ describe("archetypeFilters", () => {
   });
 });
 
-describe("keeperCheck", () => {
-  const card = (archetype: string, displayName = "X") => ({ archetype, displayName });
-
-  it("names the one Goalkeeper", () => {
-    const check = keeperCheck([card("goalkeeper", "Yara Q."), card("finisher")]);
-    expect(check.tone).toBe("ok");
-    expect(text(check.segments)).toBe("Yara Q. goes in goal.");
-  });
-
-  it("promises only the strongest on the night when there are several", () => {
-    expect(text(keeperCheck([card("goalkeeper"), card("goalkeeper")]).segments)).toBe(
-      "Your strongest Goalkeeper on the night goes in goal; the other plays outfield.",
-    );
-    expect(
-      text(keeperCheck([card("goalkeeper"), card("goalkeeper"), card("goalkeeper")]).segments),
-    ).toContain("the others play outfield");
-  });
-
-  it("warns when there is none", () => {
-    const check = keeperCheck([card("defender"), card("all_rounder")]);
-    expect(check.tone).toBe("warn");
-    expect(text(check.segments)).toBe(
-      "No Goalkeeper in your five. Your best defender goes in goal, and keeps goal much worse than a real one.",
-    );
-  });
-});
-
 describe("load last week's five", () => {
   const rows = [
     { slot: 1, player_id: "dirk" },
@@ -442,6 +415,28 @@ describe("last week", () => {
         rewards: [1, 2, 3, 4, 5].map((round_no) => ({ round_no, amount: 50 })),
       }),
     ).toBe(`You won it! +250 ${BRAND.currency}.`);
+  });
+
+  it("says it short on the hub's Last week tile (DR5-12)", () => {
+    const base = { rounds: 5, entered: true, isChampion: false };
+    expect(
+      lastWeekTileState({
+        ...base,
+        rewards: [
+          { round_no: 1, amount: 17 },
+          { round_no: 2, amount: 33 },
+        ],
+      }),
+    ).toBe("Out in the quarter-finals · +50");
+    expect(lastWeekTileState({ ...base, rewards: [] })).toBe("Out in round 1");
+    expect(lastWeekTileState({ ...base, entered: false, rewards: [] })).toBe("Sat it out");
+    expect(
+      lastWeekTileState({
+        ...base,
+        isChampion: true,
+        rewards: [1, 2, 3, 4, 5].map((round_no) => ({ round_no, amount: 50 })),
+      }),
+    ).toBe("Champion · +250");
   });
 
   it("words a skip or a void by its reason code", () => {

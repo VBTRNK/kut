@@ -322,3 +322,26 @@ roles, the kicker), DR1-5 (as DR5-4) and ADR-107 (Compete's section badge).
   its ceiling equals the count. S11 takes it to zero.
 - `BottomSheet` gains `everyWidth` for the one filter sheet (Q7). How it works
   gets topic tiles and an anchor per topic; sessions move cut text there.
+
+## ADR-154 — The Midweek hub, its pages and the picker on its own page
+
+Date: 2026-10-12 (flut-ui-pass S5, VibeTrunk/kut#294, DR5-11 to DR5-13,
+DR5-16). Amends ADR-107 (`/midweek` lands on the hub), ADR-113 (the clock is
+retired), ADR-091 (the privacy line), DR3 (the plusses rule), ADR-114 and
+ADR-119 (Home's Midweek card).
+
+- **Hub.** `/midweek`: Compete's tabs, the Title, a Small line, one Now block,
+  four tiles in fixed places. The Now block is brass only when it needs you;
+  a live match shows score and minute, never a moment. No `MidweekClock`; the
+  hub still polls (ADR-115).
+- **Routes.** `/midweek/pick` (from the lock, your locked five). A week gains
+  `bracket`, `night`, `calls`, `picks`: back link, no Compete tabs, the same
+  reads at the same moments, so no gating changed. `?view=pick` redirects.
+  S6 restyles them and turns `/midweek/[weekStart]` into the week page.
+- **Picker.** Five slots and the plusses; the save bar with one privacy line
+  (`Members see the five you enter from 19:55. Privacy ›`); your cards with
+  the archetypes in the Filter sheet. Add fills the first empty slot. The
+  plusses rule and the keeper caveat moved to How it works `#plusses`.
+- **Home** has one Midweek block by the hub's rules: brass with a primary
+  button while something is due, else plain. The live tint goes; a `Live`
+  tag marks the evening.

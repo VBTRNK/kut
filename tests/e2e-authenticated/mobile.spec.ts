@@ -125,8 +125,8 @@ async function expectRatings(page: Page, { open }: { open: boolean }) {
   await expectNoHorizontalOverflow(page);
 }
 
-/** A picker card's button, whether it adds to the five or fills the slot being chosen. */
-const PICK_BUTTON = /^(Put in slot \d|Add to your five): /;
+/** A picker card's Add button (DR5-13): it fills the first empty slot. */
+const PICK_BUTTON = /^Add to your five: /;
 
 /** Compete's tab while it asks for a pick: the word, then what it means (ADR-107). */
 const PICK_NAME = /^Compete Pick\. Midweek Madness: you haven't picked your five$/;
@@ -164,7 +164,12 @@ test("member can sign in and use core mobile routes", { tag: "@narrow" }, async 
     "/club/collection",
     "/club/packs",
     "/midweek",
+    "/midweek/pick",
     `/midweek/${COMPLETED_WEEK}`,
+    `/midweek/${COMPLETED_WEEK}/bracket`,
+    `/midweek/${COMPLETED_WEEK}/night`,
+    `/midweek/${COMPLETED_WEEK}/calls`,
+    `/midweek/${COMPLETED_WEEK}/picks`,
     "/market",
     "/leaderboard",
   ]) {
@@ -193,20 +198,30 @@ test.describe("Midweek Madness entry (PR 7)", () => {
     // Compete asks for the pick until one is saved (ADR-107).
     await expect(competeTab(page)).toHaveAccessibleName(PICK_NAME);
 
+    // The hub (DR5-12): the brass Now block asks for the five; the picker has its own page.
     await page.goto("/midweek");
-    await expect(page.getByRole("heading", { name: "Pick your five" })).toBeVisible();
-    await expect(page.getByRole("status").filter({ hasText: "Not picked yet" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Midweek Madness" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Your five" })).toContainText(
+      "Not picked yet, so an auto squad would play.",
+    );
+    await expectNoHorizontalOverflow(page);
+    await page.getByRole("link", { name: "Pick your five" }).click();
+    await expect(page).toHaveURL(/\/midweek\/pick$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Pick your five" })).toBeVisible();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Not picked: an auto squad plays." }),
+    ).toBeVisible();
     // One row per Player: the second copy is a note, not a sixth row.
-    await expect(page.getByText(/×2 copies/).filter({ visible: true })).toHaveCount(1);
+    await expect(page.getByText(/×2/).filter({ visible: true })).toHaveCount(1);
     await expectNoHorizontalOverflow(page);
 
     for (const name of five) {
-      await page
-        .getByRole("button", { name: new RegExp(`^(Put in slot \\d|Add to your five): ${name}`) })
-        .click();
+      await page.getByRole("button", { name: new RegExp(`^Add to your five: ${name}`) }).click();
     }
-    await expect(page.getByText("Keeper Fixture goes in goal.")).toBeVisible();
-    await expect(page.getByRole("status").filter({ hasText: "Unsaved changes" })).toBeVisible();
+    await expect(page.getByText("Keeper Fixture goes in goal and isn’t counted.")).toBeVisible();
+    await expect(
+      page.getByRole("status").filter({ hasText: "Save to make it count." }),
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "Save your five" }).click();
     await expect(page.getByText("Saved. Your five play on Wednesday.")).toBeVisible();
@@ -217,8 +232,14 @@ test.describe("Midweek Madness entry (PR 7)", () => {
     await expect(page.getByText(/^✓ In/).filter({ visible: true })).toHaveCount(five.length);
     await expectNoHorizontalOverflow(page);
 
+    await page.goto("/midweek");
+    await expect(page.getByRole("region", { name: "Your five" })).toContainText("✓ Saved");
+    await expect(page.getByRole("link", { name: "Change your five" })).toBeVisible();
+
     await page.goto("/");
-    await expect(page.getByRole("link", { name: /Your five are in/ })).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Now" }).getByRole("link", { name: "Change your five" }),
+    ).toBeVisible();
     await expect(competeTab(page)).toHaveAccessibleName("Compete");
   });
 
@@ -228,44 +249,50 @@ test.describe("Midweek Madness entry (PR 7)", () => {
     async ({ page }) => {
       await withDatabase((database) => setWeekArchetype(database, "Winger Fixture", "goalkeeper"));
       await signIn(page, "release_member");
-      await page.goto("/midweek");
-      await expect(page.getByText(/^Squads lock /)).toBeVisible();
+      await page.goto("/midweek/pick");
+      await expect(page.getByText(/ · locks \d\d:\d\d$/)).toBeVisible();
       // KB-028 in the phone list: the week's archetype, and the change in words.
       await expect(
         page.getByText("Goalkeeper this week, Speedster from next").filter({ visible: true }),
       ).toHaveCount(1);
 
-      // The archetype filter is instant; Goalkeepers counts the week's archetype.
-      const filter = page.getByRole("group", { name: "Filter your cards by archetype" });
-      await filter.getByRole("button", { name: "Goalkeepers 2" }).click();
-      await expect(filter.getByRole("button", { name: "Goalkeepers 2" })).toHaveAttribute(
-        "aria-pressed",
-        "true",
-      );
+      // The archetypes live in the Filter sheet (Q7); Goalkeepers counts the week's archetype.
+      const filter = async (name: string | RegExp, result: string) => {
+        await page.getByRole("button", { name: /^Filter/ }).click();
+        const sheet = page.getByRole("dialog", { name: "Filter" });
+        // The radio is visually hidden inside its chip: tap the chip, as a member does.
+        await sheet.locator("label", { hasText: name }).click();
+        await expect(sheet.getByRole("radio", { name })).toBeChecked();
+        await sheet.getByRole("button", { name: result }).click();
+        await expect(sheet).toBeHidden();
+      };
+      await filter("Goalkeepers 2", "Show 2 Players");
+      await expect(page.getByRole("button", { name: "Filter 1 on" })).toBeVisible();
       await expect(page.getByRole("button", { name: PICK_BUTTON })).toHaveCount(2);
-      await filter.getByRole("button", { name: /^All / }).click();
+      await filter(/^All /, "Show 5 Players");
       await expect(page.getByRole("button", { name: PICK_BUTTON })).toHaveCount(5);
 
       // Unsaved changes on a phone: one compact row stays above the tab bar.
       await page.getByRole("button", { name: /: Striker Fixture$/ }).click();
-      await expect(page.getByRole("status").filter({ hasText: "Unsaved changes" })).toBeVisible();
+      await expect(
+        page.getByRole("status").filter({ hasText: "Save to make it count." }),
+      ).toBeVisible();
       await page.getByRole("button", { name: /: Engine Fixture$/ }).scrollIntoViewIfNeeded();
       await expect(page.getByRole("button", { name: "Save your five" })).toBeInViewport();
       await expectNoHorizontalOverflow(page);
 
       // From lg: the card face says what the Player plays from next week, and
-      // the team sheet says it under the card.
+      // the five's slot says it in words.
       await page.setViewportSize({ width: 1440, height: 900 });
       await expect(
         page.getByText("Speedster from next week").filter({ visible: true }),
       ).toHaveCount(1);
       await page.getByRole("button", { name: /: Winger Fixture$/ }).click();
       await expect(
-        page.getByText("Goalkeeper this week, Speedster from next").filter({ visible: true }),
-      ).toHaveCount(1);
-      await expect(
-        page.getByText("Speedster from next week").filter({ visible: true }),
-      ).toHaveCount(2);
+        page
+          .getByRole("list", { name: "Your five" })
+          .getByText("Goalkeeper this week, Speedster from next"),
+      ).toBeVisible();
       await expectNoHorizontalOverflow(page);
     },
   );
@@ -276,7 +303,7 @@ test.describe("Midweek Madness entry (PR 7)", () => {
     const add = (name: string) =>
       page.getByRole("button", { name: new RegExp(`${PICK_BUTTON.source}${name}`) }).click();
     await signIn(page, "release_member");
-    await page.goto("/midweek");
+    await page.goto("/midweek/pick");
     // Each phone row shows its card's plusses, from the engine's table.
     await expect(
       page.getByText("Plusses: attack 3, midfield 1, defence 0").filter({ visible: true }),
@@ -303,9 +330,9 @@ test.describe("Midweek Madness entry (PR 7)", () => {
     await add("Wall Fixture");
     await expect(lines.getByText("Every line has 3 or more, so no penalty.")).toBeVisible();
     await expect(page.getByText("✓ Lines balanced")).toBeVisible();
-    await expect(lines.getByRole("link", { name: "How plusses work →" })).toHaveAttribute(
+    await expect(lines.getByRole("link", { name: "How plusses work" })).toHaveAttribute(
       "href",
-      "/how-it-works#midweek-shape",
+      "/how-it-works#plusses",
     );
 
     // From sm the save bar is inline and its second row is hidden; the count stays.
@@ -331,8 +358,11 @@ test.describe("Midweek Madness entry (PR 7)", () => {
     await page.goto("/midweek");
     await expect(page.getByRole("heading", { name: "You’re sitting this out" })).toBeVisible();
     await expectNoHorizontalOverflow(page);
+    // Opted out, the picker sends you back to the hub, which says why.
+    await page.goto("/midweek/pick");
+    await expect(page).toHaveURL(/\/midweek$/);
     await page.getByRole("button", { name: "Take part again" }).click();
-    await expect(page.getByRole("heading", { name: "Pick your five" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Pick your five" })).toBeVisible();
 
     await page.goto("/settings");
     await expect(page.getByRole("switch", { name: "Midweek Madness" })).toHaveAttribute(
@@ -423,10 +453,10 @@ test.describe("Midweek Madness results (PR 8)", () => {
     async ({ page }) => {
       await signIn(page, "release_member");
 
-      // The picker carries last week's result with the way to its bracket.
+      // The hub's Last week tile carries last week's result and opens that week.
       await page.goto("/midweek");
-      await expect(page.getByRole("heading", { name: "Pick your five" })).toBeVisible();
-      await page.getByRole("link", { name: "Bracket →" }).click();
+      await expect(page.getByRole("region", { name: "Your five" })).toBeVisible();
+      await page.getByRole("link", { name: /^Last week/ }).click();
       await expect(page).toHaveURL(new RegExp(`/midweek/${COMPLETED_WEEK}$`));
 
       await expect(page.getByRole("heading", { level: 1, name: /won it$/ })).toBeVisible();
@@ -623,19 +653,9 @@ test.describe("Midweek Madness results (PR 8)", () => {
   });
 });
 
-/** The sticky `MidweekClock`, named by its one-sentence label. */
-const eveningClock = (page: Page) =>
-  page.getByRole("list", { name: /^Wednesday evening: Lock \d\d:\d\d, locked; / });
-
-/** The clock stays under the app header however far the page scrolls. */
-async function expectClockPinned(page: Page) {
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  const box = await page.getByTestId("midweek-clock").boundingBox();
-  expect(box).not.toBeNull();
-  expect(box!.y).toBeGreaterThanOrEqual(0);
-  expect(box!.y).toBeLessThanOrEqual(80);
-  await page.evaluate(() => window.scrollTo(0, 0));
-}
+/** The hub's Small line under its Title (DR5-12): `Wed 7 Oct · the draw is out`. */
+const hubLine = (page: Page, phase: RegExp) =>
+  page.getByText(new RegExp(`^\\w{3} \\d+ \\w{3} · ${phase.source}$`));
 
 test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
   test.afterEach(async () => {
@@ -654,22 +674,25 @@ test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
       await signIn(page, "release_member");
       await page.goto("/midweek");
 
-      await expect(page.getByRole("heading", { level: 1, name: "The draw is out" })).toBeVisible();
-      await expect(eveningClock(page)).toHaveAccessibleName(
-        // The first round after the lock, named from the end ("Quarters" with 5–8 entrants).
-        /locked; [\w ]+ \d\d:\d\d, next, you're in;/,
-      );
-      await expect(page.getByRole("heading", { name: "Your first match" })).toBeVisible();
+      await expect(hubLine(page, /the draw is out/)).toBeVisible();
+      // The sticky evening clock is retired (DR5 Q3, ADR-154).
+      await expect(page.getByTestId("midweek-clock")).toHaveCount(0);
+      const first = page.getByRole("region", { name: "Your first match" });
+      await expect(first).toBeVisible();
       // release_member's auto squad, and one or two opponents' fives, from the lock.
-      const fives = page.getByRole("region", { name: /’s five$/ });
-      expect(await fives.count()).toBeGreaterThanOrEqual(2);
-      await expect(fives.first().getByText("Auto squad")).toBeVisible();
-      await expect(
-        page.getByText(/^Form, pick boost and the chances before kick-off/),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("heading", { level: 2, name: /^(Round 1|Quarter-finals|Semi-finals)$/ }),
-      ).toBeVisible();
+      expect(await first.getByRole("list").count()).toBeGreaterThanOrEqual(2);
+      await expect(first.getByRole("list", { name: "Your five" })).toBeVisible();
+      await expect(first.getByText("Auto", { exact: true }).first()).toBeVisible();
+      await expect(page.getByRole("link", { name: /^Your night Starts \d\d:\d\d/ })).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      // KB-034: with `Live` on Midweek, Compete's tabs stay inside the page's
+      // 16 px gutter, which the page-width check alone can't see.
+      const tabs = await page.getByRole("navigation", { name: "Compete" }).boundingBox();
+      expect(tabs!.x + tabs!.width).toBeLessThanOrEqual(page.viewportSize()!.width - 15);
+
+      await page.getByRole("link", { name: /^Bracket / }).click();
+      await expect(page).toHaveURL(new RegExp(`/midweek/${weekStart}/bracket$`));
+      await expect(page.getByRole("heading", { level: 1, name: "Bracket" })).toBeVisible();
       await expect(
         page
           .getByRole("group", { name: /, kick-off \d\d:\d\d\.$|has a bye, which counts/ })
@@ -677,17 +700,6 @@ test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
       ).toBeVisible();
       // Nothing is played yet: no full-time row, no report link.
       await expect(page.getByRole("link", { name: /^Match report: / })).toHaveCount(0);
-      await expectNoHorizontalOverflow(page);
-      // KB-034: with `Live` on Midweek, Compete's tabs stay inside the page's
-      // 20 px gutter, which the page-width check alone can't see.
-      const tabs = await page.getByRole("navigation", { name: "Compete" }).boundingBox();
-      expect(tabs!.x + tabs!.width).toBeLessThanOrEqual(page.viewportSize()!.width - 19);
-      await expectClockPinned(page);
-
-      await page.getByRole("link", { name: "Full bracket →" }).click();
-      await expect(page).toHaveURL(new RegExp(`/midweek/${weekStart}$`));
-      await expect(page.getByRole("heading", { level: 1, name: "The bracket" })).toBeVisible();
-      await expect(eveningClock(page)).toBeVisible();
       const jump = page.getByRole("navigation", { name: "Jump to" });
       await expect(jump.getByRole("link", { name: /^Your match · R\d \d\d:\d\d$/ })).toBeVisible();
       await expect(page.getByText(/^Kick-off \d\d:\d\d$/).first()).toBeVisible();
@@ -711,17 +723,22 @@ test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
     await page.goto("/midweek");
 
     await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: /^(Round 2 is live|(Quarter|Semi)-finals are live|You’re out|The final is live)$/,
-      }),
+      hubLine(
+        page,
+        /(round 2 is live|(quarter|semi)-finals are live|you’re out|the final is live)/,
+      ),
     ).toBeVisible();
-    await expect(eveningClock(page)).toHaveAccessibleName(/locked; [\w ]+ \d\d:\d\d, played/);
-    await expect(page.getByRole("heading", { name: "Your night" })).toBeVisible();
-    await expect(page.getByRole("list", { name: "Your night" })).toBeVisible();
-    await expect(page.getByRole("group", { name: / won\.$/ }).first()).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: /^(Your next match|You’re out|Your match|The final)$/ }),
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
-    await expectClockPinned(page);
+
+    await page.goto(`/midweek/${weekStart}/night`);
+    await expect(page.getByRole("heading", { name: "Round by round" })).toBeVisible();
+    await expect(page.getByRole("list", { name: "Your night" })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.goto(`/midweek/${weekStart}/bracket`);
+    await expect(page.getByRole("group", { name: / won\.$/ }).first()).toBeVisible();
 
     await page.goto(`/midweek/${weekStart}`);
     await expect(page.getByRole("link", { name: /^Match report: / }).first()).toBeVisible();
@@ -745,14 +762,18 @@ test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
     await signIn(page, "release_member");
     await page.goto("/midweek");
 
-    await expect(page.getByText(/· Champion$/)).toBeVisible();
-    await expect(page.getByTestId("midweek-clock")).toHaveCount(0);
-    // The ratings replace their placeholder (F7, ADR-117), closed by default here.
-    await expect(page.getByRole("note").filter({ hasText: "Your five’s ratings" })).toHaveCount(0);
-    await expectRatings(page, { open: false });
-    await expect(page.getByRole("region", { name: "Share the night" })).toBeVisible();
+    // The title names the champion (Q4); the Now block is your night.
+    await expect(page.getByRole("heading", { level: 1, name: / are champions$/ })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Your night" })).toContainText("Your finish");
+    await expect(page.getByRole("region", { name: "The final" })).toBeVisible();
     await expectNoHorizontalOverflow(page);
-    await page.getByRole("link", { name: "Past weeks →" }).click();
+    // The ratings and the share images are behind the Your night tile.
+    await page.getByRole("link", { name: /^Your night / }).click();
+    await expect(page).toHaveURL(/\/night$/);
+    await expectRatings(page, { open: true });
+    await expect(page.getByRole("region", { name: "Share the night" })).toBeVisible();
+    await page.goto("/midweek");
+    await page.getByRole("link", { name: /^Past weeks/ }).click();
     await expect(page).toHaveURL(/\/midweek\/past$/);
     await expect(page.getByRole("heading", { level: 1, name: "Past weeks" })).toBeVisible();
   });
@@ -768,14 +789,14 @@ test.describe("Midweek Madness evening from the lock (F5, ADR-113)", () => {
     });
     await signIn(page, "release_member");
     await page.goto("/midweek");
-    await expect(page.getByRole("heading", { level: 1, name: "The draw is out" })).toBeVisible();
-    const fives = page.getByRole("region", { name: /’s five$/ });
-    const mine = await fives.first().boundingBox();
-    const theirs = await fives.nth(1).boundingBox();
-    expect(theirs!.x).toBeGreaterThan(mine!.x + mine!.width);
+    await expect(hubLine(page, /the draw is out/)).toBeVisible();
+    // From lg the tiles sit beside the Now block (DR5-12).
+    const now = await page.getByRole("region", { name: "Your first match" }).boundingBox();
+    const tiles = await page.getByRole("navigation", { name: "Midweek" }).boundingBox();
+    expect(tiles!.x).toBeGreaterThan(now!.x + now!.width);
     await expectNoHorizontalOverflow(page);
 
-    await page.goto(`/midweek/${weekStart}`);
+    await page.goto(`/midweek/${weekStart}/bracket`);
     const tree = page.getByTestId("bracket-tree");
     await expect(tree).toBeVisible();
     await expect(tree.getByText(/^Kick-off \d\d:\d\d$/).first()).toBeVisible();
@@ -838,22 +859,25 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
     const other = matches.find((m) => !isMine(m));
     await signIn(page, "release_member");
 
-    const home = page.getByRole("region", { name: "Now" }).getByRole("link").first();
+    // Home's block (DR5-16): brass with Watch it while your own match plays.
+    const home = page.getByRole("region", { name: "Now" }).getByRole("region").first();
     await expect(home).toContainText("Live");
-    // Live has its own tint now, never a side's (ADR-119).
-    await expect(home).toHaveCSS("border-top-color", "rgb(122, 45, 59)");
-    await expect(home).toHaveCSS("background-image", /linear-gradient/);
+    if (mine) await expect(home.getByRole("link", { name: "Watch it" })).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     await page.goto("/midweek");
     await expect(page.getByText(/^Updated \d\d:\d\d:\d\d$/)).toBeVisible();
-    await expect(eveningClock(page)).toHaveAccessibleName(/locked; [\w ]+ \d\d:\d\d, live/);
+    await expect(page.getByRole("link", { name: /^Bracket .+ · \d+ live$/ })).toBeVisible();
     if (mine) {
+      // Your match: the score and the minute only, no moment on the hub (DR5-12).
       await expect(page.getByRole("heading", { name: "Your match" })).toBeVisible();
       await expect(page.getByRole("group", { name: LIVE_BOARD })).toBeVisible();
-      await expect(page.getByRole("link", { name: "Watch it →" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Watch it", exact: true })).toBeVisible();
+      await expect(page.getByRole("list", { name: "The latest chance" })).toHaveCount(0);
     }
-    await expect(page.getByRole("heading", { name: "This round" })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+
+    await page.goto(`/midweek/${weekStart}/bracket`);
     if (other) {
       // Every match in play is live on its row, with its score so far (ADR-148).
       await expect(page.getByRole("group", { name: LIVE_ROW }).first()).toBeVisible();
@@ -898,11 +922,9 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
     const { matches } = await roundMatches(weekStart, rounds);
     await signIn(page, "release_member");
     await page.goto("/midweek");
-    await expect(page.getByRole("heading", { level: 1, name: "The final is live" })).toBeVisible();
+    await expect(hubLine(page, /the final is live/)).toBeVisible();
+    await expect(page.getByRole("region", { name: "The final" })).toBeVisible();
     await expect(page.getByRole("group", { name: LIVE_BOARD })).toBeVisible();
-    await expect(
-      page.getByText(/^The champion is named and coins are paid when the final ends\./),
-    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -1161,13 +1183,21 @@ test.describe("Midweek Madness rows live (MM 3.0 S4, ADR-148)", () => {
       const { matches } = await roundMatches(weekStart, 2);
       const ids = matches.map((m) => m.id);
       await signIn(page, "release_member");
-      // Compile both routes before their timing matters.
+      // Compile the routes before their timing matters.
       await page.goto("/midweek");
+      await page.goto(`/midweek/${weekStart}/bracket`);
       await page.goto(`/midweek/${weekStart}`);
       // Round 2 kicked off 150 seconds ago: about the 48th minute.
       await withDatabase((database) => moveFixtureEveningTo(database, matches[0].id, 150));
 
-      for (const url of ["/midweek", `/midweek/${weekStart}`]) {
+      // The hub counts the matches in play on its Bracket tile, and sends no end.
+      const hub = (await (await page.goto("/midweek"))!.text()).replace(/<!-- -->/g, "");
+      expect(hub).not.toMatch(/ends_at/);
+      await expect(
+        page.getByRole("link", { name: new RegExp(`^Bracket .+ · ${matches.length} live$`) }),
+      ).toBeVisible();
+
+      for (const url of [`/midweek/${weekStart}/bracket`, `/midweek/${weekStart}`]) {
         const before = await goalsSoFar(ids);
         const html = (await (await page.goto(url))!.text()).replace(/<!-- -->/g, "");
         const after = await goalsSoFar(ids);
@@ -1180,10 +1210,7 @@ test.describe("Midweek Madness rows live (MM 3.0 S4, ADR-148)", () => {
         // result, report link or full time in its section (round 1's played
         // rows may say "on penalties").
         expect(html, url).not.toMatch(/ends_at/);
-        const round2 =
-          url === "/midweek"
-            ? page.getByRole("region", { name: "This round" })
-            : page.locator("#round-2");
+        const round2 = page.locator("#round-2");
         await expect(round2.getByRole("group", { name: / won\.$/ }), url).toHaveCount(0);
         await expect(round2.getByRole("link", { name: /^Match report: / }), url).toHaveCount(0);
         await expect(round2.getByText("Full time"), url).toHaveCount(0);
@@ -1276,7 +1303,12 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     test.skip(!out, "Nobody in the fixture goes out before the final.");
     await signIn(page, out!.login);
 
+    // Out: the hub's Now block says so and leads to the calls (DR5-12, DR5-14).
     await page.goto("/midweek");
+    await expect(page.getByRole("region", { name: "You’re out" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Calls \d+ open$/ })).toBeVisible();
+    await page.getByRole("link", { name: "Make your calls" }).click();
+    await expect(page).toHaveURL(new RegExp(`/midweek/${weekStart}/calls$`));
     const block = page.getByRole("region", { name: "Call the winners" });
     await expect(block).toBeVisible();
     await expect(
@@ -1326,7 +1358,7 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     await expectNoHorizontalOverflow(page);
 
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/midweek");
+    await page.goto(`/midweek/${weekStart}/calls`);
     await expect(page.getByRole("region", { name: "Call the winners" })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await page.goto(`/midweek/${weekStart}`);
@@ -1337,7 +1369,7 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
 
     // Kick-off: the call closes and the club's split shows (counts only).
     await withDatabase((database) => advanceFixtureEvening(database, 2));
-    await page.goto("/midweek");
+    await page.goto(`/midweek/${weekStart}/calls`);
     await expect(page.getByText(`Closed at kick-off. You picked ${firstName}.`)).toBeVisible();
     await expect(page.getByText("How the club called it").first()).toBeVisible();
     await expectNoHorizontalOverflow(page);
@@ -1345,10 +1377,12 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     // After the final the week is paid: the weekly line, and the calls kept on the bracket.
     await withDatabase((database) => advanceFixtureEvening(database, 120, { runWorker: true }));
     await page.goto("/midweek");
-    await expect(page.getByText(/^You called [01] of 1 right/)).toBeVisible();
     await expect(page.getByText(/ for wins, \d+ for calls$/)).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Calls [01] of 1 right$/ })).toBeVisible();
+    await page.goto(`/midweek/${weekStart}/night`);
+    await expect(page.getByText(/^You called [01] of 1 right/)).toBeVisible();
     await page.getByRole("link", { name: "Your calls →" }).click();
-    await expect(page).toHaveURL(new RegExp(`/midweek/${weekStart}#calls$`));
+    await expect(page).toHaveURL(new RegExp(`/midweek/${weekStart}/calls$`));
     await expect(page.getByRole("region", { name: "Your calls" })).toContainText(
       `You picked ${firstName}.`,
     );
@@ -1411,7 +1445,7 @@ test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
 
       // Round 1 has ended (8:55 at the longest) and round 2 is 90 seconds away.
       await withDatabase((database) => moveFixtureEveningTo(database, matchId, beforeRoundTwo(90)));
-      for (const where of ["/midweek", `/midweek/${weekStart}`]) {
+      for (const where of [`/midweek/${weekStart}/bracket`, `/midweek/${weekStart}`]) {
         await page.goto(where);
         await expect(
           page.getByRole("link", { name: /^Pre-match: .+ v .+, kick-off \d\d:\d\d$/ }).first(),
@@ -1419,7 +1453,16 @@ test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
         ).toBeVisible();
         await expectNoHorizontalOverflow(page);
       }
+      // Still in, the hub's Now block leads to your next match's pre-match (DR5-12).
       await page.goto("/midweek");
+      const next = page.getByRole("region", { name: "Your next match" });
+      if ((await next.count()) > 0) {
+        await expect(next.getByRole("link", { name: "Pre-match" })).toHaveAttribute(
+          "href",
+          /\/next\/2\/\d+$/,
+        );
+      }
+      await page.goto(`/midweek/${weekStart}/night`);
       const night = page.getByRole("list", { name: "Your night" });
       if ((await night.getByText(/^Next: .+\.$/).count()) > 0) {
         await expect(night.getByRole("link", { name: "Pre-match →" })).toBeVisible();
@@ -1483,7 +1526,7 @@ test.describe("Midweek Madness pre-match (MM 3.0 S5, ADR-149)", () => {
     // The device clock runs on as ever, so it can be paused just before kick-off.
     await page.clock.install();
 
-    await page.goto("/midweek");
+    await page.goto(`/midweek/${weekStart}/calls`);
     await page
       .getByRole("region", { name: "Call the winners" })
       .getByRole("link", { name: "Pre-match →" })
@@ -1557,7 +1600,7 @@ test.describe("Midweek Madness ratings at full time (MM 3.0 S6, ADR-150)", () =>
       await signIn(page, "release_member");
       // Compile the routes before their timing matters.
       await page.goto(report(first.id));
-      await page.goto("/midweek");
+      await page.goto(`/midweek/${weekStart}/night`);
 
       // Twenty seconds before full time: in play, so no rating anywhere in the page.
       await withDatabase((database) => moveFixtureEveningTo(database, first.id, length - 20));
@@ -1583,7 +1626,7 @@ test.describe("Midweek Madness ratings at full time (MM 3.0 S6, ADR-150)", () =>
         await expect(page.getByText(/^Rating$/).first()).toBeVisible();
         await expectNoHorizontalOverflow(page);
 
-        await page.goto("/midweek");
+        await page.goto(`/midweek/${weekStart}/night`);
         const block = page.getByRole("region", { name: /^Your five against / });
         if (mine) {
           await expect(block).toBeVisible();
@@ -1718,9 +1761,14 @@ test.describe("Home and Messages (F4, ADR-114)", () => {
         page.getByRole("heading", { level: 1, name: `This week in ${BRAND.shortName}` }),
       ).toBeVisible();
       const now = page.getByRole("region", { name: "Now" });
-      await expect(
-        now.getByRole("link", { name: /^Midweek Madness · .*Pick your five/ }),
-      ).toBeVisible();
+      // Home's Midweek block (DR5-16): brass, the countdown, one primary.
+      await expect(now.getByRole("region", { name: "Pick your five" })).toContainText(
+        /^Pick your five ?Locks in /,
+      );
+      await expect(now.getByRole("link", { name: "Pick your five" })).toHaveAttribute(
+        "href",
+        "/midweek/pick",
+      );
       // The coins tile went: the coin pill shows the balance.
       await expect(page.getByText("Wallet balance")).toHaveCount(0);
       await expect(
@@ -1754,11 +1802,13 @@ test.describe("Home and Messages (F4, ADR-114)", () => {
     });
     await signIn(page, "release_member");
     const now = page.getByRole("region", { name: "Now" });
-    const live = now.getByRole("link").first();
+    const live = now.getByRole("region").first();
     await expect(live).toContainText("Live");
     await expect(live).toContainText("The draw is out");
-    await expect(live).toContainText("See the draw");
-    await expect(live).toHaveAttribute("href", "/midweek");
+    await expect(live.getByRole("link", { name: "See the draw" })).toHaveAttribute(
+      "href",
+      "/midweek",
+    );
     await expectNoHorizontalOverflow(page);
 
     await withDatabase(async (database) => {
@@ -1767,10 +1817,11 @@ test.describe("Home and Messages (F4, ADR-114)", () => {
     });
     await page.reload();
     await expect(live).toContainText("Live");
-    await expect(live).toContainText(
-      /See the report|Follow the final|Follow the bracket|Watch your match/,
-    );
-    await expect(live).toHaveAttribute("href", /^\/midweek/);
+    await expect(
+      live.getByRole("link", {
+        name: /^(See the report|Follow the final|Follow the bracket|Watch it)$/,
+      }),
+    ).toHaveAttribute("href", /^\/midweek/);
     await expectNoHorizontalOverflow(page);
   });
 

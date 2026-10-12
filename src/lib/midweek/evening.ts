@@ -554,13 +554,6 @@ export function myNight(input: {
   return { rows, coins, alive, entered, champion };
 }
 
-/** The rounds the member won, for the clock's halo. */
-export function wonRounds(night: MyNight): Set<number> {
-  return new Set(
-    night.rows.filter((row) => row.kind === "won" || row.kind === "bye").map((row) => row.round),
-  );
-}
-
 /** "Quarters" and "out on penalties", "Champion", or "Round 1" and "out": the Week-Complete stat. */
 export function finishStat(night: MyNight, rounds: number): { value: string; note: string } {
   if (!night.entered) return { value: "—", note: "sat it out" };
@@ -702,96 +695,6 @@ export function entryCardFace(
 }
 
 // ---- the evening from the lock (MM 2.0 F5, ADR-113) ------------------------------
-
-export type StopState = "locked" | "played" | "live" | "next" | "later";
-
-/** The words `MidweekClock` prints under each stop. */
-export const STOP_WORD: Record<StopState, string> = {
-  locked: "Locked",
-  played: "Played",
-  live: "Live",
-  next: "Next",
-  later: "Later",
-};
-
-export type EveningStop = {
-  time: string;
-  name: string;
-  state: StopState;
-  /** A round the member is still in (or went out in): a brass dot after its name. */
-  you: boolean;
-  /** Null for the lock. */
-  round: number | null;
-};
-
-/**
- * `MidweekClock`'s stops (HANDOFF "Midweek: the evening"): the lock, then one
- * per round. A round is `played` once every one of its pairings is at full
- * time, `live` from its kick-off until then, and of the rounds still to come
- * the first is `next` and the rest `later`. Today a match shows whole at its
- * kick-off, so a round goes straight to `played`; with ADR-106 a round shows
- * `live` while it plays, with no change here.
- */
-export function eveningStops(input: {
-  lockAt: string;
-  scheduleVersion: number;
-  rounds: number;
-  now: Date;
-  matches: readonly MatchRow[];
-  /** The last round the member is in (`roundsYouAreIn`), or null. */
-  youThrough: number | null;
-}): EveningStop[] {
-  const lock = new Date(input.lockAt);
-  const now = input.now.getTime();
-  let nextGiven = lock.getTime() > now;
-  const stops: EveningStop[] = [
-    {
-      time: formatClock(input.lockAt),
-      name: "Lock",
-      state: nextGiven ? "next" : "locked",
-      you: false,
-      round: null,
-    },
-  ];
-  for (let round = 1; round <= input.rounds; round += 1) {
-    const at = roundStartAt(lock, round, input.scheduleVersion);
-    const pairings = 2 ** (input.rounds - round);
-    const done = input.matches.filter((match) => match.round === round && atFullTime(match));
-    let state: StopState;
-    if (at.getTime() <= now) state = done.length === pairings ? "played" : "live";
-    else if (!nextGiven) {
-      state = "next";
-      nextGiven = true;
-    } else state = "later";
-    stops.push({
-      time: formatClock(at.toISOString()),
-      name: roundShort(round, input.rounds),
-      state,
-      you: input.youThrough !== null && round <= input.youThrough,
-      round,
-    });
-  }
-  return stops;
-}
-
-/** The clock as one sentence for screen readers. */
-export function eveningClockLabel(stops: readonly EveningStop[]): string {
-  const parts = stops.map(
-    (stop) =>
-      `${stop.name} ${stop.time}, ${STOP_WORD[stop.state].toLowerCase()}${stop.you ? ", you're in" : ""}`,
-  );
-  return `Wednesday evening: ${parts.join("; ")}.`;
-}
-
-/**
- * The last round the member plays in tonight: the round they went out in, or
- * the final while they are still in; null when they aren't entered.
- */
-export function roundsYouAreIn(night: MyNight, entered: boolean, rounds: number): number | null {
-  if (!entered) return null;
-  const out = night.rows.find((row) => row.kind === "out");
-  return out ? out.round : rounds;
-}
 
 export type EveningPhase = {
   /**
@@ -1021,7 +924,7 @@ export type HomeEvening = {
  * - the draw: who you meet, and `See the draw`;
  * - your match this round: the scoreboard and headline at full time, with
  *   `See the report`, or while it plays the score so far and the latest
- *   chance, with `Watch your match` (ADR-115);
+ *   chance, with `Watch it` (ADR-115);
  * - out, or not in the final: `Follow the final` (HANDOFF);
  * - a bye, or between rounds: the evening's title and your night in a line.
  */
@@ -1081,7 +984,7 @@ export function homeEvening(input: {
       title: phase.title,
       line,
       match: playing,
-      button: yours(playing) ? { label: "Watch your match", href: report(playing) } : followFinal,
+      button: yours(playing) ? { label: "Watch it", href: report(playing) } : followFinal,
     };
   }
   return {

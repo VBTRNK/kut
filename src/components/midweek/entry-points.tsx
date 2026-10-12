@@ -1,31 +1,29 @@
-import Link from "next/link";
+import { Block } from "@/components/ui/block";
+import { Button } from "@/components/ui/button";
+import { Tag } from "@/components/ui/tag";
 import { formatClock, formatDayDate, formatWeekday } from "@/lib/midweek/entry";
 import type { EntryMini, HomeMatch } from "@/lib/midweek/load";
-import { LiveMarker } from "./chip";
 import { MidweekCountdown } from "./countdown";
-import { MidweekMiniCard } from "./mini-card";
+import { MiniFive } from "./hub";
 import { ReportText } from "./player-name";
 import { MidweekScoreboard } from "./report";
 
 /**
- * Home's ways into `/midweek`, in its "now" stack (design/ux-review
- * `Home-Now-Picking` and `Home-Now-Live`, ADR-114): the pick card before the
- * lock, the evening card from the lock to the end of the final, and the
- * champion until owner decision D4's cutoff. Which one shows is
- * `loadMidweekEntryPoint`'s call; nothing shows when Midweek is disabled or the
- * member has opted out. Each card is one link.
+ * Home's way into Midweek (DR5-16, ADR-154): one Now-style block with the
+ * hub's rules. Brass with a primary button while something is due (not
+ * picked; your match live), plain once nothing is. Which moment shows is
+ * `loadMidweekEntryPoint`'s call (ADR-114); nothing shows when Midweek is
+ * disabled or the member has opted out. Home doesn't poll (Q11), so it is
+ * the evening as it stood at page load.
  */
 
+/** Home's other Now cards, until S8 moves Home onto the DR5 blocks. */
 export const NOW_CARD = "grid gap-3 rounded-2xl border p-4 sm:px-6 sm:py-5";
 export const NOW_BRASS = "border-brass/50 bg-brass-bg/30 hover:border-brass";
 export const NOW_KICKER =
   "text-[0.7rem] font-extrabold tracking-[0.26em] text-brass uppercase [overflow-wrap:anywhere]";
-const PRIMARY =
-  "inline-flex min-h-12 items-center justify-center rounded-xl bg-gradient-to-b from-[#eebd63] to-[#d29a34] px-5 text-[15px] font-black text-ink-on-accent shadow-lg shadow-brass/25 group-hover:brightness-105";
-const SECONDARY =
-  "inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-panel/70 px-5 text-[15px] font-black text-ink group-hover:border-brass";
 
-/** Before the lock: pick your five, or they're in (Home-Now-Picking). */
+/** Before the lock: pick your five, or they're in. */
 export function MidweekEntryCard({
   lockAt,
   now,
@@ -35,119 +33,100 @@ export function MidweekEntryCard({
   now: string;
   saved: EntryMini[];
 }) {
-  const picked = saved.length > 0;
+  const date = formatDayDate(lockAt);
+  if (saved.length === 0) {
+    return (
+      <Block
+        aside={
+          <p className="text-small font-semibold text-brass">
+            Locks <MidweekCountdown now={now} target={lockAt} />
+          </p>
+        }
+        id="home-midweek-h"
+        title="Pick your five"
+        tone="now"
+      >
+        <p className="text-small text-ink-dim">
+          Midweek Madness, {date}. Not picked yet, so an auto squad would play.
+        </p>
+        <Button href="/midweek/pick" wide>
+          Pick your five
+        </Button>
+      </Block>
+    );
+  }
   return (
-    <Link className={`group ${NOW_CARD} ${NOW_BRASS}`} href="/midweek">
-      <span className="flex flex-wrap items-baseline justify-between gap-x-2.5 gap-y-1">
-        <span className={NOW_KICKER}>Midweek Madness &middot; {formatDayDate(lockAt)}</span>
-        <MidweekCountdown className="text-sm font-extrabold text-brass" now={now} target={lockAt} />
-      </span>
-      <span className="display text-2xl sm:text-3xl">
-        {picked ? "Your five are in" : "Pick your five"}
-      </span>
-      <span className="text-sm leading-relaxed text-ink-dim">
-        {picked ? (
-          <>
-            Change them until {formatWeekday(lockAt)} {formatClock(lockAt)}.
-          </>
-        ) : (
-          <>
-            Squads lock {formatWeekday(lockAt)} at {formatClock(lockAt)}. You haven&rsquo;t picked
-            yet, so an auto squad would play for you, heavily handicapped.
-          </>
-        )}
-      </span>
-      {picked && (
-        <span aria-hidden="true" className="flex gap-1.5">
-          {saved.map((card, index) => (
-            <MidweekMiniCard
-              injured={card.injured}
-              key={index}
-              ovr={card.ovr}
-              rarityTier={card.rarityTier}
-              small
-            />
-          ))}
-        </span>
-      )}
-      <span className={picked ? SECONDARY : PRIMARY}>
-        {picked ? "Change your five" : "Pick your five"}
-      </span>
-    </Link>
+    <Block aside={<Tag tone="won">✓ Saved</Tag>} id="home-midweek-h" title="Your five">
+      <MiniFive cards={saved} label="Your five" />
+      <p className="text-small text-ink-dim">
+        Midweek Madness, {date}. Change them until {formatWeekday(lockAt)} {formatClock(lockAt)}.
+      </p>
+      <Button href="/midweek/pick" kind="secondary">
+        Change your five
+      </Button>
+    </Block>
   );
 }
 
 /**
- * From the lock to the end of the final (Home-Now-Live): leads Home. Your
- * match, or the final, as it stood at page load: Home doesn't poll (Q11).
+ * From the lock to the end of the final: your match, or the final, as it
+ * stood at page load. Brass only while your own match is in play.
  */
 export function MidweekLiveCard({
-  kicker,
   title,
   line,
   match,
   button,
 }: {
-  kicker: string;
   title: string;
   line: string;
   match: HomeMatch | null;
   button: { label: string; href: string };
 }) {
+  const due = match?.live != null && match.youSide !== null;
   return (
-    <Link
-      className={`group ${NOW_CARD} border-live-line bg-[linear-gradient(180deg,color-mix(in_srgb,var(--color-live-bg)_55%,transparent),rgb(33_28_21/60%))] hover:border-live`}
-      href={button.href}
+    <Block
+      aside={<Tag tone="live">Live</Tag>}
+      id="home-midweek-h"
+      title={match ? (match.youSide !== null ? "Your match" : "The final") : title}
+      tone={due ? "now" : "plain"}
     >
-      <span className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1">
-        <span className={NOW_KICKER}>{kicker}</span>
-        <LiveMarker />
-      </span>
-      {match ? (
-        <>
-          <MidweekScoreboard
-            auto={match.auto}
-            compact
-            goals={match.goals}
-            clubs={match.clubs}
-            live={match.live}
-            penalties={match.penalties}
-            winnerSide={match.winnerSide}
-            youSide={match.youSide}
-          />
-          <span className="text-sm leading-relaxed text-ink-dim">
-            <ReportText parts={match.line} />
-          </span>
-        </>
-      ) : (
-        <>
-          <span className="display text-2xl sm:text-3xl">{title}</span>
-          <span className="text-sm leading-relaxed text-ink-dim">{line}</span>
-        </>
+      {match && (
+        <MidweekScoreboard
+          auto={match.auto}
+          clubs={match.clubs}
+          compact
+          goals={match.goals}
+          live={match.live}
+          penalties={match.penalties}
+          winnerSide={match.winnerSide}
+          youSide={match.youSide}
+        />
       )}
-      <span className={PRIMARY}>{button.label}</span>
-    </Link>
+      <p className="text-small text-ink-dim">
+        {match?.live ? (
+          "Watch it chance by chance."
+        ) : match ? (
+          <ReportText parts={match.line} />
+        ) : (
+          line
+        )}
+      </p>
+      <Button href={button.href} kind={due ? "primary" : "secondary"} wide={due}>
+        {button.label}
+      </Button>
+    </Block>
   );
 }
 
-/** After the final, until Thursday 23:59 (owner decision D4). */
-export function MidweekFinalCard({
-  weekStart,
-  lockAt,
-  title,
-  line,
-}: {
-  weekStart: string;
-  lockAt: string;
-  title: string;
-  line: string;
-}) {
+/** After the final, until Thursday 23:59 (owner decision D4): plain, nothing is due. */
+export function MidweekFinalCard({ title, line }: { title: string; line: string }) {
   return (
-    <Link className={`group ${NOW_CARD} ${NOW_BRASS}`} href={`/midweek/${weekStart}`}>
-      <span className={NOW_KICKER}>Midweek Madness &middot; {formatDayDate(lockAt)}</span>
-      <span className="display text-2xl sm:text-3xl">{title}</span>
-      <span className="text-sm leading-relaxed text-ink-dim">{line}</span>
-      <span className={SECONDARY}>See the bracket</span>
-    </Link>
+    <Block id="home-midweek-h" title={title}>
+      <p className="text-small text-ink-dim">{line}</p>
+      <Button href="/midweek" kind="secondary">
+        Midweek
+      </Button>
+    </Block>
   );
 }
