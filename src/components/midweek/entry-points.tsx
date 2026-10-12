@@ -86,7 +86,8 @@ export function MidweekLiveCard({
   const due = match?.live != null && match.youSide !== null;
   return (
     <Block
-      aside={<Tag tone="live">Live</Tag>}
+      // A match in play carries its own `Live · 64′` under the score.
+      aside={match?.live ? undefined : <Tag tone="live">Live</Tag>}
       id="home-midweek-h"
       title={match ? (match.youSide !== null ? "Your match" : "The final") : title}
       tone={due ? "now" : "plain"}

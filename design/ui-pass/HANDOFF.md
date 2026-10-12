@@ -19,8 +19,9 @@ changes it.
   decisions (round 3)" and "Records the build needs").
 
 Built so far: S4 (the foundations, ADR-153), S5 (the hub, its routes, the
-picker and Home's block, ADR-154) and S6 (the week, bracket, night, calls and
-pre-match, ADR-155).
+picker and Home's block, ADR-154), S6 (the week, bracket, night, calls and
+pre-match, ADR-155) and S7 (the match report, ADR-156). Since S7 the A2
+board's "before" side no longer rebuilds: its components are retired.
 
 ## The canvas
 

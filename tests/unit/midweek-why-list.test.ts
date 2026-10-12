@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { keepScores } from "@/components/midweek/player-name";
-import { ordinal } from "@/components/midweek/report";
-import { FACTOR_EXPLANATIONS, factorEffect, matchPower } from "@/components/midweek/why-list";
+import { ordinal, reportLine, reportTab } from "@/components/midweek/report";
+import {
+  FACTOR_EXPLANATIONS,
+  factorEffect,
+  matchPower,
+  nextTips,
+  NO_TIPS,
+  shownTip,
+  type TipEvent,
+} from "@/components/midweek/why-list";
 import type { Archetype } from "@/game/archetypes";
 import { PPM } from "@/game/midweek/config";
 import { powerBand, powerBarWidth } from "@/lib/midweek/power";
@@ -115,5 +123,101 @@ describe("report text on a match page", () => {
     const kept = keepScores("a 3–0 defeat, 7–6 on penalties");
     expect(kept).not.toBe("a 3–0 defeat, 7–6 on penalties");
     expect(kept.replace(/\u2060/g, "")).toBe("a 3–0 defeat, 7–6 on penalties");
+  });
+});
+
+describe("a factor's explanation (#279)", () => {
+  const run = (...events: TipEvent[]) => events.reduce(nextTips, NO_TIPS);
+
+  it("shows the focused factor while a resting pointer hovers another", () => {
+    // Focusing Form scrolls Pick under a resting pointer: Chromium fires a hover on Pick.
+    expect(
+      shownTip(run({ type: "focus", key: "0:0:Form" }, { type: "enter", key: "0:0:Pick" })),
+    ).toBe("0:0:Form");
+    // A pointer already on Pick, then Form focused from the keyboard.
+    expect(
+      shownTip(run({ type: "enter", key: "0:0:Pick" }, { type: "focus", key: "0:0:Form" })),
+    ).toBe("0:0:Form");
+  });
+
+  it("shows a hovered factor when nothing is focused, and hides it when the pointer leaves", () => {
+    const hovered = run({ type: "enter", key: "1:2:Day" });
+    expect(shownTip(hovered)).toBe("1:2:Day");
+    expect(shownTip(nextTips(hovered, { type: "leave", key: "1:2:Day" }))).toBeNull();
+  });
+
+  it("moves with each tap and stays shown after the finger lifts", () => {
+    const tapped = run(
+      { type: "enter", key: "0:1:Form" },
+      { type: "focus", key: "0:1:Form" },
+      { type: "leave", key: "0:1:Form" },
+    );
+    expect(shownTip(tapped)).toBe("0:1:Form");
+    expect(
+      shownTip(
+        run(
+          { type: "focus", key: "0:1:Form" },
+          { type: "enter", key: "0:1:Day" },
+          { type: "focus", key: "0:1:Day" },
+        ),
+      ),
+    ).toBe("0:1:Day");
+  });
+
+  it("hides everything on Escape until the next focus, tap or hover", () => {
+    const dismissed = run(
+      { type: "enter", key: "0:0:Pick" },
+      { type: "focus", key: "0:0:Form" },
+      { type: "escape" },
+    );
+    // The pointer still rests on Pick: Escape hid that too.
+    expect(shownTip(dismissed)).toBeNull();
+    expect(shownTip(nextTips(dismissed, { type: "focus", key: "0:0:Day" }))).toBe("0:0:Day");
+    const hovered = run({ type: "enter", key: "0:0:Day" }, { type: "escape" });
+    expect(shownTip(hovered)).toBeNull();
+    expect(
+      shownTip(
+        run(
+          { type: "enter", key: "0:0:Day" },
+          { type: "escape" },
+          { type: "leave", key: "0:0:Day" },
+          { type: "enter", key: "0:0:Day" },
+        ),
+      ),
+    ).toBe("0:0:Day");
+  });
+
+  it("closes on blur and on Show every factor", () => {
+    expect(
+      shownTip(run({ type: "focus", key: "0:0:Form" }, { type: "blur", key: "0:0:Form" })),
+    ).toBeNull();
+    expect(
+      run(
+        { type: "focus", key: "0:0:Form" },
+        { type: "enter", key: "0:0:Pick" },
+        { type: "reset" },
+      ),
+    ).toEqual(NO_TIPS);
+  });
+});
+
+describe("the report's line and tabs (DR5-15)", () => {
+  it("names the match, its state and yours, never on the final", () => {
+    expect(reportLine({ round: 3, pairing: 2, rounds: 5, live: false, yours: true })).toBe(
+      "Quarter-final 3 · full time · your match",
+    );
+    expect(reportLine({ round: 1, pairing: 1, rounds: 5, live: true, yours: false })).toBe(
+      "Round 1, match 2 · live",
+    );
+    expect(reportLine({ round: 5, pairing: 0, rounds: 5, live: true, yours: true })).toBe(
+      "The final · live",
+    );
+  });
+
+  it("opens Teams only for ?tab=teams", () => {
+    expect(reportTab("teams")).toBe("teams");
+    expect(reportTab(undefined)).toBe("match");
+    expect(reportTab(["teams", "match"])).toBe("match");
+    expect(reportTab("why")).toBe("match");
   });
 });

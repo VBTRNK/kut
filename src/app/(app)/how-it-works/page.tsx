@@ -502,6 +502,17 @@ export default async function HowItWorksPage() {
               <strong className="text-ink">Day</strong>: a fresh roll every match, so upsets happen.
             </li>
           </ul>
+          <p>
+            A match&rsquo;s Teams tab shows each card&rsquo;s Power for that match: the week&rsquo;s
+            Power times its day roll. 1.00, the tick on each bar, is an ordinary card. Longer bars
+            are stronger cards; the badges are green for stronger cards, amber and orange for weaker
+            ones. Show every factor opens each card&rsquo;s five factors, and each says what it
+            means. Goals and assists are added at full time, with each card&rsquo;s{" "}
+            <Link className="font-semibold text-brass underline" href="#midweek-ratings">
+              rating
+            </Link>{" "}
+            for the match.
+          </p>
           <h3 className="scroll-mt-6 pt-2 font-black text-ink" id="plusses">
             Your squad&rsquo;s shape
           </h3>

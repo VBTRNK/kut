@@ -302,7 +302,9 @@ Part L item).
     final and tiles; in play it redirects to the hub (ADR-155). Under it
     `bracket` (a block per round on a phone, latest first, each from 15
     minutes before kick-off; the tree from `lg`), `night`, `calls`, `picks`,
-    `match/[matchId]` and `next/[round]/[pairing]` (pre-match).
+    `next/[round]/[pairing]` (pre-match) and `match/[matchId]`, the report:
+    Match (facts, moments, penalties) and Teams (`?tab=teams`), paired from
+    `lg` (ADR-156).
 - **Live** (ADR-115, ADR-147). Every match in play is watchable on its page:
   - a clock ticking each second on the corrected device clock, held at 90′;
   - the feed newest on top: kicks, then the report's moments;
@@ -313,8 +315,6 @@ Part L item).
   - Every bracket row in play shows the score so far and a ticking minute or
     `Pens`, and links to watch it (ADR-148). Its score counts the goal events
     members may see now; no report is rendered for a row.
-  - The `lg` tree stacks each group's two pairings in equal rows, so the
-    bracket line meets both (#216).
 - **Pre-match** (ADR-149, ADR-155). Once both feeders of a later pairing have
   ended, its row, `Your night` and the call link to a pre-match: a
   countdown, both fives with the week's Power and plusses per line, and the

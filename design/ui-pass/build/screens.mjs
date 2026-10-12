@@ -602,7 +602,15 @@ function beforeAfter() {
   const { ReportText: OldText } = src("components/midweek/player-name.tsx");
   const clubs = clubsOf(row);
   const short = report.timeline.slice(0, 4);
-  const before = h(
+  // S7 (ADR-156) built the report onto the scale and retired the components
+  // this side drew with; the canvas keeps the board as it was published.
+  const before = !old.MidweekLaneTimeline
+    ? h(
+        "p",
+        { className: "w-[412px] rounded-2xl border border-dashed border-line p-5 text-small text-ink-dim" },
+        "Built in S7 (ADR-156): the report's old components are retired. The before side is on the canvas (A2) and in Git before PR S7.",
+      )
+    : h(
     "div",
     { className: "grid w-[412px] content-start gap-5 bg-board p-5" },
     h("a", { className: "justify-self-start text-sm font-bold text-brass", href: "#" }, "← Wed 7 Oct bracket"),

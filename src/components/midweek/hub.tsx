@@ -186,8 +186,9 @@ export function NowDraw({
 
 /**
  * A match in play for you: yours this round, or the final for everyone (DR2-1:
- * one match, team colours). The score and the minute only; the moments are on
- * the match page (owner, DR5 round 2).
+ * one match, team colours). The score and the minute only, on the block's own
+ * ground (a compact board); the moments are on the match page (owner, DR5
+ * round 2).
  */
 export function NowMatch({
   title,
@@ -211,6 +212,7 @@ export function NowMatch({
       <MidweekScoreboard
         auto={auto}
         clubs={clubs}
+        compact
         goals={goals}
         live={live}
         penalties={null}

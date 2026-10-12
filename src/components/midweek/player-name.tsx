@@ -5,9 +5,10 @@ import type { Segment } from "@/lib/midweek/report/types";
 export const TEAM_TEXT = ["text-team-0", "text-team-1"] as const;
 
 /**
- * `PlayerName` (HANDOFF "Matches", DR1-5, DR2-2): a Player or manager in their
- * side's colour, on a match page only (DR2-1). A Player both sides fielded
- * shows its base name; screen readers still hear whose copy it is.
+ * `PlayerName` (HANDOFF "Matches", DR5-4): a Player or manager in their side's
+ * colour, on a match page only (DR2-1), at the weight of the line it sits in.
+ * A Player both sides fielded shows its base name; screen readers still hear
+ * whose copy it is.
  */
 export function PlayerName({
   side,
@@ -19,7 +20,7 @@ export function PlayerName({
   children: string;
 }) {
   return (
-    <span className={`font-extrabold ${TEAM_TEXT[side]}`}>
+    <span className={TEAM_TEXT[side]}>
       {children}
       {owner !== undefined && <span className="sr-only"> ({owner}&rsquo;s)</span>}
     </span>
@@ -29,11 +30,25 @@ export function PlayerName({
 /** A score such as "3–0" never breaks at its dash: word joiners hold it together. */
 export const keepScores = (text: string) => text.replace(/(\d)–(\d)/g, "$1\u2060–\u2060$2");
 
-/** A line of report text from the renderer's segments, every name in its side's colour. */
-export function ReportText({ parts }: { parts: readonly Segment[] }) {
+/**
+ * A line of report text from the renderer's segments, every name in its side's
+ * colour. `plain` (a report's headline, DR5-15): ink throughout, names too.
+ */
+export function ReportText({
+  parts,
+  plain = false,
+}: {
+  parts: readonly Segment[];
+  plain?: boolean;
+}) {
   return parts.map((part, index) =>
     part.side === undefined ? (
       keepScores(part.text)
+    ) : plain ? (
+      <span key={index}>
+        {part.text}
+        {part.owner !== undefined && <span className="sr-only"> ({part.owner}&rsquo;s)</span>}
+      </span>
     ) : (
       <PlayerName key={index} owner={part.owner} side={part.side}>
         {part.text}
