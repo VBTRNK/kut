@@ -1,29 +1,20 @@
-import Link from "next/link";
+import { LinkRow } from "@/components/ui/links";
 import type { PastWeek } from "@/lib/midweek/evening";
 
 /**
- * `MidweekWeekList` (HANDOFF "Bracket", Weeks-Past): one row per finished
- * week, newest first, each opening that week's bracket.
+ * `MidweekWeekList` (Weeks-Past, DR5-14): one link row per finished week,
+ * newest first, each opening that week's page.
  */
 export function MidweekWeekList({ weeks }: { weeks: readonly PastWeek[] }) {
   return (
-    <ul aria-label="Past weeks" className="grid gap-2">
+    <ul aria-label="Past weeks" className="rounded-2xl border border-line/60 bg-panel/60 px-4">
       {weeks.map((week) => (
-        <li key={week.weekStart}>
-          <Link
-            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 rounded-xl border border-line/60 bg-panel/50 px-3.5 py-3 hover:border-brass"
-            href={`/midweek/${week.weekStart}`}
-          >
-            <b className="text-[15px]">{week.date}</b>
-            <span
-              aria-hidden="true"
-              className="col-start-2 row-span-2 row-start-1 text-lg font-black text-brass"
-            >
-              ›
-            </span>
-            <span className="text-[13px] text-ink-dim">{week.text}</span>
-          </Link>
-        </li>
+        <LinkRow
+          href={`/midweek/${week.weekStart}`}
+          key={week.weekStart}
+          meta={week.text}
+          title={week.date}
+        />
       ))}
     </ul>
   );

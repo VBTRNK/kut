@@ -1,19 +1,58 @@
 import { MidweekCalls } from "@/components/midweek/calls-list";
 import { MidweekLivePoller } from "@/components/midweek/live-poller";
-import { MidweekPredictions } from "@/components/midweek/predictions";
+import { MidweekPredictions, type CallLink } from "@/components/midweek/predictions";
 import { InfoLink } from "@/components/ui/links";
 import { predictionCoins } from "@/game/midweek/rewards";
-import { callCards, callRecords, weeklyCallsLine } from "@/lib/midweek/calls";
+import {
+  callCards,
+  callRecords,
+  callsHeading,
+  weeklyCallsLine,
+  type CallCard,
+} from "@/lib/midweek/calls";
+import type { BracketRound } from "@/lib/midweek/evening";
+import { preMatchHref } from "@/lib/midweek/prematch";
 import { loadCalls } from "@/lib/midweek/results";
 import { openWeek, WeekNote, WeekShell, weekNow } from "../week";
 
 export const metadata = { title: "Calls" };
 
+/** Where each call leads (owner, DR5-14): its pre-match while open, the match in play, its report once ended. */
+function callLinks(
+  cards: readonly CallCard[],
+  bracket: readonly BracketRound[],
+  weekStart: string,
+): Map<string, CallLink> {
+  const links = new Map<string, CallLink>();
+  for (const card of cards) {
+    const pair = bracket[card.round - 1]?.pairs[card.pairing];
+    const key = `${card.round}/${card.pairing}`;
+    if (pair?.kind === "upcoming" && pair.preMatch) {
+      links.set(key, {
+        label: "Pre-match",
+        href: preMatchHref(weekStart, card.round, card.pairing),
+      });
+    } else if (pair?.kind === "inplay") {
+      links.set(key, {
+        label: "Watch it",
+        href: `/midweek/${weekStart}/match/${pair.match.match_id}`,
+      });
+    } else if (pair?.kind === "played") {
+      links.set(key, {
+        label: "Report",
+        href: `/midweek/${weekStart}/match/${pair.match.match_id}`,
+      });
+    }
+  }
+  return links;
+}
+
 /**
- * `/midweek/[week]/calls` (DR5-11, ADR-118): once you're out, a call for each
- * later match while the evening runs, each closing at its kick-off; once the
- * week is complete, your calls for good, read-only. Before you're out, or for
- * a member who was never in, nothing to call. S6 restyles it (DR5-14).
+ * `/midweek/[week]/calls` (DR5-11, DR5-14, ADR-118): once you're out, a call
+ * for each later match while the evening runs, each a block of its own that
+ * closes at its kick-off and leads to its match; once the week is complete,
+ * your calls for good, read-only. Before you're out, or for a member who was
+ * never in, nothing to call. The rule is behind `How calls work ›`.
  */
 export default async function MidweekCallsPage({
   params,
@@ -39,16 +78,21 @@ export default async function MidweekCallsPage({
       callCards({ bracket, night, predictions: calls.predictions, splits: calls.splits, now }) ??
       [];
     return (
-      <WeekShell sub={date} title="Calls">
-        <MidweekLivePoller at={now.toISOString()} nextAt={nextKickoff} poll={inPlay} />
+      <WeekShell sub={`${date} · ${callsHeading(cards, rounds, false).note}`} title="Calls">
+        <div className="grid">
+          <p className="text-small text-pretty text-ink-dim">
+            Call the winners still to come. Everyone sees the split from kick-off.
+          </p>
+          {how}
+        </div>
         <MidweekPredictions
           at={now.toISOString()}
           cards={cards}
           coins={coins}
-          rounds={rounds}
+          links={callLinks(cards, bracket, weekStart)}
           tournamentId={tournament.tournament_id}
-          weekStart={weekStart}
         />
+        <MidweekLivePoller at={now.toISOString()} nextAt={nextKickoff} poll={inPlay} />
       </WeekShell>
     );
   }
@@ -58,11 +102,7 @@ export default async function MidweekCallsPage({
     const right = records.filter((record) => record.correct === true).length;
     return (
       <WeekShell sub={date} title="Calls">
-        <MidweekCalls
-          coins={coins}
-          line={weeklyCallsLine(right, records.length, coins)}
-          records={records}
-        />
+        <MidweekCalls line={weeklyCallsLine(right, records.length, coins)} records={records} />
         {how}
       </WeekShell>
     );

@@ -1,113 +1,104 @@
 import Link from "next/link";
+import { FOCUS } from "@/components/ui/page";
+import { Tag } from "@/components/ui/tag";
 import { formatClock } from "@/lib/midweek/entry";
-import { roundShort, type PathRow } from "@/lib/midweek/evening";
-import { Chip } from "./chip";
-import { MidweekCountdown } from "./countdown";
+import { roundName, type PathRow } from "@/lib/midweek/evening";
+import { keepScores } from "./player-name";
 
-const ROW =
-  "grid min-h-[60px] grid-cols-[62px_minmax(0,1fr)_auto] items-center gap-3 rounded-[14px] border px-3 py-2.5";
+/** A round's row: what happened (or happens next) and where. */
+function rowWords(row: PathRow, rounds: number): { title: string; meta: string } {
+  const where = roundName(row.round, rounds);
+  switch (row.kind) {
+    case "bye":
+      return { title: "Bye", meta: where };
+    case "won":
+      return { title: `Beat ${row.opponent} ${row.score}`, meta: where };
+    case "out":
+      return { title: `Lost to ${row.opponent} ${row.score}`, meta: where };
+    case "live":
+      return { title: `Playing ${row.opponent} now`, meta: `${where} · live` };
+    case "next":
+      return {
+        title: row.opponent ? `Next: ${row.opponent}` : "Next: to be decided",
+        meta: `${where} · ${formatClock(row.revealAt)}`,
+      };
+  }
+}
+
+const ROW = "grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-2.5";
 
 /**
- * `MidweekPath`, "Your night": a row per round you played (a bye, a win with
- * its report and coins, the round you went out in), then a dashed row for the
- * match in play ("Playing Eline now.", ADR-115) or the next one, with what a
- * win would pay, and `Pre-match →` once its opponent is settled (`preMatch`,
- * DR4-7, ADR-149).
+ * `MidweekPath`, "Round by round" (DR5-14): one link row per round, the
+ * report of a match played or in play, the next match's pre-match once both
+ * its feeders have ended (`preMatch`, DR4-7, ADR-149). A bye is a row without
+ * a link. The coins on the right: what a round paid, or what a win would pay.
  */
 export function MidweekPath({
   rows,
   rounds,
   weekStart,
-  now,
   preMatch = null,
 }: {
   rows: readonly PathRow[];
   rounds: number;
   weekStart: string;
-  now: string;
   /** The next match's pre-match, once both its feeders have ended. */
   preMatch?: string | null;
 }) {
   return (
-    <ol aria-label="Your night" className="grid gap-2">
+    <ol aria-label="Your night" className="grid">
       {rows.map((row) => {
-        const tone =
-          row.kind === "next" || row.kind === "live"
-            ? "border-dashed border-brass-line bg-brass-bg/25"
-            : row.kind === "out"
-              ? "border-brick-line bg-brick-bg/35"
-              : "border-line/70 bg-panel/70";
-        const report =
-          row.kind === "won" || row.kind === "out" ? (
-            <Link
-              className="font-extrabold text-brass hover:underline"
-              href={`/midweek/${weekStart}/match/${row.matchId}`}
-            >
-              Report
-            </Link>
-          ) : null;
+        const { title, meta } = rowWords(row, rounds);
+        const coins =
+          row.kind === "out"
+            ? ""
+            : row.kind === "next" || row.kind === "live"
+              ? `win +${row.coins}`
+              : `+${row.coins}`;
+        const href =
+          row.kind === "won" || row.kind === "out" || row.kind === "live"
+            ? `/midweek/${weekStart}/match/${row.matchId}`
+            : row.kind === "next"
+              ? preMatch
+              : null;
+        const body = (
+          <>
+            <span className="grid min-w-0 gap-0.5">
+              <span
+                className={`text-body ${row.kind === "out" ? "text-ink-dim" : "font-semibold"}`}
+              >
+                {keepScores(title)}
+              </span>
+              <span className="text-small text-ink-dim">{meta}</span>
+            </span>
+            <span className="flex items-center gap-2 text-small whitespace-nowrap tabular-nums">
+              {row.kind === "live" && <Tag tone="live">Live</Tag>}
+              <span
+                className={
+                  row.kind === "won" || row.kind === "bye"
+                    ? "font-semibold text-brass"
+                    : "text-ink-dim"
+                }
+              >
+                {coins}
+              </span>
+              {href && (
+                <span aria-hidden="true" className="text-body text-ink-faint">
+                  ›
+                </span>
+              )}
+            </span>
+          </>
+        );
         return (
-          <li className={`${ROW} ${tone}`} key={`${row.kind}-${row.round}`}>
-            <p className="text-[10.5px] leading-[1.3] font-extrabold tracking-[0.1em] text-ink-faint uppercase">
-              {roundShort(row.round, rounds)}
-              <b className="block text-sm tracking-normal text-ink-dim normal-case tabular-nums">
-                {formatClock(row.revealAt)}
-              </b>
-            </p>
-            <p className="text-sm leading-[1.4] text-ink-dim">
-              {row.kind === "bye" && (
-                <>
-                  <b className="text-ink">Bye.</b> Counts as a win.
-                </>
-              )}
-              {row.kind === "won" && (
-                <>
-                  <b className="text-ink">
-                    Beat {row.opponent} {row.score}.
-                  </b>{" "}
-                  {report}
-                </>
-              )}
-              {row.kind === "out" && (
-                <>
-                  <b className="text-ink">
-                    Out: lost to {row.opponent} {row.score}.
-                  </b>{" "}
-                  {report}
-                </>
-              )}
-              {row.kind === "live" && <b className="text-ink">Playing {row.opponent} now.</b>}
-              {row.kind === "next" && (
-                <>
-                  <b className="text-ink">Next{row.opponent ? `: ${row.opponent}` : ""}.</b>{" "}
-                  Kick-off {formatClock(row.revealAt)},{" "}
-                  <MidweekCountdown now={now} target={row.revealAt} />.
-                  {preMatch && (
-                    <>
-                      {" "}
-                      <Link
-                        className="font-extrabold whitespace-nowrap text-brass hover:underline"
-                        href={preMatch}
-                      >
-                        Pre-match &rarr;
-                      </Link>
-                    </>
-                  )}
-                </>
-              )}
-            </p>
-            <p className="text-right text-sm font-black text-brass tabular-nums">
-              {row.kind === "out" ? (
-                <Chip tone="out">Out</Chip>
-              ) : row.kind === "next" || row.kind === "live" ? (
-                <>
-                  <small className="block text-[10px] font-extrabold text-ink-faint">win</small>+
-                  {row.coins}
-                </>
-              ) : (
-                `+${row.coins}`
-              )}
-            </p>
+          <li className="border-b border-line/40 last:border-b-0" key={`${row.kind}-${row.round}`}>
+            {href ? (
+              <Link className={`${ROW} rounded-md hover:text-brass ${FOCUS}`} href={href}>
+                {body}
+              </Link>
+            ) : (
+              <div className={ROW}>{body}</div>
+            )}
           </li>
         );
       })}

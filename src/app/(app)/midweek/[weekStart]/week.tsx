@@ -21,9 +21,9 @@ import { createClient } from "@/lib/supabase/server";
 
 /**
  * The pages behind the hub's tiles (DR5-11, ADR-154): `/midweek/[week]/bracket`,
- * `night`, `calls` and `picks`. Each has a back link and no Compete tabs (one
- * tab row per screen), and reads what the week page read, at the same moments.
- * S6 restyles what they hold.
+ * `night`, `calls` and `picks`, and the week page itself. Each has a back link
+ * and no Compete tabs (one tab row per screen), and reads what the old week
+ * page read, at the same moments (DR5-14, ADR-155).
  */
 
 /** A sub-page's frame: the back link to the hub, the Title and the week in Small. */
@@ -73,10 +73,11 @@ export type OpenWeek = {
 
 /**
  * Opens a week for a sub-page: the member, a due week run first (ADR-098),
- * the week by its start, and, for a week with nothing played, its notice.
- * Not a week, or no such week: not found.
+ * the week by its start, and, for a week with nothing played, its notice
+ * under `title` (the week's date when null). Not a week, or no such week: not
+ * found.
  */
-export async function openWeek(weekStart: string, title: string): Promise<OpenWeek> {
+export async function openWeek(weekStart: string, title: string | null): Promise<OpenWeek> {
   const user = await requireUser();
   await runDueMidweek();
   if (!isWeekStart(weekStart)) notFound();
@@ -85,11 +86,14 @@ export async function openWeek(weekStart: string, title: string): Promise<OpenWe
   if (!tournament) notFound();
   const lockAt = tournament.lock_at;
   const date = formatDayDate(lockAt);
+  // The week page is titled by its date; a sub-page says the date under its title.
+  const heading = title ?? date;
+  const sub = title === null ? "Midweek Madness" : date;
   const notice = skipOrVoidNotice(tournament, MIDWEEK.minEntrants);
   let blocked: ReactNode | null = null;
   if (notice) {
     blocked = (
-      <WeekShell sub={date} title={title}>
+      <WeekShell sub={sub} title={heading}>
         <MidweekNotice tone={notice.tone}>
           <b>{notice.lead}</b> {notice.rest}
         </MidweekNotice>
@@ -99,7 +103,7 @@ export async function openWeek(weekStart: string, title: string): Promise<OpenWe
     const scheduleVersion = scheduleVersionOf(tournament);
     const roundOne = formatClock(roundStartAt(new Date(lockAt), 1, scheduleVersion).toISOString());
     blocked = (
-      <WeekShell sub={date} title={title}>
+      <WeekShell sub={sub} title={heading}>
         <WeekNote title="Not drawn yet">
           The bracket is drawn at the lock, {date} at {formatClock(lockAt)}. Round 1 kicks off at{" "}
           {roundOne}, then a round {roundIntervalText(scheduleVersion)}.

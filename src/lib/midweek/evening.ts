@@ -347,23 +347,6 @@ export function assembleBracket(input: {
 }
 
 /**
- * The round of the member's match in play, or else of their next match still
- * to kick off, for the jump link "Your match · Live" or "Your match · R2 20:15";
- * null once they are out or have no match left.
- */
-export function yourNextRound(bracket: readonly BracketRound[], you: string): BracketRound | null {
-  return (
-    bracket.find((round) =>
-      round.pairs.some(
-        (pair) =>
-          (pair.kind === "upcoming" || pair.kind === "inplay") &&
-          pair.sides.some((side) => !side.placeholder && side.userId === you),
-      ),
-    ) ?? null
-  );
-}
-
-/**
  * Where a group of pairings sits in the `lg` bracket tree (KB-031). The tree is
  * one grid shared by every round: a header row, then `2^(rounds − 1)` rows of
  * equal height, one per round-1 pairing. A round-`r` pairing spans `2^(r − 1)`

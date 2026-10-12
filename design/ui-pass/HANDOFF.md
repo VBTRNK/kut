@@ -18,8 +18,9 @@ changes it.
   its own on Home, and the re-split build with five adjustments (see "Owner
   decisions (round 3)" and "Records the build needs").
 
-Built so far: S4 (the foundations, ADR-153) and S5 (the hub, its routes, the
-picker and Home's block, ADR-154).
+Built so far: S4 (the foundations, ADR-153), S5 (the hub, its routes, the
+picker and Home's block, ADR-154) and S6 (the week, bracket, night, calls and
+pre-match, ADR-155).
 
 ## The canvas
 

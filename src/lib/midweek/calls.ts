@@ -3,7 +3,6 @@ import { BRAND } from "@/lib/brand";
 import {
   capitalise,
   matchName,
-  roundShort,
   type BracketPair,
   type BracketRound,
   type MyNight,
@@ -216,22 +215,6 @@ export function weeklyCallsLine(correct: number, picks: number, coins: number): 
   return correct > 0
     ? `You called ${correct} of ${picks} right: +${correct * coins} ${BRAND.currency}.`
     : `You called 0 of ${picks} right.`;
-}
-
-/** The bracket's jump link while a call is open: `Call the semis · 1 open`. */
-export function callJumpLink(
-  cards: readonly CallCard[],
-  rounds: number,
-): { round: number; label: string } | null {
-  const open = cards.filter((card) => card.state === "open");
-  if (open.length === 0) return null;
-  const round = Math.min(...open.map((card) => card.round));
-  const short = roundShort(round, rounds);
-  const what = /^Round /.test(short) ? short.toLowerCase() : `the ${short.toLowerCase()}`;
-  return {
-    round,
-    label: `Call ${what} · ${open.filter((card) => card.round === round).length} open`,
-  };
 }
 
 /** The status line under a card's options, for a state the page rendered (not a tap in progress). */

@@ -1,8 +1,7 @@
 import { MidweekWeeklyCalls } from "@/components/midweek/calls-list";
 import { MidweekLivePoller } from "@/components/midweek/live-poller";
-import { MidweekMatchRatings } from "@/components/midweek/match-ratings";
 import { MidweekPath } from "@/components/midweek/path";
-import { MidweekRatingList } from "@/components/midweek/rating-list";
+import { MidweekMatchRatings, MidweekRatingList } from "@/components/midweek/rating-list";
 import { MidweekShare } from "@/components/midweek/share";
 import { Block } from "@/components/ui/block";
 import { predictionCoins } from "@/game/midweek/rewards";
@@ -25,8 +24,9 @@ export const metadata = { title: "Your night" };
  * evening your five's ratings for the match just played, from its full time
  * (DR4-8, ADR-150); once the week is complete the night's ratings (DR3,
  * ADR-117), your calls in a line and the share images (ADR-120). What the
- * evening page and the champion view showed, at the same moments. S6
- * restyles it (DR5-14).
+ * evening page and the champion view showed, at the same moments. Laid out
+ * as DR5-14: link rows, then the ratings block, the calls in one row, and
+ * Share the night.
  */
 export default async function MidweekNightPage({
   params,
@@ -46,28 +46,21 @@ export default async function MidweekNightPage({
   const entered =
     night.entered ||
     results.draw.some((row) => row.side_0_user_id === userId || row.side_1_user_id === userId);
-  if (!entered) {
-    return (
-      <WeekShell sub={date} title="Your night">
-        <WeekNote title="Not in this one">You weren&rsquo;t in this week&rsquo;s bracket.</WeekNote>
-      </WeekShell>
-    );
-  }
-
   // The next match's pre-match, once both its feeders have ended (DR4-7, ADR-149).
   const nextRow = night.rows.find((row) => row.kind === "next");
   const preMatch =
     evening && nextRow?.kind === "next" && nextPairing(bracket, nextRow.round, nextRow.pairing)
       ? preMatchHref(weekStart, nextRow.round, nextRow.pairing)
       : null;
-  const matchRated = evening
-    ? await loadLatestMatchRatings(
-        supabase,
-        { seed_hash: tournament.seed_hash ?? null, rounds, week_start: weekStart },
-        results,
-        userId,
-      )
-    : null;
+  const matchRated =
+    evening && entered
+      ? await loadLatestMatchRatings(
+          supabase,
+          { seed_hash: tournament.seed_hash ?? null, rounds, week_start: weekStart },
+          results,
+          userId,
+        )
+      : null;
 
   let after = null;
   if (complete) {
@@ -105,7 +98,7 @@ export default async function MidweekNightPage({
     const ratings = rated.get(userId) ?? null;
     after = (
       <>
-        {ratings && <MidweekRatingList defaultOpen ratings={ratings} />}
+        {ratings && <MidweekRatingList ratings={ratings} />}
         {records.length > 0 && (
           <MidweekWeeklyCalls
             href={`/midweek/${weekStart}/calls`}
@@ -117,9 +110,18 @@ export default async function MidweekNightPage({
     );
   }
 
+  if (!entered) {
+    // Nothing of your own, but the champion poster is everyone's to share.
+    return (
+      <WeekShell sub={date} title="Your night">
+        <WeekNote title="Not in this one">You weren&rsquo;t in this week&rsquo;s bracket.</WeekNote>
+        {after}
+      </WeekShell>
+    );
+  }
+
   return (
     <WeekShell sub={date} title="Your night">
-      {evening && <MidweekLivePoller at={now.toISOString()} nextAt={nextKickoff} poll={inPlay} />}
       <Block
         aside={
           <p className="text-small text-ink-dim">
@@ -139,16 +141,11 @@ export default async function MidweekNightPage({
             Round 1 kicks off at {formatClock(bracket[0].kickoffAt)}.
           </p>
         )}
-        <MidweekPath
-          now={now.toISOString()}
-          preMatch={preMatch}
-          rounds={rounds}
-          rows={night.rows}
-          weekStart={weekStart}
-        />
+        <MidweekPath preMatch={preMatch} rounds={rounds} rows={night.rows} weekStart={weekStart} />
       </Block>
       {matchRated && <MidweekMatchRatings rated={matchRated} />}
       {after}
+      {evening && <MidweekLivePoller at={now.toISOString()} nextAt={nextKickoff} poll={inPlay} />}
     </WeekShell>
   );
 }

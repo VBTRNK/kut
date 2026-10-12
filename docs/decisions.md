@@ -345,3 +345,26 @@ ADR-119 (Home's Midweek card).
 - **Home** has one Midweek block by the hub's rules: brass with a primary
   button while something is due, else plain. The live tint goes; a `Live`
   tag marks the evening.
+
+## ADR-155 — The Midweek week, bracket, night, calls and pre-match on the scale
+
+Date: 2026-10-12 (flut-ui-pass S6, VibeTrunk/kut#294, DR5-14). Amends ADR-118
+and DR3-6 (calls on their own page, a block each), ADR-117 and DR3 (rating
+rows), ADR-149 (the pre-match's layout) and ADR-113 (the week page).
+
+- **Week.** `/midweek/[weekStart]` is a finished week: the date as the Title,
+  who won it, your night, the final and four tiles (Your night, Bracket,
+  Calls, Who picked whom); the seal folds away at the foot. A week still in
+  play redirects to the hub. `MidweekJumpLinks` and the champion banner go.
+- **Bracket.** On a phone a block per round, latest first, listed from 15
+  minutes before its kick-off; from `lg` the tree, on the scale. A row is one
+  link (report, live match or pre-match) with a `You` tag on your side and,
+  once you're out, `Your call: …` or `Call open`.
+- **Your night.** Rounds as link rows; ratings as rows (mini card, name, the
+  line, disc, `★ Best`), no per-match chips or toggle. A non-entrant still
+  gets the champion poster.
+- **Calls.** Each call is a block, brass while open and uncalled, `✓ Right` or
+  `Wrong` once ended, linking to its pre-match, the match or its report.
+- **Pre-match.** The pairing as the Title, each five a block with a team
+  rail; the Power foot moved to How it works `#power`. Cut: the ratings rule,
+  `SHARE_NOTE`, `CALLS_FOOT` (all on How it works). Gating is unchanged.

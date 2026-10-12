@@ -17,20 +17,20 @@ export function MidweekNotice({
 }) {
   return (
     <div
-      className={`flex items-start gap-3 rounded-[14px] border px-4 py-3.5 text-[13.5px] leading-relaxed text-ink-dim ${
-        tone === "warn" ? "border-warning-line bg-warning-bg/55" : "border-line bg-panel/60"
+      className={`flex items-start gap-3 rounded-2xl border p-4 text-body text-pretty text-ink-dim ${
+        tone === "warn" ? "border-warning-line bg-warning-bg/55" : "border-line/60 bg-panel/60"
       }`}
       role={live ? "status" : undefined}
     >
       <span
         aria-hidden="true"
-        className={`grid h-[22px] w-[22px] flex-none place-items-center rounded-full text-xs font-black ${
+        className={`mt-0.5 grid h-5 w-5 flex-none place-items-center rounded-full text-label font-extrabold ${
           tone === "warn" ? "bg-warning text-[#1d1206]" : "bg-steel text-[#0d171c]"
         }`}
       >
         {tone === "warn" ? "!" : "i"}
       </span>
-      <div className="min-w-0 [&_b]:text-ink">{children}</div>
+      <div className="min-w-0 [&_b]:font-semibold [&_b]:text-ink">{children}</div>
     </div>
   );
 }
