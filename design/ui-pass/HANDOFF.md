@@ -1,4 +1,4 @@
-# UI pass design round 5 (DR5): the system, Midweek and the match report
+# UI pass design round 5 (DR5): the system, Midweek, the report and the rest of the app
 
 For every agent building the UI pass sessions S4 onward (plan
 `~/.claude/plans/flut-ui-pass.md`, tracking issue #294). Read this in full,
@@ -8,9 +8,17 @@ this note doesn't change. Where this note and an artboard disagree, this note
 wins; where either disagrees with an ADR, the ADR wins until a new ADR
 changes it.
 
-**Status: answered by the owner, 12 Oct 2026.** Q1 to Q4 as recommended, plus
-three changes the canvas now shows (see "Owner decisions" at the end).
-Nothing here is built yet. S3 adds the rest of the app to this note.
+**Status:**
+
+- **Round 2** (S2: the system, Midweek, the report) was answered by the
+  owner on 12 Oct 2026. Q1 to Q4 as recommended, plus three changes the
+  canvas now shows (see "Owner decisions (DR5, round 2)").
+- **Round 3** (S3: the rest of the app, pages G to M) was answered by the
+  owner on 12 Oct 2026: Q5 to Q8 as recommended, the Chronicle as a tile of
+  its own on Home, and the re-split build with five adjustments (see "Owner
+  decisions (round 3)" and "Records the build needs").
+
+Nothing here is built yet.
 
 ## The canvas
 
@@ -18,21 +26,26 @@ Nothing here is built yet. S3 adds the rest of the app to this note.
   <https://claude.ai/artifact/UwL1GERjSw4DMSxmY1rDJM>, which only the owner
   can open. A build agent reads an artboard with the Artifact tool's `read`
   action (`path: project/<file>`).
-- **56 artboards from 28 boards on six pages, A to F.** Most boards are at
+- **99 artboards from 51 boards on 13 pages:** A to F (round 2) and G to M
+  (round 3, see "Round 3"). Most boards are at
   320 and 412 px, some also at 1440 px. The file name says which:
   `B5-Hub-YourMatch-412.dc.html`. A blue sticky beside each row says what it
   shows and why.
-- **Generated, not drawn.** A scratch generator, built on the MM3 one and not
-  kept in the repo, does four things:
+- **Generated, not drawn.** A generator built on the MM3 one, kept in this
+  repo at `design/ui-pass/build/` since S3, does four things:
   - it stores the sample week as the member views' rows;
   - it calls the app's real functions on those rows;
   - it renders the DR5 components (TSX in the app's idiom) with the app's
     compiled `globals.css`, plus the six type tokens below;
   - it measures every artboard in Chromium and fails on any sideways scroll.
-- **Its source is on the canvas** under `project/source/`. `ui.tsx.txt`,
-  `midweek.tsx.txt`, `report.tsx.txt` and `pages.tsx.txt` are the TSX; lift
-  the components from there, not from the artboards' flattened HTML.
-  `README.txt` says how to rebuild.
+- **Its source is in `design/ui-pass/build/`** (a copy is on the canvas
+  under `project/source/`), so every agent can read it without the canvas.
+  `ui.tsx`, `midweek.tsx`, `report.tsx`, `pages.tsx` and `app.tsx` (round 3)
+  are the TSX; lift the components from there, not from the artboards'
+  flattened HTML. `node design/ui-pass/build/build.mjs [--shots <dir>]`
+  rebuilds every artboard into `.release-evidence/ui-pass-mocks/` (ignored),
+  `voices.mjs` measures one and `clipped.mjs` lists text cut off by an
+  ellipsis. It is design-only: nothing in the app imports it.
 - **The screenshot review fixed eleven defects before the owner saw them.**
   Four came from the sideways-scroll check:
   - long club names widened `auto` grid tracks;
@@ -233,7 +246,7 @@ Sub-pages have a back link and no Compete tabs (one tab row per screen).
   `Pre-match`), your pairing in brass. One link per row. Once you're out a
   row also carries `Your call: Niels` or `Call open` (`rowCalls`), and a
   settled pairing links to its pre-match.
-- **From `lg`** the tree stays `MidweekBracket`'s (DR4-10). S5 moves its type
+- **From `lg`** the tree stays `MidweekBracket`'s (DR4-10). S6 moves its type
   onto the scale without changing its structure.
 - **Your night:** `Round by round` as link rows, then the ratings block. Until
   the week completes it shows your latest match (`Against Sophie`), after it
@@ -295,7 +308,7 @@ no feed. S3 places it on the new Home.
 
 Phrasebook lines (headlines, facts, moments, kicks, ratings' lines) are
 unchanged (ADR-093). `{…}` is data. **Cut** strings are removed, **moved**
-ones go to How it works (#233, S8).
+ones go to How it works (#233, S11 in the revised split).
 
 **The hub and tiles:**
 
@@ -438,18 +451,18 @@ ones go to How it works (#233, S8).
 ## Components
 
 - **New (S4):** the primitives above.
-- **New (S5):**
+- **New (S5 and S6, Midweek):**
   - the hub's Now blocks (`NowFive`, `NowDraw`, `NowMatch`, `NowNext`,
     `NowOut`, `NowResult`) and `HubTiles`;
   - `ChampionBlock`, `MiniFive`;
   - the pages behind the tiles (DR5-11).
-- **Revised (S5):**
+- **Revised (S5 and S6):**
   - `MidweekMatchRow`, `MidweekPath` (as link rows), `MidweekRatingList`
     (DR5-6);
   - `MidweekPredictions` (call blocks), `MidweekPreMatchFive`;
   - the picker (split into slots, plusses, save bar, list), `LastWeek`;
   - `MidweekEntryCard` and `MidweekLiveCard` (Home).
-- **Revised (S6):**
+- **Revised (S7, the report):**
   - `MidweekScoreboard` (`MatchScoreboard`);
   - `MidweekMomentRow`, `MidweekKickRow` (one `LaneRow`, rails, 520 px
     lanes);
@@ -485,21 +498,468 @@ The owner's answers of 12 Oct 2026:
 - **No newest outline.** The live feed's newest item loses its brass outline
   (amends DR4-1 and DR5-5); it still slides in.
 
+## Round 3: the rest of the app (S3, approved)
+
+**Status: answered by the owner, 12 Oct 2026** (DR5-17 to DR5-26; Q5 to Q8
+as recommended; see "Owner decisions (round 3)"). Pages G to M of the canvas,
+43 artboards from 23 boards. They use the round 2 system unchanged, plus a
+few primitives.
+
+### The data
+
+The same invented world as the Midweek boards (`app-world.mjs` beside
+`world.mjs`), stored as the member views' rows: `player_directory`,
+`my_collection_cards`, `active_market_listings`, `my_trade_offers`,
+`club_value_leaderboard`, `activity_feed`, `user_notifications`,
+`chronicle_weeks`.
+
+- **"You" are Sanne again,** on Mon 12 Oct 12:00: 9 cards, 8 of 30 Players,
+  two of them listed, one offer in, one sent.
+- **Derived by the app's own functions:**
+  - card stats from `ARCHETYPE_OFFSETS`, tiers from `getRarityTier`, discard
+    values from `calculateLiveDiscardValue`;
+  - album slots from `buildSlots`, `applyLens` and `paginate`;
+  - pack chips from `packSummary`, ownership chips from `countOwnedCopies`
+    and `ownershipDisplayData`;
+  - Home's feed from `foldActivity` and `describeFoldedActivity`;
+  - messages from `groupMessages`, `messageTarget` and `presentNotification`;
+  - the Chronicle's lines from `issueStandfirst`, `formatChronicleDate` and
+    `formatReportedCount`;
+  - the lock countdown from `countdownText`.
+- **Invented inputs:**
+  - coin balances, listing prices and expiries, the offers;
+  - the risers' deltas, the activity and message rows;
+  - the Chronicle's sessions.
+- **Checked:** no board scrolls sideways, and only the 80-character club
+  name is cut off by an ellipsis (as DR4-9 intends). The screenshot review
+  fixed eleven defects:
+  - the completion bar drew at 100 px (SVG aspect ratio);
+  - page 1 offered `‹ Page 1`;
+  - a listing's price tag sat on the shirt name and said the price twice;
+  - the ownership note truncated at 320 px;
+  - Compete's `Pick` badge squeezed "Midweek" to "M…" at 320 px;
+  - every standings row truncated its counts;
+  - Settings said "Club name" twice;
+  - Packs said 250 three times;
+  - Home's Now block ran the full desktop width;
+  - section tabs ran the full desktop width;
+  - on Home at 320 px, `1,389` and `Open a pack` were cut off in two-up
+    tiles (found after publishing; the tiles now stack below 360 px).
+- **Measured** at 412 px (S1's method, main area): every page uses 3 to 6 of
+  the six sizes, 4 to 9 voices and 4 to 6 text colours. S1 measured 7 to 16
+  sizes per page today.
+
+### Boards and routes
+
+| Board | Route | Shows |
+|---|---|---|
+| `G1-Home-Due` (320, 412, 1440) | `/` | Mon 12 Oct: Pick your five is due, a session report too |
+| `G2-Home-Quiet` (412) | `/` | Thu 8 Oct: nothing due, Open a pack is the primary |
+| `H1-Collection-Album` (320, 412, 1440) | `/club/collection` | The album, page 1; a spread from `lg` |
+| `H2-Collection-Filter` (412) | `/club/collection` | The Filter sheet, open on Gaps |
+| `H3-Collection-Manage` (412) | `?view=manage` | The grid with the toolbar |
+| `H4-Collection-Trading` (320, 412) | `/club/collection/wanted` | Wanted and your copies |
+| `H5-Card-Detail` (412) | `/club/collection/[card]` | A card's page: why, list, discard |
+| `I1-Packs` (320, 412, 1440) | `/club/packs` | The pack and the tier ladder |
+| `I2-Pack-Confirm` (412) | `/club/packs` | The confirm sheet |
+| `I3-Reveal-Summary` (320, 412) | `/club/packs/[opening]` | After the reveal |
+| `J1-Market-Buy` (320, 412, 1440) | `/market` | Buy |
+| `J2-Market-Listing` (412, 1440) | `/market/[listing]` | A listing with the offer form |
+| `J3-Market-Selling` (320, 412) | `/market/selling` | Your listings (#237) |
+| `J4-Market-Offers` (320, 412) | `/market/offers` | Offers in and sent |
+| `K1-Standings` (320, 412) | `/leaderboard` | The standings |
+| `K2-Players` (412, 1440) | `/players` | The directory |
+| `L1-Chronicle` (320, 412) | `/chronicle` | The issues |
+| `L2-Chronicle-Week` (412) | `/chronicle/[week]` | One issue |
+| `L3-Messages` (320, 412) | `/messages` | The inbox |
+| `M1-Settings` (320, 412) | `/settings` | Settings |
+| `M2-How-It-Works` (412) | `/how-it-works` | Topic tiles and one topic (#233) |
+| `M3-Login` (320, 412) | `/login` | Sign in |
+| `M4-Welcome` (320, 412) | `/welcome` | The sealed starter pack |
+
+### Primitives added (`app.tsx`; S4 moves them into `src/components/ui/`)
+
+| Primitive | Props | Notes |
+|---|---|---|
+| `FigureTile` | `{ href, label, value, note? }` | A place whose state is one number: a Small label with ›, a Figure |
+| `Toolbar` | `{ placeholder, value?, on?, summary? }` | Search and one Filter button (with the count of filters on), a Small result line |
+| `FilterSheet` | groups of `{ label, options, on }`, a result | `FilterBar`'s `BottomSheet`, restyled: a row of choice chips per field, Clear, one primary naming the result |
+| `Field` | `{ label, value?, placeholder?, help?, type? }` | The label in Small 600, the input, a Small help line |
+| `Switch` | `{ on, label }` | `role="switch"`; its state is also a Tag beside it |
+| `CardGrid` | `{ children, wide?: 4 \| 5 }` | Cards two across on a phone (about 140 px at 320, the face's floor), 3 from `sm`, 4 or 5 from `lg` |
+
+- **`SectionNav`** gains `lg:max-w-md`: tabs never stretch across a desktop.
+- **A section tab's badge** is a word when it fits (`Offers 1`), else a
+  brass dot with the word for screen readers (Compete's `Pick` on Standings
+  and Players). The primary tab bar keeps its word badges.
+- **The app chrome** (`AppNav`) moves onto the scale in S4. The tab bar's
+  labels are 10 to 11 px today, under the Label floor. S4 measures 12 px
+  labels at 320 px ("Collection" is the longest) and flags it if they don't
+  fit.
+
+### Decisions (approved by the owner)
+
+**DR5-17. Home.**
+
+- **Header:** the Title and a Small date. The kicker
+  `Terrible Football Haarlem` goes.
+- **The Now block:** the soonest thing due (`orderNowCards`), with the hub's
+  rules (DR5-16): brass and a primary button.
+- **Tiles under it:**
+  - Club Value and Rank as `FigureTile`s;
+  - Open a pack as a tile while something is due, the one primary when
+    nothing is (DR5-7);
+  - anything else due (the session report, the rehab check-in) as a tile
+    with its state in brass.
+- **From 360 px** the tiles sit two across; below it they stack, because a
+  Figure such as `1,389` doesn't fit half a 320 px column. **From `lg`** they
+  sit beside the Now block.
+- **Top risers:** rows with a mini card and a `▲ +4` tag on a phone, the five
+  cards from `lg` (Q8).
+- **The Chronicle** is a tile of its own between Top risers and Club
+  activity (owner): its icon, `This week's Chronicle`, and the latest
+  issue's week and standfirst as its state. It is Home's way in; the
+  session messages (`Session report ready`, `Attendance reward`) also lead
+  to an issue, and the Home tab stays lit on `/chronicle`. `LinkTile` gains
+  an optional `icon`.
+- **Club activity:** plain rows.
+- **Cut:** the risers' lede and `New here? How FLUT works →` (the account
+  menu has it).
+- Amends ADR-114 (Home's layout).
+
+**DR5-18. Collection.**
+
+- **Header:** the Title, then one Small line, `8 of 30 Players · 9 cards ·
+  Club Value 1,389 ›`, and the completion bar. Then Album · Manage · Trading.
+- **The album:**
+  - the lens chips and the two menus go into the Filter sheet (C): Show (All,
+    Gaps, Specialists), Type, Tier;
+  - a Small line says which lens and which page;
+  - a page is a block with a Heading and `2 of 9`;
+  - gaps are dashed with the Player's name; `×2` and `Listed` are Tags;
+  - page buttons below; from `lg` a spread of two pages, and the buttons step
+    by spread;
+  - the first slot moves up from about 660 px to about 330 px on a phone.
+- **Manage:** the toolbar; `Listed · 60` as a Tag on the card.
+- **Trading:**
+  - the page keeps the Collection title with its tab (it was "Trading
+    preferences");
+  - Wanted is a block of rows, each saying where to get the card, with
+    `Add a wanted card` opening the sheet. The two long `details` lists go;
+  - Your copies is a block of rows with one button each; a listed copy says
+    why it can't be available.
+- **The card page:** back link, the name as the Title, then three blocks:
+  - Why this rating (insets);
+  - List on the market (a `Field`);
+  - Discard.
+
+  #295 (its sideways scroll) is fixed on its own.
+- **The archetype nudge** stays, as one link row under the tabs, only for an
+  All-rounder.
+
+**DR5-19. Packs.**
+
+- **The page:** no kicker, no lede (the coin pill has the balance).
+- **The pack** keeps its art as a brass block:
+  - a Heading;
+  - `3 Live Cards. Duplicates can happen.`;
+  - `Open for 250 coins`;
+  - `Leaves you 990.`
+- **The ladder:** rows, with `How tiers work ›`.
+- **The confirm sheet:** a Heading, one line, Not now and Pay.
+- **The reveal summary:**
+  - the Title `Your new Live Cards`;
+  - `TFH Pack · 2 new Players. Album 8 / 30.` in Small;
+  - each chip as a Tag under its card.
+
+  The reveal itself (tap to flip) keeps its show, with its labels moved onto
+  the scale.
+
+**DR5-20. Market** (DR5-9, #237).
+
+- **Tabs:** Buy · Selling · Offers.
+- **Buy:**
+  - no kicker or lede; the toolbar;
+  - no price tag on the card: `Buy for 280` (secondary) carries the price;
+  - the seller in Small, the ownership chip on the card as today (KB-026).
+- **A listing:**
+  - back link, the name as the Title;
+  - a Buy now block: the price as a Figure, discard value and seller in
+    Small, the button pinned above the tab bar on a phone as today;
+  - an Or make an offer block, whose escrow line stays.
+- **Selling** (new, `/market/selling`):
+  - your active listings as rows: mini card, name, `43 h left · 1 offer`, the
+    price;
+  - each row opens its listing;
+  - listing still starts from the card.
+
+  No new data: `my_collection_cards` has `active_listing_price` and
+  `active_listing_expires_at`, and `my_trade_offers` has `listing_id`.
+- **Offers:**
+  - `On your listings`, then `You sent`;
+  - an open offer on your listing is the screen's brass block, with Accept
+    as its primary;
+  - a sent offer has Withdraw; an answered one shows its tag.
+
+**DR5-21. Standings and Players.**
+
+- **Standings:**
+  - Compete's tabs, the Title, and one Small line,
+    `By Club Value: coins plus what your cards are worth.`;
+  - the lede moves behind `See the maths ›`;
+  - one table in a block, Label heads;
+  - rank in ink: the top three lose their brass, which means action;
+  - your row tinted, with a `You` tag;
+  - on a phone the club alone under the name; cards and Players are columns
+    from `sm` (Q6).
+- **Players:** the tabs, the Title with the count, the toolbar, the grid.
+  The lede is cut.
+
+**DR5-22. The Chronicle.**
+
+- **The index:**
+  - the masthead (4 px brass rules, tracked capitals) becomes the Title and
+    `One issue per football week · 5 issues`;
+  - the latest issue is a block with its standfirst and `Read the issue`;
+  - earlier issues are link rows.
+- **An issue:**
+  - the week as the Title, the dates in Small, the standfirst in Body;
+  - a block per session: the weekday as Heading, attendance and G+A on the
+    right, reports and bibs in Small, rows of name and count with kudos in
+    Small;
+  - Crossings as rows with tier Tags; its explanation is cut.
+
+**DR5-23. Messages.**
+
+- **A row:** the title (Body, 600 while unread) and the body in Small, with
+  the time and a `New` tag on the right. Four voices per row become two.
+- **Gone:** the tracked kicker and the inline `Bracket →`; the row is the
+  link (C).
+- **Kept:** the day groups from `groupMessages`, under a Label head, and
+  `Mark all read`.
+
+**DR5-24. Settings.**
+
+- **Header:** `Signed in as Sanne · sanne` in the Small line.
+- **Your club:** a block with the club name `Field`.
+- **Midweek Madness:**
+  - the switch in the block's heading, the state as a Tag;
+  - the three privacy lines kept and shortened (ADR-091).
+- **Rows:** My card and How FLUT works as link rows; Admin tools as a row
+  for admins.
+- **Sign out:** secondary.
+
+**DR5-25. How it works becomes the FAQ (#233).**
+
+- **Topic tiles at the top:** Cards and ratings, Packs and discard, Market
+  and trading, Club Value, Midweek Madness, What others see.
+- **An anchor per topic,** and every `How … works ›` in the app lands on
+  one: `#plusses`, `#power`, `#ratings`, `#calls`, `#trading`, `#cards`,
+  `#privacy`.
+- **The numbered serif sections** become blocks with a Heading and Body.
+- **Built in steps (owner, from Codex's review):** S4 lays the skeleton,
+  the tiles and an anchor per topic on today's sections. Each build session
+  then moves the explanations it cuts from its screens into their anchor in
+  the same PR, so every `How … works ›` link lands on its text from the day
+  it ships. S11 rewrites what is left and closes #233.
+
+**DR5-26. Sign-in and welcome.**
+
+- **The crest lockup** stays as the brand mark, with its own type (Q5).
+- **Login:**
+  - `Sign in` as the Title;
+  - `FLUT is for invited members.`;
+  - the fields as `Field`s, the email hint shortened;
+  - one primary.
+- **Welcome:**
+  - the lockup centred, the Title;
+  - the sealed pack with a Label instead of tracked capitals;
+  - one Body line, one primary.
+
+### Pages without mocks (foundations only)
+
+These take the scale, the primitives and the copy audit's verdicts in their
+build session, with no artboard:
+
+- the player profile;
+- Club Value;
+- My card;
+- the session report;
+- the invite page;
+- Admin.
+
+Their copy rows are in S1's table (the review canvas, `D-Copy-Audit`); its
+Card page rows apply to the card page (DR5-18).
+
+### Copy (round 3)
+
+Phrasebook lines, the server's message wording and empty states are
+unchanged. **Cut** strings go; **moved** ones go to How it works (DR5-25).
+
+- **Home:**
+  - `This week in FLUT`, `Mon 12 Oct`;
+  - tiles `Club Value ›`, `Rank ›`, `Open a pack` with
+    `{250} coins · {3} cards`, `Your report` with `+50 · closes {Thu}`;
+  - `Top risers`, `Players ›`, `{Playmaker} · OVR {66}`, `▲ +{4}`;
+  - `Club activity`, `This week's Chronicle` with `Week of {5 October}`.
+  - **Cut:** the kicker, the risers' lede, `New here? How FLUT works →`.
+- **Collection:**
+  - `{8} of {30} Players · {9} cards · Club Value {1,389} ›`;
+  - `{All Players} · page {1} of {4}`, `Filter`, `Page {1}`, `{2} of {9}`;
+  - `‹ Page {n}`, `Page {n} ›`, `Pages {3}–{4} ›`, `Show all pages ›`;
+  - the sheet: `Filter`, `Clear`, `Show`, `Type`, `Tier`, `Sort`,
+    `Show {22} Players`;
+  - Manage: `Search your cards`, `Listed · {60}`;
+  - Trading:
+    - `Wanted`, `{2} of 100`, `Wanted cards stay private.` (shortened);
+    - `Not in your collection · listed from {60} ›`, `{Lieke} has one`;
+    - `Add a wanted card`, `How trading works ›`;
+    - `Your copies`, `{1} of 30`, `Make available`, `Make private`;
+    - `Listed cards can’t also be available.`
+  - The card page:
+    - `Why this rating`, `How ratings move ›`;
+    - `List on the market`, `25 to 240 coins. The card is locked while
+      listed.` (shortened);
+    - `Discard`, `This can’t be undone.` (shortened), `Discard for {22}`.
+  - **Cut:** `My club` (kicker), `TFH players collected`, `Lens`, the
+    trading intro's second sentence (moved), `Market listings and members
+    with matching available copies appear here.`, the card page's two rating
+    sentences (D).
+- **Packs:**
+  - `{3} Live Cards. Duplicates can happen.` (shortened);
+  - `Open for {250} coins`, `Leaves you {990}.`;
+  - `The tier ladder`, `How tiers work ›`;
+  - the sheet: `Open a {TFH Pack}?`, `{250} coins for {3} Live Cards. You
+    keep {990}.`, `Not now`, `Pay {250}`;
+  - the summary: `Your new Live Cards`, `View your Collection`, `Open
+    another`.
+  - **Cut:** `Pack store` (kicker), the page lede, the ladder's foot
+    (moved), `Pack opening saved — the result was fixed before this
+    reveal.`
+- **Market:**
+  - `Buy`, `Selling`, `Offers`, `Search Players`, `{9} listings · newest
+    first`;
+  - `Sold by {Joris}`, `Buy for {280}`, `Your listing`;
+  - a listing: `Buy now`, `Discard value {117} · sold by {Joris}`, `Buy for
+    {280} coins`, `Or make an offer`, `Coins`, `Add cards`, `Coins and
+    cards are held until the seller answers, or for {12} h.` (shortened),
+    `Send offer`;
+  - Selling: `Your listings`, `{2} active`, `{43} h left · {1} offer`,
+    `List a card from its page in your Collection.`;
+  - Offers: `On your listings`, `You sent`, `{Bas V.} · {60} asked`, `From
+    {Joris} · {9} h left`, `{35} coins + {Umut C. (30)}`, `Open`,
+    `Declined`, `Accept`, `Decline`, `Withdraw`.
+  - **Cut:** `Transfer market` (kicker), both ledes (the 5% moves to where a
+    seller sets a price), `What this card pays out if you discard it.`
+- **Standings and Players:**
+  - `Standings`, `By Club Value: coins plus what your cards are worth.`,
+    `Member and club`, `Value`, `Cards`, `Players`, `You`, `See the maths ›`;
+  - `Players`, `{30} Players`, `Highest OVR first`.
+  - **Moved:** the standings lede. **Cut:** the players lede and both
+    kickers.
+- **Chronicle:**
+  - `FLUT Chronicle`, `One issue per football week · {5} issues`, `Read the
+    issue`, `Earlier issues`, `‹ All issues`;
+  - `{Monday 5 October}`, `{16} in · {21} G+A`, `{14} of {16} reports ·
+    bibs by {Hidde P.}`, `Crossings`.
+  - **Cut:** `Latest issue`, `Matchday {1} · {Session}`, `This week’s
+    promotions`, the Crossings sentence.
+- **Messages:** `Messages`, `{3} new`, `Mark all read`, `New`. **Cut:**
+  `FLUT inbox`, `opening one marks it read`, `Nothing new. Each message
+  opens what it is about.`, each row's kicker and its `{Bracket} →`.
+- **Settings:**
+  - `Signed in as {Sanne} · {sanne}`, `Your club`, `Club name`, `Shown in
+    the standings and on Midweek. Leave it blank for {Sanne's Club}.`, `Save
+    club name`;
+  - `Midweek Madness`, `Taking part`, the three privacy lines as on the
+    board;
+  - `My card` with `Photo and archetype`, `How FLUT works`, `Sign out`.
+  - **Cut:** `Account` (kicker), `A knockout for five of your cards, every
+    Wednesday.`
+- **How it works:** `How FLUT works`, `Attendance drives every card. Here is
+  how the rest follows.`, the six tile titles and states on the board, `Back
+  to the topics ↑`.
+- **Login and Welcome:**
+  - `Sign in`, `FLUT is for invited members.` (shortened), `Username`, `Or
+    the email address you joined with.` (shortened), `Password`;
+  - `Your starter pack is waiting`, `Sealed starter pack`, `250 FLUT Coins
+    and three Live Cards are already yours.` (shortened), `Open your starter
+    pack`.
+
+### Owner decisions (round 3)
+
+The owner's answers of 12 Oct 2026, all as recommended:
+
+- **Q5. The lockup keeps its own type.** The crest lockup's tracked
+  `FOOTBALL LEAGUE ULTIMATE TEAM` is the brand mark and is exempt from "no
+  tracked capitals", like the card face (`design/flut`, ADR-137).
+- **Q6. Standings on a phone show the club alone.** The counts are columns
+  from `sm`. This amends the archived spec (§39, KB-005: both counts at
+  every width).
+- **Q7. Filters live in the sheet at every width.** One toolbar (search,
+  Filter) everywhere; the desktop loses its inline tier chips and sort
+  select.
+- **Q8. Top risers are rows on a phone,** with a mini card and the rise; the
+  five cards from `lg`.
+- **The Chronicle is a tile of its own on Home,** distinct from the activity
+  rows (DR5-17).
+
 ## Records the build needs
 
-Each build session adds its ADR (from ADR-153) and updates `docs/PRODUCT.md`:
+The build sessions as revised in S3 (plan rev. 3, approved by the owner
+with five adjustments from a Codex review, all already in this split or
+added to it):
 
-- **S4:** the scale, the primitives, the one-row tabs. Amends ADR-043 (type
-  roles, the kicker), DR1-5 (DR5-4) and `SectionTabs`.
-- **S5:**
-  - the hub, the routes, the picker's move, the evening's pages and Home's
-    block;
+- **S4 stays small:** foundations and the shared shell only; each page moves
+  onto the scale in its own session, so no page is touched twice.
+- **Midweek is two PRs** (S5, S6), each verifying timing and privacy on its
+  own routes.
+- **The rest of the app is three PRs** by area (S8, S9, S10).
+- **Explanations move with their screens:** a session that cuts an
+  explanation moves it into its How it works anchor in the same PR, so a
+  `How … works ›` link always lands on its text (DR5-25). S11 catches
+  leftovers.
+- **The generator is in the repo** (`design/ui-pass/build/`), not only on
+  the private canvas or in scratch space.
+
+Each session adds its ADR (from ADR-153, in order), updates
+`docs/PRODUCT.md` where what a member sees changes, and records any changed
+rule in `docs/decisions.md`, in the same PR:
+
+- **S4 Foundations:**
+  - the scale, the primitives of both rounds, `SectionNav` in place of
+    `SectionTabs`' segmented variant, the app chrome on the scale;
+  - a ratchet check on arbitrary text sizes outside the card face: a count
+    that may only fall, which S11 sets to zero;
+  - How it works' skeleton: topic tiles and an anchor per topic on today's
+    sections (DR5-25).
+  - Amends ADR-043 (type roles, the kicker), DR1-5 (DR5-4) and
+    `SectionTabs`.
+- **S5 Midweek I:**
+  - the hub, the routes (DR5-11), the picker at `/midweek/pick` and Home's
+    Midweek block (DR5-16);
   - amends ADR-107 (`/midweek` lands on the hub), ADR-113 (the clock,
-    retired), ADR-114 (Home's block), ADR-091 (the privacy line), ADR-118
-    and DR3-6 (calls on their page), ADR-117 and DR3 (rating rows, the
-    plusses rule).
-- **S6:** the report. Amends ADR-111 and ADR-115/147 (its layout), DR4-1 (the
-  520 px lanes, no newest outline) and DR2's Why foot. Closes #279.
+    retired), ADR-091 (the privacy line) and DR3 (the plusses rule).
+- **S6 Midweek II:**
+  - the bracket, your night, calls, the pre-match and a past week (DR5-14);
+  - amends ADR-118 and DR3-6 (calls on their page), ADR-117 and DR3
+    (rating rows).
+- **S7 The report:**
+  - amends ADR-111 and ADR-115/147 (its layout), DR4-1 (the 520 px lanes,
+    no newest outline) and DR2's Why foot;
+  - closes #279.
+- **S8 Home, Collection and Packs:** DR5-17 to DR5-19. Amends ADR-114
+  (Home).
+- **S9 Market:** DR5-20 with the Selling tab. Amends ADR-053 and ADR-051;
+  closes #237.
+- **S10 The rest:**
+  - Standings, Players, the Chronicle, Messages, Settings, Login and
+    Welcome (DR5-21 to DR5-24, DR5-26);
+  - the pages without mocks, and Admin on the foundations.
+- **S11 Close-out:**
+  - How it works rewritten as the FAQ (DR5-25, closes #233) and a sweep for
+    leftover copy;
+  - the ratchet to zero, `PRODUCT.md` checked whole.
 
 No migration. Gating is unchanged: every page reads what today's pages read,
 at the same moments.
