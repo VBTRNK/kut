@@ -1,6 +1,6 @@
 import { buildCompeteTabs } from "@/lib/nav/routes";
 import { getNavContext } from "@/lib/nav/context";
-import { SectionTabs } from "./section-tabs";
+import { SectionNav } from "@/components/ui/section-nav";
 
 /**
  * Compete's section tabs, Midweek · Standings · Players (ADR-107), at the top
@@ -11,5 +11,5 @@ import { SectionTabs } from "./section-tabs";
  */
 export async function CompeteTabs() {
   const { competeStatus } = await getNavContext();
-  return <SectionTabs label="Compete" tabs={buildCompeteTabs(competeStatus)} />;
+  return <SectionNav label="Compete" tabs={buildCompeteTabs(competeStatus)} />;
 }

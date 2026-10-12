@@ -23,7 +23,7 @@ import type { ComponentType, SVGProps } from "react";
  * unit-tested; icons live here because this module is only ever imported from
  * inside the client boundary (`app-nav.tsx`).
  *
- * Section tabs deliberately get no icons — `SectionTabs` is rendered by server
+ * Section tabs deliberately get no icons — `SectionNav` is rendered by server
  * pages, and a component cannot cross the RSC boundary as a prop.
  */
 export type NavItem = RouteEntry & {

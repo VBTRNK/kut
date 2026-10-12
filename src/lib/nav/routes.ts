@@ -124,7 +124,7 @@ export const ACCOUNT_ROUTES: readonly RouteEntry[] = [
   { key: "admin", href: "/admin/attendance", label: "Admin", owns: ["/admin"], adminOnly: true },
 ];
 
-/** Section tabs. Text-only: `SectionTabs` is a client component rendered by
+/** Section tabs. Text-only: `SectionNav` is a client component rendered by
  *  server pages, so a component prop would fail the RSC boundary. */
 export const MARKET_TABS: readonly RouteEntry[] = [
   { key: "buy", href: "/market", label: "Buy" },
@@ -170,11 +170,12 @@ export const COMPETE_TABS: readonly RouteEntry[] = [
 ];
 
 /**
- * Compete's tabs with the status on Midweek. Only `live` shows there: `pick`
- * would sit on the picker itself, the page that asks for the pick (DR2 mockups).
+ * Compete's tabs with the status on Midweek. `SectionNav` shows a badge only
+ * on a tab you are not on, so `pick` reaches Standings and Players as a dot
+ * and never sits on the picker itself, the page that asks for it (ADR-153).
  */
 export function buildCompeteTabs(status: CompeteStatus | null): BadgedRoute[] {
   return COMPETE_TABS.map((tab) =>
-    tab.key === "midweek" && status === "live" ? { ...tab, status } : { ...tab },
+    tab.key === "midweek" && status ? { ...tab, status } : { ...tab },
   );
 }

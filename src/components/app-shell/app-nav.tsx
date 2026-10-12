@@ -42,7 +42,7 @@ function TabBadge({ item }: { item: NavItem }) {
   const text = formatBadgeCount(item.badgeCount ?? 0);
   if (!text) return null;
   return (
-    <span className="grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-brass px-1.5 text-[0.7rem] font-black leading-none tabular-nums text-ink-on-accent">
+    <span className="grid h-5 min-w-5 place-items-center rounded-full bg-brass px-1.5 text-label font-extrabold tabular-nums text-ink-on-accent">
       {text}
       {item.badgeNoun && <span className="sr-only"> {item.badgeNoun}</span>}
     </span>
@@ -54,7 +54,7 @@ function TabBarBadge({ item }: { item: NavItem }) {
   const text = formatBadgeCount(item.badgeCount ?? 0);
   if (!text) return null;
   return (
-    <span className="absolute -right-2.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full border-2 border-board-deep bg-brass px-1 text-[0.625rem] font-black leading-none tabular-nums text-ink-on-accent">
+    <span className="absolute -top-2 -right-3 grid h-5 min-w-5 place-items-center rounded-full border-2 border-board-deep bg-brass px-1 text-label font-extrabold tabular-nums text-ink-on-accent">
       {text}
       {item.badgeNoun && <span className="sr-only"> {item.badgeNoun}</span>}
     </span>
@@ -76,7 +76,7 @@ function MessagesLink({ unreadCount, className }: { unreadCount: number; classNa
       {!!text && (
         <span
           aria-hidden="true"
-          className="absolute -right-1 -top-1 grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full border-2 border-board bg-brass px-1 text-[0.625rem] font-black leading-none tabular-nums text-ink-on-accent"
+          className="absolute -top-1.5 -right-1.5 grid h-5 min-w-5 place-items-center rounded-full border-2 border-board bg-brass px-1 text-label font-extrabold tabular-nums text-ink-on-accent"
         >
           {text}
         </span>
@@ -114,7 +114,7 @@ export function AppNav({
             the link for screen readers and as its hover title. */}
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 lg:gap-6 lg:px-6">
           <Link
-            className={`flex items-center gap-2.5 rounded-lg text-xl font-black tracking-tight text-ink ${focusRing}`}
+            className={`flex items-center gap-2.5 rounded-lg text-heading font-extrabold tracking-tight text-ink ${focusRing}`}
             href="/"
           >
             <span aria-hidden="true" className="clip-pennant h-4 w-3.5 shrink-0 bg-brass" />
@@ -124,7 +124,7 @@ export function AppNav({
             {primaryItems.map((item) => (
               <Link
                 aria-current={ariaCurrent(item, pathname, activeKey)}
-                className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-bold transition-colors lg:px-3 ${focusRing} ${item.key === activeKey ? "bg-brass/10 text-brass" : "text-ink-dim hover:text-ink"}`}
+                className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-small font-semibold transition-colors lg:px-3 ${focusRing} ${item.key === activeKey ? "bg-brass/10 text-brass" : "text-ink-dim hover:text-ink"}`}
                 href={item.href}
                 key={item.key}
                 title={item.label}
@@ -138,7 +138,7 @@ export function AppNav({
           <div className="flex items-center gap-3">
             <span
               aria-label={balanceLabel(balance)}
-              className="flex items-center gap-1.5 rounded-full border border-brass/30 bg-gradient-to-b from-brass/15 to-brass/5 px-3.5 py-1.5 text-sm font-black tabular-nums text-brass"
+              className="flex items-center gap-1.5 rounded-full border border-brass/30 bg-gradient-to-b from-brass/15 to-brass/5 px-3.5 py-1.5 text-small font-extrabold tabular-nums text-brass"
             >
               <IconCoin className="h-3.5 w-3.5" />
               {balance === null ? BALANCE_UNKNOWN : balance.toLocaleString()}
@@ -147,7 +147,7 @@ export function AppNav({
             <Link
               aria-current={settingsActive ? "page" : undefined}
               aria-label={`Settings, ${displayName}`}
-              className={`grid h-9 w-9 place-items-center rounded-full bg-brass text-xs font-black text-ink-on-accent ${focusRing} ${settingsActive ? "ring-2 ring-brass/40 ring-offset-2 ring-offset-board-deep" : ""}`}
+              className={`grid h-9 w-9 place-items-center rounded-full bg-brass text-label font-extrabold text-ink-on-accent ${focusRing} ${settingsActive ? "ring-2 ring-brass/40 ring-offset-2 ring-offset-board-deep" : ""}`}
               href="/settings"
             >
               {initials || "F"}
@@ -158,7 +158,7 @@ export function AppNav({
 
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b border-line/40 bg-board-deep/85 px-4 backdrop-blur sm:hidden">
         <Link
-          className={`flex shrink-0 items-center gap-2 rounded-lg text-lg font-black text-ink ${focusRing}`}
+          className={`flex shrink-0 items-center gap-2 rounded-lg text-heading font-extrabold text-ink ${focusRing}`}
           href="/"
         >
           <span aria-hidden="true" className="clip-pennant h-3.5 w-3 shrink-0 bg-brass" />
@@ -167,7 +167,7 @@ export function AppNav({
         <div className="flex min-w-0 items-center gap-2">
           <span
             aria-label={balanceLabel(balance)}
-            className="flex min-w-0 items-center gap-1 rounded-full border border-brass/30 bg-gradient-to-b from-brass/15 to-brass/5 px-3 py-1 text-xs font-black tabular-nums text-brass"
+            className="flex min-w-0 items-center gap-1 rounded-full border border-brass/30 bg-gradient-to-b from-brass/15 to-brass/5 px-3 py-1 text-small font-extrabold tabular-nums text-brass"
           >
             <IconCoin className="h-3 w-3 shrink-0" />
             <span className="truncate">
@@ -178,7 +178,7 @@ export function AppNav({
           <Link
             aria-current={settingsActive ? "page" : undefined}
             aria-label={`Settings, ${displayName}`}
-            className={`grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brass text-xs font-black text-ink-on-accent ${focusRing} ${settingsActive ? "ring-2 ring-brass/40 ring-offset-2 ring-offset-board" : ""}`}
+            className={`grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brass text-label font-extrabold text-ink-on-accent ${focusRing} ${settingsActive ? "ring-2 ring-brass/40 ring-offset-2 ring-offset-board" : ""}`}
             href="/settings"
           >
             {initials || "F"}
@@ -193,12 +193,12 @@ export function AppNav({
         {primaryItems.map((item) => (
           <Link
             aria-current={ariaCurrent(item, pathname, activeKey)}
-            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-bold leading-none min-[360px]:text-[11px] ${focusRing} ${item.key === activeKey ? "text-brass" : "text-ink-faint"}`}
+            className={`flex min-w-0 flex-1 flex-col items-center gap-1 py-2 text-label font-semibold ${focusRing} ${item.key === activeKey ? "text-brass" : "text-ink-faint"}`}
             href={item.href}
             key={item.key}
           >
-            <span className="relative">
-              <item.Icon className="h-5 w-5" />
+            <span className="relative flex items-center gap-0.5">
+              <item.Icon className="h-5 w-5 shrink-0" />
               <TabBarBadge item={item} />
             </span>
             <span className="whitespace-nowrap">{item.label}</span>

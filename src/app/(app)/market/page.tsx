@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { IconCoin } from "@/components/icons";
 import { FilterBar } from "@/components/filter-bar";
-import { SectionTabs } from "@/components/app-shell/section-tabs";
+import { SectionNav } from "@/components/ui/section-nav";
 import { LiveCard } from "@/components/live-card";
 import { MarketOwnership } from "@/components/market-ownership";
 import { requireUser } from "@/lib/auth/user";
@@ -111,7 +111,7 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
           </p>
         </header>
 
-        <SectionTabs label="Market" tabs={marketTabs} />
+        <SectionNav label="Market" tabs={marketTabs} />
 
         {/* The six controls used to stack full width on a phone (~352px), which
             pushed the first listing below the fold; KB-008 cut that to a

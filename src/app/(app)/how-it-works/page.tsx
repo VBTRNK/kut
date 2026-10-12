@@ -12,6 +12,7 @@ import {
   calculateActivityOvr,
   calculateLiveDiscardValue,
 } from "@/game/rating-engine";
+import { LinkTile } from "@/components/ui/links";
 import { requireUser } from "@/lib/auth/user";
 import { RATING } from "@/lib/midweek/report/rating-rule";
 import {
@@ -35,6 +36,21 @@ const RARITY_INTENT: Record<(typeof RARITY_BANDS)[number]["tier"], string> = {
 
 const ATTRS = ["pac", "sho", "pas", "dri", "def", "phy"] as const;
 
+/**
+ * The topic tiles (DR5-25, #233): one anchor per topic on today's sections.
+ * This is the FAQ's skeleton. Each UI pass session moves the explanations it
+ * cuts from its screens under these anchors, so every `How … works ›` link
+ * lands on its text; S11 rewrites the sections as blocks.
+ */
+const TOPICS = [
+  { id: "cards", title: "Cards and ratings", state: "Attendance, form, tiers" },
+  { id: "packs", title: "Packs and discard", state: "What a pack holds" },
+  { id: "market", title: "Market and trading", state: "Buying, listing, offers" },
+  { id: "value", title: "Club Value", state: "How the standings count" },
+  { id: "midweek", title: "Midweek Madness", state: "Plusses, ratings, calls" },
+  { id: "privacy", title: "What others see", state: "Your five, your club name" },
+] as const;
+
 function Section({
   title,
   id,
@@ -46,7 +62,7 @@ function Section({
 }) {
   return (
     <section
-      className="scroll-mt-6 space-y-3 rounded-3xl border border-line/60 bg-panel/60 p-6"
+      className="scroll-mt-20 space-y-3 rounded-3xl border border-line/60 bg-panel/60 p-6"
       id={id}
     >
       <h2 className="display text-2xl">{title}</h2>
@@ -104,7 +120,18 @@ export default async function HowItWorksPage() {
           </p>
         </header>
 
-        <Section title="1. Attendance builds your Activity Score">
+        <nav aria-label="Topics" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {TOPICS.map((topic) => (
+            <LinkTile
+              href={`#${topic.id}`}
+              key={topic.id}
+              state={topic.state}
+              title={topic.title}
+            />
+          ))}
+        </nav>
+
+        <Section id="cards" title="1. Attendance builds your Activity Score">
           <p>
             Every football week that has at least one published session, each player&rsquo;s hidden
             Activity Score (0&ndash;100) updates:
@@ -308,7 +335,7 @@ export default async function HowItWorksPage() {
           </div>
         </Section>
 
-        <Section title="7. Packs">
+        <Section id="packs" title="7. Packs">
           <p>
             A <strong>TFH Pack</strong> costs {ECONOMY.basicPackPrice} FLUT Coins and gives{" "}
             {ECONOMY.basicPackCardCount} Live Cards. Draws are weighted by rarity, so Common players
@@ -347,7 +374,7 @@ export default async function HowItWorksPage() {
           </table>
         </Section>
 
-        <Section title="9. Transfer market & trade offers">
+        <Section id="market" title="9. Transfer market & trade offers">
           <p>
             List any card at a buy-now price (within server-set bounds), choosing whether it runs
             for {ECONOMY.listingDurationChoiceHours.join(" or ")} hours. When it sells, a{" "}
@@ -372,7 +399,7 @@ export default async function HowItWorksPage() {
           </Link>
         </Section>
 
-        <Section title="10. Club Value & the standings">
+        <Section id="value" title="10. Club Value & the standings">
           <p>Your Club Value is a plain sum of three numbers:</p>
           <ul className="ml-5 list-disc space-y-1">
             <li>your wallet balance in FLUT Coins;</li>
@@ -606,7 +633,9 @@ export default async function HowItWorksPage() {
             . They&rsquo;re paid with your wins after the final. From kick-off everyone sees how the
             club split on a match, never who picked whom.
           </p>
-          <h3 className="pt-2 font-black text-ink">What other members see</h3>
+          <h3 className="scroll-mt-20 pt-2 font-black text-ink" id="privacy">
+            What other members see
+          </h3>
           <p className="rounded-xl bg-steel-bg/60 p-3 text-sm font-semibold text-steel">
             From {roundOneAt} on the Wednesday, members see the five cards you entered (or your auto
             squad) and their numbers for the week. Nobody ever sees the rest of your collection.

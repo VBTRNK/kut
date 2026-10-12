@@ -35,6 +35,9 @@ Ground rules for every area:
 - **No scheduler.** Due work (survey finalization, Midweek steps, offer expiry)
   runs lazily from page visits through idempotent `for update skip locked`
   workers (ADR-061, ADR-098).
+- **UI** (ADR-153): six type roles and the primitives in `src/components/ui/`;
+  `policy:check` holds off-scale sizes to a falling ceiling. How it works
+  (`/how-it-works`) has a topic tile and anchor per area.
 
 | If you are changing… | Read |
 | --- | --- |
@@ -296,7 +299,8 @@ Part L item).
   `/midweek/[weekStart]/match/[matchId]`,
   `/midweek/[weekStart]/next/[round]/[pairing]` (pre-match), `/midweek/past`,
   all under the
-  Compete tab (ADR-107). The admin page has the switch, a rehearsal and void.
+  Compete tab (ADR-107); its Midweek section tab shows a Pick or Live dot
+  from Standings and Players (ADR-153). The admin page has the switch, a rehearsal and void.
 - **Live** (ADR-115, ADR-147). Every match in play is watchable on its page:
   - a clock ticking each second on the corrected device clock, held at 90′;
   - the feed newest on top: kicks, then the report's moments;

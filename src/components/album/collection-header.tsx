@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { IconScale } from "@/components/icons";
-import { SectionTabs } from "@/components/app-shell/section-tabs";
+import { SectionNav } from "@/components/ui/section-nav";
 import type { RouteEntry } from "@/lib/nav/routes";
 
 /**
@@ -85,7 +85,7 @@ export function CollectionHeader({
         )}
       </div>
       <div className="space-y-3">
-        <SectionTabs activeKey={mode} label="Collection view" tabs={VIEW_TABS} />
+        <SectionNav active={mode} label="Collection view" tabs={VIEW_TABS} />
         {showArchetypeNudge && (
           <Link
             className="block rounded-full border border-brass-line bg-brass-bg/40 px-4 py-3 text-sm font-bold text-ink-dim hover:text-brass"
