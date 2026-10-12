@@ -6,9 +6,8 @@ private Claude Design canvas "FLUT UI pass review (DR5)",
 sketches; only the owner can open it.
 
 **Status: answered by the owner, 12 Oct 2026** (see "Owner decisions" at the
-end). The revised match report mock (E3 on the canvas) awaits the owner's
-look. Nothing is built from this note; S2 generates the mocks from the
-decisions.
+end). The owner approved the revised match report mock (E3 on the canvas).
+Nothing is built from this note; S2 generates the mocks from the decisions.
 
 ## How the review was made
 
@@ -204,19 +203,20 @@ The owner's answers of 12 Oct 2026:
   four tiles in fixed places. The picker moves to `/midweek/pick` (F7).
 - **DR5-2. The match report is E2:** two tabs, Match and Teams, with the calm
   rules.
-  - **Proposed with the mock:** from 1024 px the tabs go, and Match and Teams
-    sit side by side.
-  - **Awaiting the owner's look:** the revised mock (E3), before anything is
-    built.
+  - **Desktop:** from 1024 px the tabs go, and Match and Teams sit side by
+    side, the moments in two lanes (confirmed by the owner).
+  - **Approved:** the revised mock E3, at full time (320 and 412 px, both
+    tabs), live in a shoot-out (newest first) and on desktop.
 - **DR5-3 (F1).** Serif only for the page title and a report's headline;
   kickers retired; the rules in B apply.
-- **DR5-4 (F2, amended by the owner). Names stay in team colour throughout a
-  report, at regular weight instead of bold.**
+- **DR5-4 (F2, amended by the owner). Names stay in team colour in a
+  report's text, at regular weight instead of bold.**
   - **Why:** two clubs can field the same Player against each other.
     Bracketed owners ("Cedric (Club A) shoots, Cedric (Club B) blocks") were
     worse.
-  - **Where:** the rule covers the headline, the facts, the moments and the
-    kicks.
+  - **Where:** the rule covers the facts, the moments and the kicks.
+  - **Plain title:** the report's headline, and a live match's title, are
+    plain ink, Player and club names included.
   - **Lanes:** each moment also keeps a 3 px rail on its side.
 - **DR5-5 (F3).** Moments are rows with a side rail, not boxes.
   - **Kept:** the lanes, and newest first while live (the newest item
