@@ -11,7 +11,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-export const CEILING = 680;
+export const CEILING = 615;
 
 // The card face keeps its own type (out of the UI pass's scope, ADR-043's
 // ladder), as does the crest lockup once it is a component of its own (Q5).

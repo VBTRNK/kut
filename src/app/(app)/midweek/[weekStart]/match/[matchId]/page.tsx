@@ -1,24 +1,21 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MidweekNotice } from "@/components/midweek/bits";
-import { MIDWEEK_PAGE, MidweekPageHead } from "@/components/midweek/page-head";
 import { ReportText } from "@/components/midweek/player-name";
 import {
-  MidweekLaneTimeline,
+  MidweekPenalties,
   MidweekScoreboard,
-  MidweekShootout,
+  MidweekTimeline,
+  ReportLayout,
+  reportLine,
+  reportTab,
   type Clubs,
 } from "@/components/midweek/report";
 import { MidweekWhyList } from "@/components/midweek/why-list";
+import { COLUMN, PAGE, PageHeader } from "@/components/ui/page";
 import { MIDWEEK } from "@/game/midweek/config";
 import { requireUser } from "@/lib/auth/user";
-import {
-  formatClock,
-  formatDayDate,
-  scheduleVersionOf,
-  skipOrVoidNotice,
-} from "@/lib/midweek/entry";
-import { capitalise, isWeekStart, matchName } from "@/lib/midweek/evening";
+import { formatDayDate, scheduleVersionOf, skipOrVoidNotice } from "@/lib/midweek/entry";
+import { isWeekStart } from "@/lib/midweek/evening";
 import { maskInPlay } from "@/lib/midweek/live";
 import { loadLiveMatch, loadMatchEnds } from "@/lib/midweek/live-load";
 import { reportInputFromRows, renderStoredReport } from "@/lib/midweek/report/from-db";
@@ -33,47 +30,49 @@ import { isUuid } from "@/lib/uuid";
 export const metadata = { title: "Midweek Madness match report" };
 
 /**
- * `/midweek/[weekStart]/match/[matchId]`: one match's report
- * (design/ux-review `Match-Other-FullTime`, ADR-111), rendered on the server
- * from the stored match, its events and both sides' lock-time entries, every
- * name in its side's colour. A match that isn't revealed yet, a bye or a void
- * week has no report. Every match in play shows live, chance by chance, without
- * its result (`InPlayMatch`, ADR-115, ADR-147). From the match's full time the
- * Why list adds each card's rating for this match (`Match-Rated`, ADR-117,
+ * `/midweek/[weekStart]/match/[matchId]`: one match's report (ADR-111, as
+ * DR5-15 lays it out), rendered on the server from the stored match, its
+ * events and both sides' lock-time entries, every name but the headline's in
+ * its side's colour. Two tabs, Match and Teams (`?tab=teams`), both in the
+ * page and side by side from `lg`. A match that isn't revealed yet, a bye or
+ * a void week has no report. Every match in play shows live, chance by
+ * chance, without its result (`InPlayMatch`, ADR-115, ADR-147). From the
+ * match's full time Teams adds each card's rating for this match (ADR-117,
  * ADR-150): it needs only this match, so not the week's end.
  */
 export default async function MidweekReportPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ weekStart: string; matchId: string }>;
+  searchParams: Promise<{ tab?: string | string[] }>;
 }) {
   const user = await requireUser();
   await runDueMidweek();
   const { weekStart, matchId } = await params;
+  const tab = reportTab((await searchParams).tab);
   // Both segments are checked before any query (KB-007).
   if (!isWeekStart(weekStart) || !isUuid(matchId)) notFound();
   const supabase = await createClient();
   const tournament = await loadTournamentByWeek(supabase, weekStart);
   if (!tournament) notFound();
 
-  const back = {
-    href: `/midweek/${weekStart}`,
-    label: `${formatDayDate(tournament.lock_at)} bracket`,
-  };
+  const back = `/midweek/${weekStart}/bracket`;
+  const base = `/midweek/${weekStart}/match/${matchId}`;
   const notice = skipOrVoidNotice(tournament, MIDWEEK.minEntrants);
   if (notice) {
     return (
-      <main className={MIDWEEK_PAGE}>
-        <section className="mx-auto grid max-w-3xl gap-8 py-4 sm:py-8">
-          <MidweekPageHead
-            back={back}
-            kicker={`Midweek Madness · ${formatDayDate(tournament.lock_at)}`}
+      <main className={PAGE}>
+        <div className={COLUMN}>
+          <PageHeader
+            back={{ href: back, label: "Bracket" }}
+            sub={`Midweek Madness · ${formatDayDate(tournament.lock_at)}`}
             title="Match report"
           />
           <MidweekNotice tone={notice.tone}>
             <b>{notice.lead}</b> {notice.rest}
           </MidweekNotice>
-        </section>
+        </div>
       </main>
     );
   }
@@ -136,17 +135,20 @@ export default async function MidweekReportPage({
       <InPlayMatch
         auto={[autoOf(shown.side_0_user_id), autoOf(shown.side_1_user_id)]}
         back={back}
+        base={base}
         kickoffAt={shown.reveal_at}
-        kicker={
-          // The final is everyone's, so it never says "your match" (DR4-3).
-          shown.round === rounds
-            ? "The final · live"
-            : `${capitalise(matchName(shown.round, shown.pairing, rounds))}${yours !== null ? " · your match" : ""} · live`
-        }
         live={live}
         clubs={[sideClub(shown, 0), sideClub(shown, 1)]}
         now={now.toISOString()}
         scheduleVersion={scheduleVersion}
+        sub={reportLine({
+          round: shown.round,
+          pairing: shown.pairing,
+          rounds,
+          live: true,
+          yours: yours !== null,
+        })}
+        tab={tab}
         youSide={yours}
       />
     );
@@ -173,23 +175,10 @@ export default async function MidweekReportPage({
     match.side_0_user_id === user.id ? 0 : match.side_1_user_id === user.id ? 1 : null;
 
   return (
-    <main className={MIDWEEK_PAGE}>
-      <article className="mx-auto grid max-w-6xl gap-5 py-4 sm:gap-6 sm:py-8">
-        <header className="grid gap-3">
-          <Link
-            className="justify-self-start text-sm font-bold text-brass hover:underline"
-            href={back.href}
-          >
-            &larr; {back.label}
-          </Link>
-          <p className="text-[0.7rem] font-extrabold tracking-[0.26em] text-brass uppercase">
-            {capitalise(matchName(match.round, match.pairing, tournament.rounds))} &middot; out at{" "}
-            {formatClock(match.reveal_at)}
-          </p>
-          <h1 className="display text-[30px] text-pretty sm:text-[46px]">
-            <ReportText parts={report.headlineParts} />
-          </h1>
-        </header>
+    <ReportLayout
+      back={back}
+      base={base}
+      board={
         <MidweekScoreboard
           auto={[input.sides[0].auto, input.sides[1].auto]}
           goals={input.outcome.goals}
@@ -198,33 +187,32 @@ export default async function MidweekReportPage({
           winnerSide={input.outcome.winnerSide}
           youSide={youSide}
         />
-        <div className="grid gap-7 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-10">
-          <div className="grid min-w-0 content-start gap-7">
-            {report.facts.length > 0 && (
-              <ul className="grid gap-1.5">
-                {report.facts.map((fact, index) => (
-                  <li
-                    className="border-l-2 border-brass-line pl-3 font-serif text-lg leading-[1.35] text-pretty text-ink"
-                    key={index}
-                  >
-                    <ReportText parts={fact.parts} />
-                  </li>
-                ))}
-              </ul>
-            )}
-            <section aria-labelledby="timeline-h" className="grid gap-4">
-              <h2 className="display text-3xl" id="timeline-h">
-                How it went
-              </h2>
-              <MidweekLaneTimeline clubs={clubs} timeline={report.timeline} />
-            </section>
-            {report.shootout && <MidweekShootout clubs={clubs} shootout={report.shootout} />}
-          </div>
-          <aside className="min-w-0">
-            <MidweekWhyList ratings={ratings} why={report.why} />
-          </aside>
-        </div>
-      </article>
-    </main>
+      }
+      match={
+        <>
+          {report.facts.length > 0 && (
+            <ul className="grid list-disc gap-2 pl-5 text-body marker:text-ink-faint">
+              {report.facts.map((fact, index) => (
+                <li className="text-pretty" key={index}>
+                  <ReportText parts={fact.parts} />
+                </li>
+              ))}
+            </ul>
+          )}
+          <MidweekTimeline clubs={clubs} timeline={report.timeline} />
+          {report.shootout && <MidweekPenalties clubs={clubs} shootout={report.shootout} />}
+        </>
+      }
+      sub={reportLine({
+        round: match.round,
+        pairing: match.pairing,
+        rounds: tournament.rounds,
+        live: false,
+        yours: youSide !== null,
+      })}
+      tab={tab}
+      teams={<MidweekWhyList ratings={ratings} why={report.why} />}
+      title={<ReportText parts={report.headlineParts} plain />}
+    />
   );
 }

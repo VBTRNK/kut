@@ -368,3 +368,29 @@ rows), ADR-149 (the pre-match's layout) and ADR-113 (the week page).
 - **Pre-match.** The pairing as the Title, each five a block with a team
   rail; the Power foot moved to How it works `#power`. Cut: the ratings rule,
   `SHARE_NOTE`, `CALLS_FOOT` (all on How it works). Gating is unchanged.
+
+## ADR-156 — The match report in two tabs, on the scale
+
+Date: 2026-10-12 (flut-ui-pass S7, VibeTrunk/kut#294, DR5-15). Amends ADR-111
+and ADR-115/147 (the report's layout), DR4-1 and DR4-4 (lanes from 520 px, no
+newest outline), DR2's Why foot and DR1-5 (as DR5-4). Closes #279.
+
+- **Header.** `‹ Bracket`, the headline (live: `Club v Club`) as the Title in
+  plain ink, a Small line (`Quarter-final 3 · full time · your match`). The
+  kicker goes.
+- **Scoreboard.** Clubs in team colour at Body 600, the score as a Figure in
+  ink, `Tag`s for Through, Out, You and Auto; live, `Live · 64′` and the pink
+  line. On the hub and Home it is compact: no frame, tags or line.
+- **Tabs.** `Match · Teams` are links (`?tab=teams`), so a poll keeps the
+  tab. Both views are always in the page, so a tab changes nothing sent; from
+  `lg` they sit side by side and the tabs hide.
+- **Match.** Facts as Body bullets; moments and kicks as rows with a 3 px
+  side rail, in two lanes from 520 px of the list's width; the newest live
+  item slides in without an outline. The shoot-out is one `Penalties` block.
+- **Teams.** The chances, the key, a block per side with a team rail; the
+  Why's foot moved to How it works `#power`. Names keep team colour at the
+  line's weight.
+- **Factor tips (#279).** Focus or a tap now outranks hover: a hover no longer
+  takes a focused explanation away. Escape hides all until the next focus or
+  hover.
+- `Chip`, `LiveMarker`, `MidweekPageHead` and `MIDWEEK_PAGE` are retired.

@@ -35,11 +35,23 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 /**
- * The match page's Why (ADR-111): every card in team colour with its Power,
- * `Show every factor` opens five boxes per card, and a factor's explanation
- * shows on focus and closes on Escape, all inside the screen.
+ * The match page's Teams (ADR-111, DR5-15): on a phone behind its tab, from
+ * `lg` beside Match. Every card with its Power, `Show every factor` opens five
+ * boxes per card, and a factor's explanation shows on focus and closes on
+ * Escape, all inside the screen. A pointer resting on another factor never
+ * takes the focused explanation away (#279).
  */
 async function expectMatchPageWhy(page: Page) {
+  const tab = page
+    .getByRole("navigation", { name: "This match" })
+    .getByRole("link", { name: "Teams" });
+  if (await tab.isVisible()) {
+    await tab.click();
+    await expect(page).toHaveURL(/\?tab=teams$/);
+    await expect(tab).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("list", { name: "Key moments" })).toBeHidden();
+  }
+  await expect(page.getByRole("img", { name: /^Before kick-off: / })).toBeVisible();
   const why = page.getByRole("region", { name: /’s five$/ });
   await expect(why).toHaveCount(2);
   await expect(
@@ -52,19 +64,32 @@ async function expectMatchPageWhy(page: Page) {
   );
   const form = page.getByRole("button", { name: "Form", exact: true }).first();
   await expect(form).toHaveAccessibleDescription(/^The Player's form this week/);
-  // The click leaves the pointer where the boxes now open. If focusing scrolls
-  // another factor under it, Chromium's synthetic hover opens that one instead
-  // (KB-042, #216), so move the pointer off first.
-  await page.mouse.move(0, 0);
   await form.focus();
   const tip = page
     .getByRole("tooltip")
     .filter({ hasText: /^The Player's form this week/ })
     .first();
   await expect(tip).toBeVisible();
+  // The mixed-input case (#279, KB-042): with Form focused, another factor
+  // comes under the pointer, as when focusing scrolls one under a resting
+  // pointer and Chromium fires a hover. Focus wins. (A hidden tooltip has no
+  // role, so the filter finds the shown one or none.)
+  const pick = page.getByRole("tooltip").filter({ hasText: /^Picking against/ });
+  // The other five's first card: the open explanation covers the cards under Form.
+  const otherPick = page.getByRole("button", { name: "Pick", exact: true }).nth(5);
+  await otherPick.hover();
+  await expect(tip).toBeVisible();
+  await expect(pick).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
+  // Escape hides everything, the hovered factor too (WCAG 1.4.13).
   await page.keyboard.press("Escape");
   await expect(tip).toBeHidden();
+  await expect(pick).toHaveCount(0);
+  // Once focus leaves, hover shows the factor under the pointer again.
+  await form.blur();
+  await page.mouse.move(0, 0);
+  await otherPick.hover();
+  await expect(pick).toBeVisible();
 }
 
 /**
@@ -471,10 +496,10 @@ test.describe("Midweek Madness results (PR 8)", () => {
         .first()
         .click();
       await expect(page).toHaveURL(new RegExp(`/midweek/${COMPLETED_WEEK}/match/[0-9a-f-]{36}$`));
+      // The Match tab (DR5-15): the moments, with Teams behind its tab.
       await expect(page.getByRole("heading", { name: "How it went" })).toBeVisible();
       await expect(page.getByRole("list", { name: "Key moments" })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "Why" })).toBeVisible();
-      await expect(page.getByRole("img", { name: /^Before kick-off: / })).toBeVisible();
+      await expect(page.getByRole("region", { name: /’s five$/ }).first()).toBeHidden();
       await expectNoHorizontalOverflow(page);
       await expectTeamColours(page);
 
@@ -482,7 +507,7 @@ test.describe("Midweek Madness results (PR 8)", () => {
     },
   );
 
-  test("on a 1440 px desktop a match report puts the Why beside the story", async ({ page }) => {
+  test("on a 1440 px desktop a match report puts Teams beside the story", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await signIn(page, "release_member");
     await page.goto(`/midweek/${COMPLETED_WEEK}/bracket`);
@@ -491,8 +516,10 @@ test.describe("Midweek Madness results (PR 8)", () => {
       .first()
       .click();
     await expect(page).toHaveURL(new RegExp(`/midweek/${COMPLETED_WEEK}/match/[0-9a-f-]{36}$`));
+    // Both views side by side, so the tabs hide.
+    await expect(page.getByRole("navigation", { name: "This match" })).toBeHidden();
     const story = await page.getByRole("list", { name: "Key moments" }).boundingBox();
-    const why = await page.getByRole("heading", { name: "Why" }).boundingBox();
+    const why = await page.getByRole("heading", { name: "Teams" }).boundingBox();
     expect(why!.x).toBeGreaterThan(story!.x + story!.width);
     await expectNoHorizontalOverflow(page);
     await expectTeamColours(page);
@@ -572,7 +599,7 @@ test.describe("Midweek Madness results (PR 8)", () => {
       await expectNoHorizontalOverflow(page);
 
       // The report: the scoreboard names it in full to a screen reader and shows at
-      // most two lines; the Why's heading wraps it in full.
+      // most two lines; on the Teams tab its five's heading wraps it in full.
       await report.click();
       const board = page.getByRole("group", { name: new RegExp(`^Final score: .*${LONG_CLUB}`) });
       await expect(board).toBeVisible();
@@ -581,6 +608,7 @@ test.describe("Midweek Madness results (PR 8)", () => {
         (node) => node.clientHeight / parseFloat(getComputedStyle(node).lineHeight),
       );
       expect(lines).toBeLessThanOrEqual(2.05);
+      await page.getByRole("link", { name: "Teams" }).click();
       await expect(
         page.getByRole("heading", { level: 3, name: new RegExp(`^${LONG_CLUB}`) }),
       ).toBeVisible();
@@ -854,12 +882,21 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
 
     // Every match in play is watched live (ADR-147).
     await page.goto(`/midweek/${weekStart}/match/${match.id}`);
-    await expect(page.getByText(mine ? /· your match · live$/ : /^[^·]+ · live$/)).toBeVisible();
+    await expect(page.getByText(mine ? / · live · your match$/ : /^[^·]+ · live$/)).toBeVisible();
     await expect(page.getByRole("group", { name: LIVE_BOARD })).toBeVisible();
     await expect(page.getByRole("heading", { name: "How it’s going" })).toBeVisible();
     await expect(page.getByText(/· checks every 10 seconds$/)).toBeVisible();
-    await expect(page.getByText(/Goals and assists are added at full time\./)).toBeVisible();
     await expect(page.getByRole("group", { name: /^Final score:/ })).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    // Teams before full time: both fives, without goals or assists (ADR-115).
+    await page
+      .getByRole("navigation", { name: "This match" })
+      .getByRole("link", { name: "Teams" })
+      .click();
+    await expect(page).toHaveURL(/\?tab=teams$/);
+    const teams = page.getByRole("region", { name: "Teams" });
+    await expect(teams.getByRole("region", { name: /’s five$/ })).toHaveCount(2);
+    await expect(teams).not.toContainText(/\b\d+ (goal|assist)s?\b/);
     await expectNoHorizontalOverflow(page);
 
     if (mine && other) {
@@ -893,8 +930,8 @@ test.describe("Midweek Madness live (F6, ADR-115)", () => {
     await expect(page.getByText(/^The final · live$/)).toBeVisible();
     await expect(page.getByRole("heading", { name: "How it’s going" })).toBeVisible();
     const story = await page.getByRole("heading", { name: "How it’s going" }).boundingBox();
-    const why = await page.getByRole("heading", { name: "Why" }).boundingBox();
-    // From lg the Why sits beside the story.
+    const why = await page.getByRole("heading", { name: "Teams" }).boundingBox();
+    // From lg Teams sits beside the story.
     expect(why!.x).toBeGreaterThan(story!.x + 200);
     await expectNoHorizontalOverflow(page);
   });
@@ -989,7 +1026,7 @@ test.describe("Midweek Madness, every match live (MM 3.0 S3, ADR-147)", () => {
 
       await page.setViewportSize({ width: 1440, height: 900 });
       const story = await page.getByRole("heading", { name: "How it’s going" }).boundingBox();
-      const why = await page.getByRole("heading", { name: "Why" }).boundingBox();
+      const why = await page.getByRole("heading", { name: "Teams" }).boundingBox();
       expect(why!.x).toBeGreaterThan(story!.x + 200);
       await expectNoHorizontalOverflow(page);
     },
@@ -1023,7 +1060,7 @@ test.describe("Midweek Madness, every match live (MM 3.0 S3, ADR-147)", () => {
       const shown = await shownKicks.count();
       expect(shown).toBeGreaterThanOrEqual(12);
       expect(shown).toBeLessThan(14);
-      await expect(page.getByText(`${shown} kicks so far · one every 5 seconds`)).toBeVisible();
+      await expect(page.getByText(`${shown} kicks so far`, { exact: true })).toBeVisible();
       await expect(shownKicks.first()).toHaveText(/^Latest\. Penalty \d+: /);
       // Exactly the kicks due are in the page.
       expect(html.match(/Penalty \d+: /g)).toHaveLength(shown);
@@ -1063,7 +1100,7 @@ test.describe("Midweek Madness, every match live (MM 3.0 S3, ADR-147)", () => {
     await page.goto(url);
     const html = await openAt(page, url, matchId, kickAt(5) + 2.5);
     await expect(page.getByRole("timer")).toHaveText(/^Live · pens (0–2|2–0)$/);
-    await expect(page.getByText("5 kicks so far · one every 5 seconds")).toBeVisible();
+    await expect(page.getByText("5 kicks so far", { exact: true })).toBeVisible();
     await expect(page.getByText("Miss", { exact: true })).toHaveCount(3);
     expectNoResult(html);
 
@@ -1089,7 +1126,7 @@ test.describe("Midweek Madness, every match live (MM 3.0 S3, ADR-147)", () => {
     // After the tenth kick, before the draw five seconds later.
     const html = await openAt(page, url, matchId, kickAt(10) + 2.5);
     await expect(page.getByRole("timer")).toHaveText("Live · pens 5–5");
-    await expect(page.getByText("10 kicks so far · one every 5 seconds")).toBeVisible();
+    await expect(page.getByText("10 kicks so far", { exact: true })).toBeVisible();
     expectNoResult(html);
 
     await withDatabase((database) => moveFixtureEveningTo(database, matchId, kickAt(11) + 1));
@@ -1588,7 +1625,8 @@ test.describe("Midweek Madness ratings at full time (MM 3.0 S6, ADR-150)", () =>
         await expect(page.getByRole("heading", { name: "How it went" })).toBeVisible();
         // Five cards a side, each with a disc, while the week is still running.
         await expect(page.getByText(RATED)).toHaveCount(10);
-        await expect(page.getByText(/^Rating$/).first()).toBeVisible();
+        await page.goto(`${report(first.id)}?tab=teams`);
+        await expect(page.getByText("Rating, out of 10")).toBeVisible();
         await expectNoHorizontalOverflow(page);
 
         await page.goto(`/midweek/${weekStart}/night`);

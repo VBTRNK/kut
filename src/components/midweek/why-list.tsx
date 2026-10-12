@@ -1,26 +1,28 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { InfoLink } from "@/components/ui/links";
+import { FOCUS } from "@/components/ui/page";
 import { archetypeLabel } from "@/game/archetypes";
 import { MIDWEEK, PPM } from "@/game/midweek/config";
 import { handicapText } from "@/lib/midweek/evening";
 import { powerBand, powerBarWidth } from "@/lib/midweek/power";
-import { RATING } from "@/lib/midweek/report/rating-rule";
 import type { WhyCard, WhySide } from "@/lib/midweek/report/types";
-import { Chip } from "./chip";
-import { PlayerName } from "./player-name";
+import { TEAM_TEXT } from "./player-name";
 import { MidweekRatingDisc } from "./rating-disc";
 
 /**
- * `MidweekWhyList` (HANDOFF "Matches", DR1-5, DR2-3, DR2-6..8): the odds before
- * kick-off, then per side its five cards, strongest first, one compact row
- * each with the card's Power in this match. `Show every factor` opens the five
- * factor boxes under every card, and each box's label explains itself on
- * hover, tap or focus. No tables, so nothing scrolls sideways at any width;
- * bars are SVG with `width` attributes because the CSP blocks inline styles.
- * From full time each card also shows its rating for this match
- * (DR3 HANDOFF §1, ADR-117): an untinted disc on the right, apart from the
- * Power pill on the left in shape, side, range and colour.
+ * `MidweekWhyList`, the report's Teams tab (DR5-15; DR2-3, DR2-6..8 kept): the
+ * chances before kick-off, the key once there are ratings, then per side a
+ * block with its colour as a 3 px top rail and its five cards strongest
+ * first, one row each with the card's Power in this match. `Show every
+ * factor` opens the five factor boxes under every card, and each box's label
+ * explains itself on hover, tap or focus (DR2-7). How Power works has the
+ * rest. No tables, so nothing scrolls sideways at any width; bars are SVG
+ * with `width` attributes because the CSP blocks inline styles. From full
+ * time each card also shows its rating for this match (ADR-117, ADR-150): an
+ * untinted disc on the right, apart from the Power pill on the left in shape,
+ * side, range and colour.
  */
 
 /** A card's power in this match: the week's power, fixed at the lock, times this match's Day roll. */
@@ -62,64 +64,88 @@ const factorPpm = (card: WhyCard): Record<Factor, number> => ({
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 
-/** Which factor explanation shows: the one tapped or focused, else the one hovered, unless dismissed. */
-type Tips = { open: string | null; hover: string | null; dismissed: string | null };
+/**
+ * Which factor explanation shows (#279): the one focused or tapped, else the
+ * one hovered. Focus stays in charge while it lasts: a pointer resting where
+ * another factor scrolls under it (Chromium then fires a hover) no longer
+ * takes the focused explanation away. Escape hides every explanation until
+ * the next focus, tap or hover.
+ */
+export type Tips = { focus: string | null; hover: string | null; hidden: boolean };
+export type TipEvent =
+  { type: "focus" | "blur" | "enter" | "leave"; key: string } | { type: "escape" | "reset" };
+
+export const NO_TIPS: Tips = { focus: null, hover: null, hidden: false };
+
+/** The factor whose explanation shows, if any. */
+export const shownTip = (tips: Tips): string | null =>
+  tips.hidden ? null : (tips.focus ?? tips.hover);
+
+/** The next state after a focus or tap, a blur, a pointer entering or leaving, or Escape. */
+export function nextTips(tips: Tips, event: TipEvent): Tips {
+  switch (event.type) {
+    case "focus":
+      return { ...tips, focus: event.key, hidden: false };
+    case "blur":
+      return { ...tips, focus: tips.focus === event.key ? null : tips.focus };
+    case "enter":
+      return { ...tips, hover: event.key, hidden: false };
+    case "leave":
+      return { ...tips, hover: tips.hover === event.key ? null : tips.hover };
+    case "escape":
+      return { ...tips, hidden: true };
+    case "reset":
+      return NO_TIPS;
+  }
+}
 
 function FactorStrip({
   card,
   tipKey,
-  tips,
-  setTips,
+  shown,
+  send,
 }: {
   card: WhyCard;
   tipKey: string;
-  tips: Tips;
-  setTips: (update: (tips: Tips) => Tips) => void;
+  shown: string | null;
+  send: (event: TipEvent) => void;
 }) {
   const baseId = useId();
   const values = factorPpm(card);
   return (
-    <dl className="relative col-span-full mt-1 mb-0.5 grid grid-cols-5 gap-[3px] min-[412px]:col-start-2">
+    <dl className="relative col-span-full grid grid-cols-5 gap-1 min-[412px]:col-start-2">
       {FACTORS.map((factor) => {
         const key = `${tipKey}:${factor}`;
         const id = `${baseId}-${factor}`;
-        const shown = (tips.open ?? tips.hover) === key && tips.dismissed !== key;
+        const open = shown === key;
         const effect = factorEffect(values[factor]);
         return (
           <div
-            className={`grid min-w-0 gap-px rounded-lg py-1 pr-1 pl-[5px] ${shown ? "bg-board-deep/85 outline outline-1 outline-brass" : "bg-board-deep/55"}`}
+            className={`grid min-w-0 gap-0.5 rounded-lg px-1.5 py-1 ${open ? "bg-board-deep/85 outline outline-1 outline-brass" : "bg-board-deep/55"}`}
             key={factor}
-            onMouseEnter={() =>
-              setTips((t) => ({ open: t.open === key ? key : null, hover: key, dismissed: null }))
-            }
-            onMouseLeave={() =>
-              setTips((t) => ({
-                ...t,
-                hover: t.hover === key ? null : t.hover,
-                dismissed: t.dismissed === key ? null : t.dismissed,
-              }))
-            }
+            onMouseEnter={() => send({ type: "enter", key })}
+            onMouseLeave={() => send({ type: "leave", key })}
           >
-            <dt className="text-[8.5px] font-black tracking-[0.03em] text-ink-faint uppercase">
+            <dt className="min-w-0 truncate text-label font-semibold text-ink-dim">
               <button
                 aria-describedby={id}
                 className="cursor-help underline decoration-dotted underline-offset-[3px] focus-visible:rounded-[3px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass"
-                onBlur={() => setTips((t) => ({ ...t, open: t.open === key ? null : t.open }))}
-                onClick={() => setTips((t) => ({ ...t, open: key, dismissed: null }))}
-                onFocus={() => setTips((t) => ({ ...t, open: key, dismissed: null }))}
+                onBlur={() => send({ type: "blur", key })}
+                onClick={() => send({ type: "focus", key })}
+                onFocus={() => send({ type: "focus", key })}
                 type="button"
               >
                 {factor}
               </button>
             </dt>
             <dd
-              className={`text-[13px] font-extrabold tabular-nums ${effect.trend === "up" ? "text-moss" : effect.trend === "down" ? "text-brick" : "text-ink-faint"}`}
+              className={`text-small font-extrabold tabular-nums ${effect.trend === "up" ? "text-moss" : effect.trend === "down" ? "text-brick" : "text-ink-faint"}`}
             >
               {effect.text}
             </dd>
             {/* Spans the whole strip, just below it, so it never runs off a narrow screen. */}
             <span
-              className={`absolute inset-x-0 top-[calc(100%+6px)] z-10 rounded-[10px] border border-line bg-panel-2 px-2.5 py-2 text-[12.5px] leading-snug font-semibold text-ink shadow-[0_8px_20px_rgb(0_0_0/45%)] ${shown ? "block" : "hidden"}`}
+              className={`absolute inset-x-0 top-[calc(100%+6px)] z-10 rounded-xl border border-line bg-panel-2 px-3 py-2 text-small text-ink shadow-[0_8px_20px_rgb(0_0_0/45%)] ${open ? "block" : "hidden"}`}
               id={id}
               role="tooltip"
             >
@@ -137,16 +163,16 @@ function CardRow({
   rating,
   open,
   tipKey,
-  tips,
-  setTips,
+  shown,
+  send,
 }: {
   card: WhyCard;
   /** This match's rating, from its full time. */
   rating: number | null;
   open: boolean;
   tipKey: string;
-  tips: Tips;
-  setTips: (update: (tips: Tips) => Tips) => void;
+  shown: string | null;
+  send: (event: TipEvent) => void;
 }) {
   const power = matchPower(card);
   const band = powerBand(power);
@@ -160,197 +186,164 @@ function CardRow({
   ].filter(Boolean);
   return (
     <li
-      className={`grid items-center gap-x-2.5 gap-y-[5px] border-b border-line/35 py-[7px] ${rating === null ? "grid-cols-[3.4rem_minmax(0,1fr)]" : "grid-cols-[3.4rem_minmax(0,1fr)_auto]"}`}
+      className={`grid items-center gap-x-3 gap-y-2 rounded-xl bg-panel-2/80 p-2 ${rating === null ? "grid-cols-[3.25rem_minmax(0,1fr)]" : "grid-cols-[3.25rem_minmax(0,1fr)_auto]"}`}
     >
       <p
-        className={`row-span-2 grid h-full min-h-[34px] place-items-center rounded-[9px] border text-[17px] font-black tabular-nums ${band.pill}`}
+        className={`grid min-h-10 place-items-center rounded-lg border text-body font-semibold tabular-nums ${band.pill}`}
       >
         {power.toFixed(2)}
         <span className="sr-only"> power, {band.word}</span>
       </p>
-      <p className="min-w-0 text-[14.5px] leading-tight font-bold [overflow-wrap:anywhere]">
-        <span className="font-extrabold text-report-ink">
+      <div className="grid min-w-0 gap-1">
+        <p className="text-body font-semibold [overflow-wrap:anywhere]">
           {card.label.text}
           {card.label.owner !== undefined && (
             <span className="sr-only"> ({card.label.owner}&rsquo;s)</span>
           )}
-        </span>{" "}
-        <small className="text-xs font-semibold text-ink-faint">
+        </p>
+        <p className="text-small text-ink-dim">
           {archetypeLabel(card.archetype)} &middot; {card.ovr}
-          {notes.length > 0 && (
-            <>
-              {" "}
-              &middot; <b className="font-bold text-ink-dim">{notes.join(", ")}</b>
-            </>
-          )}
-        </small>
-      </p>
-      <svg
-        aria-hidden="true"
-        className="block h-[5px] w-full"
-        preserveAspectRatio="none"
-        viewBox="0 0 100 6"
-      >
-        <rect className="fill-panel-2" height="6" rx="3" width="100" />
-        <rect className="fill-report-bar" height="6" rx="3" width={powerBarWidth(power)} />
-        <rect className="fill-ink-dim" height="6" width="0.8" x="49.6" />
-      </svg>
-      {rating !== null && (
-        <span className="col-start-3 row-span-2 row-start-1 self-center">
-          <MidweekRatingDisc context="for this match" rating={rating} size="sm" />
-        </span>
-      )}
-      {open && <FactorStrip card={card} setTips={setTips} tipKey={tipKey} tips={tips} />}
+          {notes.length > 0 && ` · ${notes.join(", ")}`}
+        </p>
+        <svg
+          aria-hidden="true"
+          className="block h-1 w-full"
+          preserveAspectRatio="none"
+          viewBox="0 0 100 4"
+        >
+          <rect className="fill-board" height="4" rx="2" width="100" />
+          <rect className="fill-report-bar" height="4" rx="2" width={powerBarWidth(power)} />
+          <rect className="fill-ink-dim" height="4" width="0.8" x="49.6" />
+        </svg>
+      </div>
+      {rating !== null && <MidweekRatingDisc context="for this match" rating={rating} />}
+      {open && <FactorStrip card={card} send={send} shown={shown} tipKey={tipKey} />}
     </li>
   );
 }
 
+const RAIL = ["border-t-team-0-fill", "border-t-team-1-fill"] as const;
+
 export function MidweekWhyList({
   why,
-  beforeFullTime = false,
   ratings = null,
 }: {
   why: readonly [WhySide, WhySide];
-  /** A match in play: its goals and assists are left out until full time (ADR-115). */
-  beforeFullTime?: boolean;
   /** Each card's rating for this match by side and slot, from its full time (ADR-117, ADR-150). */
   ratings?: readonly [readonly number[], readonly number[]] | null;
 }) {
   const [open, setOpen] = useState(false);
-  const [tips, setTips] = useState<Tips>({ open: null, hover: null, dismissed: null });
-  const showing = tips.open ?? tips.hover;
+  const [tips, setTips] = useState<Tips>(NO_TIPS);
+  const send = (event: TipEvent) => setTips((current) => nextTips(current, event));
+  const shown = shownTip(tips);
 
   // Escape closes an explanation wherever the pointer or focus is (WCAG 1.4.13).
   useEffect(() => {
-    if (!showing) return;
+    if (!shown) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setTips({ open: null, hover: null, dismissed: showing });
+      if (event.key === "Escape") setTips((current) => nextTips(current, { type: "escape" }));
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [showing]);
+  }, [shown]);
 
   const left = Math.round(why[0].winChancePpm / 10_000);
   const chances = [left, 100 - left] as const;
   return (
-    <section aria-labelledby="why-h" className="grid gap-[18px]">
-      <h2 className="display text-3xl" id="why-h">
-        Why
+    <section aria-labelledby="teams-h" className="grid min-w-0 content-start gap-4">
+      {/* On a phone the Teams tab names it; from `lg`, beside Match, the heading shows. */}
+      <h2 className="sr-only text-heading font-semibold lg:not-sr-only" id="teams-h">
+        Teams
       </h2>
-      {ratings && (
-        <dl className="grid gap-2 text-[13px] text-ink-dim">
-          <div className="flex items-center gap-2.5">
-            <dt className="grid h-[26px] w-[42px] flex-none place-items-center rounded-[7px] border border-[#3c5230] bg-[#1c2416] text-xs font-black text-[#8bbd6c] tabular-nums">
-              <span aria-hidden="true">1.19</span>
-              <span className="sr-only">Power</span>
-            </dt>
-            <dd>Power: how strong a card was going in</dd>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <dt className="grid h-[30px] w-[42px] flex-none place-items-center">
-              <span
-                aria-hidden="true"
-                className="grid h-[30px] w-[30px] place-items-center rounded-full border border-ink-dim bg-panel-2 text-[11.5px] font-black text-ink tabular-nums"
-              >
-                7.2
-              </span>
-              <span className="sr-only">Rating</span>
-            </dt>
-            <dd>Rating: how it played, out of 10</dd>
-          </div>
-        </dl>
-      )}
       <div className="grid gap-1.5">
-        <p className="text-[10.4px] font-extrabold tracking-[0.15em] text-ink-faint uppercase">
-          Chances before kick-off
-        </p>
+        <p className="text-small text-ink-dim">Chances before kick-off</p>
         <svg
           aria-label={`Before kick-off: ${why[0].club} ${chances[0]}%, ${why[1].club} ${chances[1]}%`}
-          className="block h-3 w-full overflow-hidden rounded-md"
+          className="block h-2 w-full overflow-hidden rounded"
           preserveAspectRatio="none"
           role="img"
-          viewBox="0 0 100 10"
+          viewBox="0 0 100 8"
         >
-          <rect className="fill-team-0-fill" height="10" width={chances[0]} />
-          <rect className="fill-team-1-fill" height="10" width={chances[1]} x={chances[0]} />
+          <rect className="fill-team-0-fill" height="8" width={chances[0]} />
+          <rect className="fill-team-1-fill" height="8" width={chances[1]} x={chances[0]} />
         </svg>
-        <p aria-hidden="true" className="flex justify-between gap-3 text-[13px]">
-          <span className="min-w-0 [overflow-wrap:anywhere]">
-            <PlayerName side={0}>{why[0].club}</PlayerName>{" "}
-            <b className="tabular-nums">{chances[0]}%</b>
-          </span>
-          <span className="min-w-0 text-right [overflow-wrap:anywhere]">
-            <b className="tabular-nums">{chances[1]}%</b>{" "}
-            <PlayerName side={1}>{why[1].club}</PlayerName>
-          </span>
+        <p
+          aria-hidden="true"
+          className="flex justify-between text-small font-semibold tabular-nums"
+        >
+          <span className={TEAM_TEXT[0]}>{chances[0]}%</span>
+          <span className={TEAM_TEXT[1]}>{chances[1]}%</span>
         </p>
       </div>
-      <div className="grid gap-6">
-        {why.map((side, s) => (
-          <section aria-label={`${side.manager}’s five`} className="grid min-w-0 gap-1" key={s}>
-            <h3 className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-b border-line pb-1.5 text-base font-black">
-              <span className="min-w-0 [overflow-wrap:anywhere]">
-                <PlayerName side={s as 0 | 1}>{side.club}</PlayerName>
-              </span>
-              <small className="text-[12.5px] font-bold text-ink-faint tabular-nums">
-                {chances[s]}% before kick-off
-              </small>
-              {side.auto && <Chip tone="auto">Auto squad</Chip>}
-              {side.keeperless && <Chip tone="warn">No keeper</Chip>}
-              {side.shortLines.map(({ line, short }) => (
-                <Chip key={line} tone="warn">
-                  {line} {short} short
-                </Chip>
+      {ratings && (
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-2 text-small text-ink-dim">
+          <span
+            aria-hidden="true"
+            className={`rounded-md border px-1.5 font-semibold tabular-nums ${powerBand(1.19).pill}`}
+          >
+            1.19
+          </span>
+          Power going in
+          <span
+            aria-hidden="true"
+            className="grid h-7 w-7 place-items-center rounded-full border-[1.5px] border-ink-dim text-label font-semibold text-ink tabular-nums"
+          >
+            7.2
+          </span>
+          Rating, out of 10
+        </p>
+      )}
+      {why.map((side, s) => (
+        <section
+          aria-label={`${side.manager}’s five`}
+          className={`grid min-w-0 gap-2 rounded-2xl border border-t-[3px] border-line/60 bg-panel/60 p-4 ${RAIL[s]}`}
+          key={s}
+        >
+          <h3 className={`text-body font-semibold [overflow-wrap:anywhere] ${TEAM_TEXT[s]}`}>
+            {side.club}
+          </h3>
+          <p className="text-small text-ink-dim">
+            {[
+              `${chances[s]}% before kick-off`,
+              side.auto && "auto squad",
+              side.keeperless && "no keeper",
+              ...side.shortLines.map(({ line, short }) => `${line} ${short} short`),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+          <ul className="grid gap-1.5">
+            {side.cards
+              .map((card, slot) => ({ card, slot }))
+              .sort((a, b) => matchPower(b.card) - matchPower(a.card) || a.slot - b.slot)
+              .map(({ card, slot }) => (
+                <CardRow
+                  card={card}
+                  key={slot}
+                  open={open}
+                  rating={ratings?.[s]?.[slot] ?? null}
+                  send={send}
+                  shown={shown}
+                  tipKey={`${s}:${slot}`}
+                />
               ))}
-              {ratings && (
-                <small className="ml-auto text-[10px] font-black tracking-[0.12em] text-ink-faint uppercase">
-                  Rating
-                </small>
-              )}
-            </h3>
-            <ul className="grid">
-              {side.cards
-                .map((card, slot) => ({ card, slot }))
-                .sort((a, b) => matchPower(b.card) - matchPower(a.card) || a.slot - b.slot)
-                .map(({ card, slot }) => (
-                  <CardRow
-                    card={card}
-                    key={slot}
-                    open={open}
-                    rating={ratings?.[s]?.[slot] ?? null}
-                    setTips={setTips}
-                    tipKey={`${s}:${slot}`}
-                    tips={tips}
-                  />
-                ))}
-            </ul>
-          </section>
-        ))}
-      </div>
-      <p>
+          </ul>
+        </section>
+      ))}
+      <div className="flex flex-wrap items-center justify-between gap-x-4">
         <button
           aria-expanded={open}
-          className="inline-flex min-h-11 items-center justify-center rounded-[10px] border border-line bg-panel/70 px-3.5 text-sm font-black whitespace-nowrap text-ink hover:border-brass"
+          className={`inline-flex min-h-11 items-center rounded-md text-small font-semibold text-brass hover:underline ${FOCUS}`}
           onClick={() => {
             setOpen((value) => !value);
-            setTips({ open: null, hover: null, dismissed: null });
+            send({ type: "reset" });
           }}
           type="button"
         >
           {open ? "Hide the factors" : "Show every factor"}
         </button>
-      </p>
-      <p className="text-xs leading-relaxed text-ink-faint">
-        Power is a card&rsquo;s strength in this match; 1.00, the tick on each bar, is an ordinary
-        card. Longer bars mean stronger cards; the number badges are green for stronger cards, amber
-        and orange for weaker ones. Power multiplies the card&rsquo;s rating, form, pick, fitness
-        and this match&rsquo;s day roll
-        {open && "; hover or tap a factor to see what it means"}.
-        {beforeFullTime && " Goals and assists are added at full time."}
-        {ratings &&
-          ` The circle on the right is how the card played in this match, out of 10, from what it did: every card starts at ${RATING.base}.`}{" "}
-        Who picked whom is on the bracket page after the final.
-      </p>
+        <InfoLink href="/how-it-works#power">How Power works</InfoLink>
+      </div>
     </section>
   );
 }
