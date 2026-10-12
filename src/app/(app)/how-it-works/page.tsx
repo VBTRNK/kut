@@ -452,7 +452,7 @@ export default async function HowItWorksPage() {
               Pick up to {MIDWEEK.squadSize} cards from your collection,{" "}
               <strong className="text-ink">one per Player</strong>, any time until{" "}
               <strong className="text-ink">Wednesday {lockAtClock}</strong>. Change them as often as
-              you like.
+              you like. Where you own two copies of a Player, the stronger one plays.
             </li>
             <li>
               Round 1 comes out at {roundOneAt}, then a round {roundIntervalText(scheduleVersion)}{" "}
@@ -495,7 +495,7 @@ export default async function HowItWorksPage() {
               <strong className="text-ink">Day</strong>: a fresh roll every match, so upsets happen.
             </li>
           </ul>
-          <h3 className="scroll-mt-6 pt-2 font-black text-ink" id="midweek-shape">
+          <h3 className="scroll-mt-6 pt-2 font-black text-ink" id="plusses">
             Your squad&rsquo;s shape
           </h3>
           <p>
@@ -552,6 +552,11 @@ export default async function HowItWorksPage() {
               <strong className="text-ink">Take a Goalkeeper</strong>: without one, the card with
               the most defence goes in goal and keeps goal much worse. Whoever is in goal adds no
               plusses to the lines.
+            </li>
+            <li>
+              The picker counts your plusses once your five has a Goalkeeper. Without one, who
+              stands in goal is only settled at the lock, so it can&rsquo;t yet say which four cards
+              count.
             </li>
           </ul>
           <p>

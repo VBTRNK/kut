@@ -302,7 +302,7 @@ test("file sharing, cancellation, action errors and download fallback", async ({
 // Each case owns its page and completed evening. Keep the same assertions and
 // preview deadline; splitting the navigation budget does not repair Topic A.
 for (const long of [false, true])
-  for (const surface of ["week", "index"] as const)
+  for (const surface of ["week", "night"] as const)
     for (const width of [320, 412, 640, 1280]) {
       test(`share rows and rating links align: ${surface}, ${width}px, ${long ? "long" : "short"} names`, async ({
         page,
@@ -331,7 +331,7 @@ for (const long of [false, true])
               ]);
           });
           await signIn(page);
-          const route = surface === "week" ? `/midweek/${week}` : "/midweek";
+          const route = surface === "week" ? `/midweek/${week}` : `/midweek/${week}/night`;
           await page.setViewportSize({ width, height: 900 });
           await page.goto(route);
           await previews(page);

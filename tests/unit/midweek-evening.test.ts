@@ -9,9 +9,7 @@ import {
   assembleBracket,
   championLeads,
   championLeadsUntil,
-  eveningClockLabel,
   eveningPhase,
-  eveningStops,
   factorText,
   fieldCounts,
   finalLine,
@@ -29,10 +27,8 @@ import {
   pairSentence,
   pastWeeks,
   roundName,
-  roundsYouAreIn,
   roundShort,
   treeGroupRows,
-  wonRounds,
   yourNextRound,
 } from "@/lib/midweek/evening";
 import type { DrawRow, EntryCardRow, MatchRow } from "@/lib/midweek/rows";
@@ -176,40 +172,6 @@ describe("owner decision D4: the champion leads until Thursday 23:59 Amsterdam",
   });
 });
 
-describe("the clock keeps each week's version (ADR-104)", () => {
-  const times = (lockAt: string, scheduleVersion: number) =>
-    eveningStops({
-      lockAt,
-      scheduleVersion,
-      rounds: 5,
-      now: new Date(lockAt),
-      matches: [],
-      youThrough: null,
-    }).map((stop) => `${stop.name} ${stop.time}`);
-
-  it("runs a version-1 evening: lock 20:00, a round every 30 minutes", () => {
-    expect(times(LOCK, V1)).toEqual([
-      "Lock 20:00",
-      "Round 1 20:30",
-      "Round 2 21:00",
-      "Quarters 21:30",
-      "Semis 22:00",
-      "Final 22:30",
-    ]);
-  });
-
-  it("runs a version-2 evening: lock 19:55, round 1 at 20:00, a round every 15 minutes", () => {
-    expect(times("2026-10-14T17:55:00.000Z", 2)).toEqual([
-      "Lock 19:55",
-      "Round 1 20:00",
-      "Round 2 20:15",
-      "Quarters 20:30",
-      "Semis 20:45",
-      "Final 21:00",
-    ]);
-  });
-});
-
 /** Round 1 as `kut.midweek_draw_public` returns it from the lock: no result. */
 const draw: DrawRow[] = rows
   .filter((row) => row.round === 1)
@@ -341,65 +303,6 @@ describe("the evening from the lock (ADR-113)", () => {
   // A version-2 week: lock 19:55, round 1 at 20:00, a round every 15 minutes.
   const LOCK2 = "2026-10-14T17:55:00.000Z";
   const at = (hhmm: string) => new Date(`2026-10-14T${hhmm}:00+02:00`);
-  const stops = (now: string, matches: readonly MatchRow[], youThrough: number | null = 2) =>
-    eveningStops({
-      lockAt: LOCK2,
-      scheduleVersion: 2,
-      rounds: 4,
-      now: at(now),
-      matches,
-      youThrough,
-    });
-
-  it("marks the clock locked, played, live, next and later", () => {
-    const draw = stops("19:57", []);
-    expect(draw.map((s) => s.state)).toEqual(["locked", "next", "later", "later", "later"]);
-    expect(draw.map((s) => s.time)).toEqual(["19:55", "20:00", "20:15", "20:30", "20:45"]);
-    expect(draw.map((s) => s.name)).toEqual(["Lock", "Round 1", "Quarters", "Semis", "Final"]);
-    expect(draw.map((s) => s.you)).toEqual([false, true, true, false, false]);
-    // Revealed whole at kick-off today, so a round is played once its rows show.
-    expect(stops("20:16", upTo(2)).map((s) => s.state)).toEqual([
-      "locked",
-      "played",
-      "played",
-      "next",
-      "later",
-    ]);
-    // A round that has kicked off without every result yet is live (ADR-106's
-    // per-event views, or a read a moment before the reveal).
-    expect(stops("20:16", upTo(1)).map((s) => s.state)).toEqual([
-      "locked",
-      "played",
-      "live",
-      "next",
-      "later",
-    ]);
-    expect(stops("19:50", []).map((s) => s.state)).toEqual([
-      "next",
-      "later",
-      "later",
-      "later",
-      "later",
-    ]);
-    expect(stops("19:57", [], null).every((s) => !s.you)).toBe(true);
-  });
-
-  it("reads the clock as one sentence", () => {
-    expect(eveningClockLabel(stops("20:16", upTo(2)))).toBe(
-      "Wednesday evening: Lock 19:55, locked; Round 1 20:00, played, you're in; Quarters 20:15, played, you're in; Semis 20:30, next; Final 20:45, later.",
-    );
-  });
-
-  it("marks the rounds a member is in: up to the one they went out in, or all", () => {
-    const out = rows.find((row) => row.round === 2 && !row.bye)!;
-    const loser = out.winner_side === 0 ? out.side_1_user_id! : out.side_0_user_id;
-    const night = (userId: string) =>
-      myNight({ userId, rounds: 4, lockAt: LOCK, scheduleVersion: V1, matches: rows });
-    expect(roundsYouAreIn(night(loser), true, 4)).toBe(2);
-    expect(roundsYouAreIn(night(nine.championUserId), true, 4)).toBe(4);
-    expect(roundsYouAreIn(night("nobody"), false, 4)).toBeNull();
-  });
-
   it("picks the page and its title from the kick-offs and the member's night", () => {
     const phase = (now: string, userId: string, matches: readonly MatchRow[]) =>
       eveningPhase({
@@ -608,7 +511,6 @@ describe("your night", () => {
     expect(night.coins).toBe(250);
     expect(night.rows.at(-1)!.kind).toBe("won");
     expect(finishStat(night, 4)).toEqual({ value: "Champion", note: "won the final" });
-    expect(wonRounds(night)).toEqual(new Set([1, 2, 3, 4]));
   });
 
   it("stops at the round a member went out in, with no coins for it", () => {
@@ -830,7 +732,7 @@ describe("Home's evening card (ADR-114)", () => {
     const inPlay = rows.map((row) => (row === final ? playing : row));
     expect(card("20:47", finalist, inPlay)).toMatchObject({
       match: playing,
-      button: { label: "Watch your match", href: report(final) },
+      button: { label: "Watch it", href: report(final) },
     });
     expect(card("20:47", "nobody", inPlay)).toMatchObject({
       match: playing,
@@ -878,7 +780,7 @@ describe("the evening in play (ADR-115)", () => {
     expect(liveLine(night, 4, LOCK2, 2)).toBe(`Playing ${round2.side_1_name} now.`);
   });
 
-  it("the bracket shows it in play, names its winner-to-be as a placeholder, and the clock says Live", () => {
+  it("the bracket shows it in play and names its winner-to-be as a placeholder", () => {
     const bracket = assembleBracket({
       rounds: 4,
       lockAt: LOCK2,
@@ -897,14 +799,5 @@ describe("the evening in play (ADR-115)", () => {
     const next = bracket[2].pairs[round2.pairing >> 1];
     expect(next.kind).toBe("upcoming");
     expect(next.sides.some((side) => side.placeholder)).toBe(true);
-    const stops = eveningStops({
-      lockAt: LOCK2,
-      scheduleVersion: 2,
-      rounds: 4,
-      now: new Date("2026-10-14T18:17:00.000Z"),
-      matches: inPlay,
-      youThrough: null,
-    });
-    expect(stops[2].state).toBe("live");
   });
 });

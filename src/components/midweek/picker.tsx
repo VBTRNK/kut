@@ -1,28 +1,36 @@
 "use client";
 
-import Link from "next/link";
-import { startTransition, useActionState, useMemo, useState } from "react";
+import { startTransition, useActionState, useMemo, useRef, useState } from "react";
 import { LiveCard, type LiveCardPlayer } from "@/components/live-card";
+import Link from "next/link";
+import { Block } from "@/components/ui/block";
+import { Button } from "@/components/ui/button";
+import { ChoiceGroup, FilterSheet } from "@/components/ui/filter-sheet";
+import { InfoLink } from "@/components/ui/links";
+import { FOCUS } from "@/components/ui/page";
+import { Tag } from "@/components/ui/tag";
+import { FilterButton } from "@/components/ui/toolbar";
+import { saveMidweekSquad, type MidweekActionState } from "@/app/(app)/midweek/actions";
 import {
   archetypeFilters,
   formatClock,
-  formatDayDate,
   formatSavedAt,
-  keeperCheck,
+  formatWeekday,
   prefillNotice,
   saveStatus,
+  type Segment,
 } from "@/lib/midweek/entry";
-import { saveMidweekSquad, type MidweekActionState } from "@/app/(app)/midweek/actions";
-import { lineCount, lineCountShort, plussesLine } from "@/lib/midweek/plusses";
 import {
-  MidweekKeeperCheck,
-  MidweekNotice,
-  MidweekPrivacyLine,
-  MidweekSaveStatus,
-  MidweekTrialistCard,
-  Segments,
-} from "./bits";
-import { MidweekLineCount } from "./line-count";
+  keeperLine,
+  LINE_NAMES,
+  lineCount,
+  lineCountLabel,
+  lineCountShort,
+  lineVerdict,
+  NO_KEEPER_COUNT,
+  plussesLine,
+  type LineCount,
+} from "@/lib/midweek/plusses";
 import { MidweekMiniCard } from "./mini-card";
 
 /** One pick tile: a Player, and the strongest copy a save sends for them. */
@@ -63,23 +71,34 @@ type MidweekPickerProps = {
   starterLead: string | null;
 };
 
-const BUTTON_BASE =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] px-3.5 text-sm font-black whitespace-nowrap";
-const PRIMARY = `${BUTTON_BASE} bg-gradient-to-b from-[#eebd63] to-[#d29a34] text-ink-on-accent shadow-lg shadow-brass/25 disabled:opacity-45 disabled:shadow-none`;
-const SECONDARY = `${BUTTON_BASE} border border-line bg-panel/70 text-ink disabled:opacity-45`;
-const GHOST =
-  "inline-flex min-h-11 items-center justify-center rounded-[10px] px-3 text-sm font-extrabold text-brass hover:underline";
-const ICON_BUTTON =
-  "grid h-11 w-11 flex-none place-items-center rounded-[10px] text-ink-faint hover:text-brick";
-const ROW_BUTTON =
-  "inline-flex min-h-10 items-center justify-center rounded-[10px] border border-line bg-panel/70 px-3 text-[13px] font-black whitespace-nowrap text-ink disabled:opacity-45";
+/** A notice above the five: something changed under the member, or a starter's trialists. */
+function Notice({ children, live = false }: { children: React.ReactNode; live?: boolean }) {
+  return (
+    <div
+      className="grid gap-1 rounded-xl border border-warning-line bg-warning-bg/55 px-4 py-3 text-small text-ink"
+      role={live ? "status" : undefined}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Segments({ segments }: { segments: readonly Segment[] }) {
+  return segments.map((segment, index) =>
+    segment.strong ? (
+      <b className="font-semibold" key={index}>
+        {segment.text}
+      </b>
+    ) : (
+      <span key={index}>{segment.text}</span>
+    ),
+  );
+}
 
 /** KB-028: a Player whose archetype changed since the week opened, in words. */
-function ChangeNote({ text, center = false }: { text: string; center?: boolean }) {
+function ChangeNote({ text }: { text: string }) {
   return (
-    <span
-      className={`mt-[3px] flex items-center gap-1.5 text-[11.5px] font-extrabold text-warning ${center ? "justify-center text-center" : ""}`}
-    >
+    <span className="flex items-center gap-1.5 text-small font-semibold text-warning">
       <span aria-hidden="true">&#8635;</span>
       {text}
     </span>
@@ -88,21 +107,56 @@ function ChangeNote({ text, center = false }: { text: string; center?: boolean }
 
 /** KB-028 on the card face: the `LiveCard` badge "Speedster from next week". */
 function nextBadge(card: PickCard) {
-  return card.next ? (
-    <span className="inline-block rounded-full border border-[#5c3c1f] bg-[#2b190d] px-2 py-0.5 text-[10px] font-black whitespace-nowrap text-[#f0b072]">
-      {card.next} from next week
-    </span>
-  ) : undefined;
+  return card.next ? <Tag tone="warn">{card.next} from next week</Tag> : undefined;
 }
 
-function InjuredChip() {
+/** The plusses per line (DR3 kept, DR5-10): three insets, the verdict, the rule behind a link. */
+function Plusses({ count }: { count: LineCount }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#6b5238] bg-[#2e2217] px-2 py-0.5 text-[10.5px] leading-normal font-extrabold tracking-[0.08em] whitespace-nowrap text-[#e8c49c] uppercase before:h-1.5 before:w-3 before:flex-none before:-rotate-[20deg] before:rounded-[3px] before:bg-[linear-gradient(90deg,#e0b58a_0_35%,#f3dcc0_35%_65%,#e0b58a_65%)] before:content-['']">
-      Injured
-    </span>
+    <section aria-label="Plusses per line" className="grid gap-2">
+      {count.kind === "count" && (
+        <div aria-label={lineCountLabel(count)} className="grid grid-cols-3 gap-2" role="group">
+          {LINE_NAMES.map((name, line) => (
+            <div
+              aria-hidden="true"
+              className="grid gap-0.5 rounded-xl bg-panel-2/80 px-3 py-2.5"
+              key={name}
+            >
+              <span className="text-label font-semibold text-ink-faint">{name}</span>
+              <span
+                className={`text-body font-semibold tabular-nums ${count.short[line] > 0 ? "text-warning" : "text-moss"}`}
+              >
+                {count.lines[line]}
+                {count.short[line] > 0 ? ` · ${count.short[line]} short` : " ✓"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {count.kind === "count" ? (
+        <>
+          <p aria-live="polite" className="text-small text-ink">
+            <b className="font-semibold">{lineVerdict(count).lead}</b> {lineVerdict(count).rest}
+          </p>
+          <p className="text-small text-ink-dim">{keeperLine(count)}</p>
+        </>
+      ) : (
+        <p aria-live="polite" className="text-small text-ink-dim">
+          {NO_KEEPER_COUNT}
+        </p>
+      )}
+      <InfoLink href="/how-it-works#plusses">How plusses work</InfoLink>
+    </section>
   );
 }
 
+/**
+ * The picker at `/midweek/pick` (DR5-13, ADR-154), from the top: your five as
+ * slots with the plusses per line, the save bar with the one-line privacy
+ * notice (DR5-8, ADR-091), then your cards with the archetypes in the Filter
+ * sheet. One row per Player below `lg`, the card grid from `lg` with the five
+ * and the save bar sticky on the left. Adding fills the first empty slot.
+ */
 export function MidweekPicker({
   cards,
   initialSlots,
@@ -116,16 +170,10 @@ export function MidweekPicker({
 }: MidweekPickerProps) {
   const byPlayer = useMemo(() => new Map(cards.map((card) => [card.playerId, card])), [cards]);
   const [slots, setSlots] = useState<(string | null)[]>(initialSlots);
-  const firstEmpty = (list: (string | null)[]) => {
-    const index = list.indexOf(null);
-    return index === -1 ? null : index;
-  };
-  // Nothing saved: the page opens on slot 1 "Choosing…", as Picker-Empty.
-  const [activeSlot, setActiveSlot] = useState<number | null>(() =>
-    savedCardIds.length === 0 && cards.length > 0 ? firstEmpty(initialSlots) : null,
-  );
   const [prefillText, setPrefillText] = useState<ReturnType<typeof prefillNotice> | null>(null);
   const [filter, setFilter] = useState("all");
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const filterButton = useRef<HTMLButtonElement>(null);
   const [state, formAction, pending] = useActionState<MidweekActionState, FormData>(
     saveMidweekSquad,
     null,
@@ -134,19 +182,6 @@ export function MidweekPicker({
   const picked = slots.map((playerId) => (playerId ? (byPlayer.get(playerId) ?? null) : null));
   const sendCardIds = picked.flatMap((card) => (card ? [card.cardId] : []));
   const status = saveStatus(savedCardIds, sendCardIds);
-  const statusText =
-    status === "none"
-      ? "Not picked yet"
-      : status === "dirty"
-        ? "Unsaved changes"
-        : savedAt
-          ? `Saved ${formatSavedAt(savedAt)}`
-          : "Saved";
-  const keeper = keeperCheck(
-    picked.flatMap((card) =>
-      card ? [{ archetype: card.archetype, displayName: card.displayName }] : [],
-    ),
-  );
   const inSquad = new Set(slots.filter((id): id is string => id !== null));
   // The weakest-line rule on the five as picked (ADR-116, DR3 HANDOFF §4).
   const count = lineCount(
@@ -155,26 +190,25 @@ export function MidweekPicker({
     ),
   );
   const countShort = lineCountShort(count);
-  const full = firstEmpty(slots) === null;
+  const firstEmpty = slots.indexOf(null);
+  const full = firstEmpty === -1;
   const filters = archetypeFilters(cards);
   const shown = filter === "all" ? cards : cards.filter((card) => card.archetype === filter);
-  const lockLabel = `${formatDayDate(lockAt)}, ${formatClock(lockAt)}`;
-  const target = activeSlot ?? firstEmpty(slots);
-  // The save bar's note (KB-029): what the status means, or the save's outcome.
-  const note =
-    status === "none"
-      ? `No pick by ${formatClock(lockAt)} on Wednesday? An auto squad plays for you, heavily handicapped.`
-      : status === "dirty"
-        ? "Nothing counts until you save."
-        : `Change it as often as you like until ${lockLabel}.`;
+  const filterLabel = filters.find((chip) => chip.key === filter)?.label ?? "All";
+  const line =
+    state?.ok === false
+      ? state.error
+      : state?.ok && status === "saved"
+        ? state.message
+        : status === "none"
+          ? "Not picked: an auto squad plays."
+          : status === "dirty"
+            ? "Save to make it count."
+            : `${savedAt ? `Saved ${formatSavedAt(savedAt)}. ` : ""}Change them until ${formatWeekday(lockAt)} ${formatClock(lockAt)}.`;
 
-  function place(playerId: string) {
-    const target = activeSlot ?? firstEmpty(slots);
-    if (target === null) return;
-    const next = slots.map((id, index) => (index === target ? playerId : id));
-    setSlots(next);
-    const after = next.findIndex((id, index) => id === null && index > target);
-    setActiveSlot(after === -1 ? firstEmpty(next) : after);
+  function add(playerId: string) {
+    if (full) return;
+    setSlots(slots.map((id, index) => (index === firstEmpty ? playerId : id)));
   }
 
   function remove(index: number) {
@@ -184,14 +218,7 @@ export function MidweekPicker({
   function loadLastWeek() {
     if (!lastWeek) return;
     setSlots(lastWeek.slots);
-    setActiveSlot(firstEmpty(lastWeek.slots));
     setPrefillText(prefillNotice(lastWeek.lostNames, lastWeek.lostSlots));
-  }
-
-  /** Saved, then "Change your five": choose for slot 1, with Cancel beside it. */
-  function change() {
-    setActiveSlot(0);
-    document.getElementById("mw-squad-h")?.scrollIntoView({ block: "start" });
   }
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -201,280 +228,120 @@ export function MidweekPicker({
   }
 
   const notice = prefillText ? (
-    <MidweekNotice live tone="warn">
-      <Segments segments={prefillText} />
-    </MidweekNotice>
+    <Notice live>
+      <p>
+        <Segments segments={prefillText} />
+      </p>
+    </Notice>
   ) : lostSavedNotice ? (
-    <MidweekNotice tone="warn">{lostSavedNotice}</MidweekNotice>
+    <Notice>
+      <p>{lostSavedNotice}</p>
+    </Notice>
   ) : starterLead ? (
-    <MidweekNotice tone="info">
-      <b>{starterLead}</b> Trialists are handicapped; every Player you add from a pack beats one.{" "}
-      <Link className="font-bold text-brass hover:underline" href="/club/packs">
-        Open a pack &rarr;
-      </Link>
-    </MidweekNotice>
+    <Notice>
+      <p>{starterLead}</p>
+      <InfoLink href="/club/packs">Open a pack</InfoLink>
+    </Notice>
   ) : null;
 
+  const addLabel = (card: PickCard) =>
+    `Add to your five: ${card.displayName}${card.card.injured ? ", injured" : ""}`;
+
   return (
-    <div className="grid gap-7">
-      {notice}
-
-      <div className="flex flex-col gap-5">
-        <section aria-labelledby="mw-squad-h" className="grid scroll-mt-24 gap-3.5">
-          <h2 className="display text-3xl" id="mw-squad-h">
-            Your five
-          </h2>
-
-          {/* Below lg: one row per slot. */}
-          <ol className="grid gap-2 lg:hidden">
-            {slots.map((playerId, index) => {
-              const card = picked[index];
-              const n = index + 1;
-              const active = activeSlot === index;
-              const rowBase =
-                "relative grid min-h-[76px] grid-cols-[18px_46px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-[14px]";
-              if (!card || !playerId) {
-                return (
-                  <li
-                    className={`${rowBase} ${
-                      active
-                        ? "border-2 border-brass bg-brass-bg/45 py-[7px] pr-[7px] pl-[9px]"
-                        : "border border-dashed border-line/70 bg-panel/35 py-2 pr-2 pl-2.5"
-                    }`}
-                    key={n}
-                  >
-                    <span
-                      className={`text-center text-xs font-black tabular-nums ${active ? "text-brass" : "text-ink-faint"}`}
-                    >
-                      {n}
-                    </span>
-                    {active ? (
-                      <MidweekMiniCard variant="empty" />
-                    ) : (
-                      <MidweekMiniCard ovr={trialistOvr} variant="trialist" />
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-[15px] leading-tight font-extrabold text-ink-dim">
-                        {active ? "Choosing…" : "Trialist"}
-                      </p>
-                      <p className="mt-0.5 text-xs leading-snug text-ink-dim">
-                        {active
-                          ? "Tap a card below to put it here."
-                          : `Plays here if you leave it empty: a Common All-rounder, OVR ${trialistOvr}, handicapped.`}
-                      </p>
-                    </div>
-                    <div className="flex">
-                      {active ? (
-                        <button className={GHOST} onClick={() => setActiveSlot(null)} type="button">
-                          Cancel
-                        </button>
-                      ) : (
-                        <button
-                          aria-label={`Add a card to slot ${n}`}
-                          className={GHOST}
-                          onClick={() => setActiveSlot(index)}
-                          type="button"
-                        >
-                          Add
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                );
-              }
-              return (
-                <li
-                  className={`${rowBase} ${
-                    active
-                      ? "border-2 border-brass bg-brass-bg/45 py-[7px] pr-[7px] pl-[9px]"
-                      : "border border-line/70 bg-panel/80 py-2 pr-2 pl-2.5"
-                  }`}
-                  key={n}
-                >
-                  <span
-                    className={`text-center text-xs font-black tabular-nums ${active ? "text-brass" : "text-ink-faint"}`}
-                  >
-                    {n}
-                  </span>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start lg:gap-10">
+      {/* Below lg the five, the save bar and the cards are one column; with
+          unsaved changes on a phone the save bar moves after the cards and
+          sticks above the tab bar, so Save stays in reach while picking. */}
+      <div className="contents lg:sticky lg:top-24 lg:grid lg:grid-cols-[minmax(0,1fr)] lg:gap-4">
+        {notice}
+        <Block
+          aside={<p className="text-small text-ink-dim">Empty slots play a trialist</p>}
+          id="five-h"
+          title="Your five"
+        >
+          <ol aria-label="Your five" className="grid gap-1.5">
+            {picked.map((card, index) => (
+              <li
+                className={`grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-2.5 py-1.5 ${
+                  card ? "bg-panel-2/80" : "border border-dashed border-line"
+                }`}
+                key={index}
+              >
+                {card ? (
                   <MidweekMiniCard
                     injured={card.card.injured}
                     ovr={card.card.liveOvr}
                     rarityTier={card.card.rarityTier}
+                    small
                   />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="grid aspect-[5/7] w-[34px] place-items-center rounded-md border border-dashed border-line text-label text-ink-faint"
+                  >
+                    {index + 1}
+                  </span>
+                )}
+                <span className="grid min-w-0">
+                  <span
+                    className={`text-body [overflow-wrap:anywhere] ${card ? "font-semibold" : "text-ink-dim"}`}
+                  >
+                    {card ? card.displayName : "Trialist"}
+                  </span>
+                  <span className="text-small text-ink-dim">
+                    {card
+                      ? `${card.archetypeLabel} · OVR ${card.card.liveOvr}${card.card.injured ? " · injured" : ""}`
+                      : `OVR ${trialistOvr}`}
+                  </span>
+                  {card?.change && <ChangeNote text={card.change} />}
+                </span>
+                {card && (
                   <button
-                    aria-label={
-                      active
-                        ? `Choosing a card to replace ${card.displayName} in slot ${n}`
-                        : `Swap ${card.displayName} in slot ${n}`
-                    }
-                    aria-pressed={active}
-                    className="min-w-0 text-left"
-                    onClick={() => setActiveSlot(active ? null : index)}
+                    aria-label={`Remove ${card.displayName} from slot ${index + 1}`}
+                    className={`inline-flex min-h-11 items-center rounded-md px-2 text-small font-semibold text-ink-dim hover:text-ink ${FOCUS}`}
+                    onClick={() => remove(index)}
                     type="button"
                   >
-                    <span className="block text-[15px] leading-tight font-black [overflow-wrap:anywhere]">
-                      {card.displayName}
-                    </span>
-                    <span className="mt-0.5 block text-xs leading-snug text-ink-dim">
-                      {active
-                        ? "Tap a card below to swap it in."
-                        : `${card.archetypeLabel} · ${card.tierLabel} · OVR ${card.card.liveOvr}${
-                            card.card.injured ? " · plays at reduced fitness" : ""
-                          }`}
-                    </span>
-                    {card.change && !active && <ChangeNote text={card.change} />}
-                    {card.card.injured && !active && (
-                      <span className="mt-1.5 flex flex-wrap gap-1">
-                        <InjuredChip />
-                      </span>
-                    )}
+                    Remove
                   </button>
-                  <div className="flex">
-                    <button
-                      aria-label={`Remove ${card.displayName} from slot ${n}`}
-                      className={ICON_BUTTON}
-                      onClick={() => remove(index)}
-                      type="button"
-                    >
-                      <span aria-hidden="true">&#10005;</span>
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
+                )}
+              </li>
+            ))}
           </ol>
+          {inSquad.size > 0 && <Plusses count={count} />}
+        </Block>
 
-          {/* From lg: the team sheet, five cards side by side. Hidden from
-              assistive tech below lg by `hidden`, and the rows above are
-              hidden from lg, so each size has exactly one list. */}
-          <ol aria-label="Your five" className="hidden grid-cols-5 gap-5 lg:grid">
-            {slots.map((playerId, index) => {
-              const card = picked[index];
-              const n = index + 1;
-              const active = activeSlot === index;
-              return (
-                <li className="grid content-start gap-2.5" key={n}>
-                  <p className="flex min-h-8 items-center justify-between gap-1 text-xs font-extrabold text-ink-faint">
-                    <span>Slot {n}</span>
-                    {card && (
-                      <span className="flex items-center">
-                        <button
-                          aria-pressed={active}
-                          className="min-h-8 rounded-lg px-2 text-brass hover:underline"
-                          onClick={() => setActiveSlot(active ? null : index)}
-                          type="button"
-                        >
-                          {active ? "Cancel" : "Swap"}
-                          <span className="sr-only"> {card.displayName}</span>
-                        </button>
-                        <button
-                          aria-label={`Remove ${card.displayName} from slot ${n}`}
-                          className="grid h-8 w-8 place-items-center rounded-lg hover:text-brick"
-                          onClick={() => remove(index)}
-                          type="button"
-                        >
-                          <span aria-hidden="true">&#10005;</span>
-                        </button>
-                      </span>
-                    )}
-                  </p>
-                  {card && playerId ? (
-                    <>
-                      <div
-                        className={`rounded-[0.9rem] ${active ? "outline-3 outline-offset-4 outline-brass" : ""}`}
-                      >
-                        <LiveCard badge={nextBadge(card)} player={card.card} />
-                      </div>
-                      {card.change && <ChangeNote center text={card.change} />}
-                    </>
-                  ) : (
-                    <button
-                      aria-label={
-                        active ? `Stop choosing for slot ${n}` : `Add a card to slot ${n}`
-                      }
-                      aria-pressed={active}
-                      className={`rounded-[0.9rem] ${active ? "outline-3 outline-offset-4 outline-brass" : ""}`}
-                      onClick={() => setActiveSlot(active ? null : index)}
-                      type="button"
-                    >
-                      <MidweekTrialistCard
-                        slot={n}
-                        state={active ? "choosing" : "trialist"}
-                        trialistOvr={trialistOvr}
-                      />
-                    </button>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-
-          {inSquad.size > 0 && <MidweekKeeperCheck segments={keeper.segments} tone={keeper.tone} />}
-          {inSquad.size > 0 && <MidweekLineCount count={count} />}
-        </section>
-
-        {/* `MidweekSaveBar` (KB-029): the status and one note on the left, the
-            actions on the right, never an empty column. With unsaved changes
-            below sm it is one compact opaque row, last in the flow and sticky
-            above the tab bar, so Save stays in reach while the member picks
-            from the list; otherwise it sits inline under the five. */}
         <form
-          className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 rounded-[14px] border bg-panel/80 px-3.5 py-3 ${
+          className={`grid gap-3 rounded-2xl border p-4 ${
             status === "dirty"
-              ? "border-brass/50 max-sm:sticky max-sm:bottom-[calc(4.5rem_+_env(safe-area-inset-bottom,0px))] max-sm:z-20 max-sm:order-last max-sm:gap-y-1.5 max-sm:bg-panel max-sm:py-2 max-sm:pr-2 max-sm:shadow-[0_-12px_24px_-10px_rgb(0_0_0/70%)]"
-              : "border-line/60"
+              ? "border-brass-line bg-panel max-sm:sticky max-sm:bottom-[calc(4.5rem_+_env(safe-area-inset-bottom,0px))] max-sm:z-20 max-sm:order-last max-sm:shadow-[0_-12px_24px_-10px_rgb(0_0_0/70%)]"
+              : "border-line/60 bg-panel/60"
           }`}
           onSubmit={submit}
         >
           {sendCardIds.map((id) => (
             <input key={id} name="card_id" type="hidden" value={id} />
           ))}
-          <div className="grid min-w-0 gap-0.5 max-sm:grow max-sm:basis-0">
-            <MidweekSaveStatus kind={status} text={statusText} />
-            <p
-              className={`text-xs text-ink-faint ${status === "dirty" && state?.ok !== false ? "max-sm:hidden" : ""}`}
+          <p className="flex flex-wrap items-center gap-2 text-small">
+            {status === "saved" ? (
+              <Tag tone="won">✓ Saved</Tag>
+            ) : status === "dirty" ? (
+              <Tag tone="you">Not saved</Tag>
+            ) : (
+              <Tag>Not picked</Tag>
+            )}
+            <span
+              className={state?.ok === false ? "font-semibold text-brick" : "text-ink-dim"}
               role="status"
             >
-              {state?.ok === false ? (
-                <span className="font-bold text-brick">{state.error}</span>
-              ) : state?.ok && status === "saved" ? (
-                <span className="font-bold text-moss">{state.message}</span>
-              ) : (
-                note
-              )}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {status === "saved" ? (
-              <button className={SECONDARY} onClick={change} type="button">
-                Change your five
-              </button>
-            ) : (
-              <>
-                {lastWeek && (
-                  <button
-                    className={`${SECONDARY} ${status === "dirty" ? "max-sm:hidden" : ""}`}
-                    onClick={loadLastWeek}
-                    type="button"
-                  >
-                    Load last week&rsquo;s five
-                  </button>
-                )}
-                <button
-                  className={PRIMARY}
-                  disabled={sendCardIds.length === 0 || pending}
-                  type="submit"
-                >
-                  {pending ? "Saving…" : "Save your five"}
-                </button>
-              </>
-            )}
-          </div>
+              {line}
+            </span>
+          </p>
           {/* On a phone with unsaved changes, the lines' verdict rides in the
               sticky bar, so the cost shows at the moment of saving (DR3). */}
           {status === "dirty" && inSquad.size > 0 && (
             <p
-              className={`basis-full text-xs font-extrabold sm:hidden ${
+              className={`text-small font-semibold sm:hidden ${
                 countShort.tone === "short"
                   ? "text-warning"
                   : countShort.tone === "ok"
@@ -485,146 +352,177 @@ export function MidweekPicker({
               {countShort.text}
             </p>
           )}
-        </form>
-
-        <MidweekPrivacyLine lock={formatClock(lockAt)} />
-
-        <section aria-labelledby="mw-cards-h" className="mt-2 grid gap-3">
-          <div className="grid gap-1">
-            <h2 className="display text-3xl" id="mw-cards-h">
-              Your cards
-            </h2>
-            <p className="text-sm text-ink-faint">
-              One slot per Player. Where you own two copies, the stronger one plays.
-              {full &&
-                activeSlot === null &&
-                " Your five is full: remove a card, or tap one to swap it."}
-            </p>
-          </div>
-          {/* `MidweekArchetypeFilter`: instant, client-side. */}
-          <div
-            aria-label="Filter your cards by archetype"
-            className="flex flex-wrap gap-1.5"
-            role="group"
-          >
-            {filters.map((chip) => (
-              <button
-                aria-pressed={filter === chip.key}
-                className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-extrabold ${
-                  filter === chip.key
-                    ? "border-brass bg-brass/12 text-brass"
-                    : "border-line text-ink-dim hover:text-ink"
-                }`}
-                key={chip.key}
-                onClick={() => setFilter(chip.key)}
-                type="button"
+          <div className="flex flex-wrap gap-2">
+            {status === "saved" ? (
+              <Button
+                kind="secondary"
+                onClick={() =>
+                  document.getElementById("cards-h")?.scrollIntoView({ block: "start" })
+                }
               >
-                {chip.label} <small className="text-[11px] text-ink-faint">{chip.count}</small>
-              </button>
-            ))}
+                Change your five
+              </Button>
+            ) : (
+              <>
+                <Button disabled={sendCardIds.length === 0 || pending} type="submit">
+                  {pending ? "Saving…" : "Save your five"}
+                </Button>
+                {lastWeek && (
+                  <span className={status === "dirty" ? "max-sm:hidden" : "contents"}>
+                    <Button kind="secondary" onClick={loadLastWeek}>
+                      Load last week&rsquo;s
+                    </Button>
+                  </span>
+                )}
+              </>
+            )}
           </div>
-          {shown.length === 0 && (
-            <p className="text-sm text-ink-dim">
-              No Goalkeeper among your cards. Your best defender goes in goal, and keeps goal much
-              worse than a real one.
-            </p>
-          )}
-
-          {/* Below lg: `MidweekPickRow`, a compact list. From lg the card grid.
-              Each size has exactly one list, the other is `hidden`. */}
-          <ul className="grid gap-1.5 lg:hidden">
-            {shown.map((card) => {
-              const isIn = inSquad.has(card.playerId);
-              return (
-                <li
-                  className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border px-2.5 py-2 ${
-                    isIn ? "border-moss-line bg-moss-bg/50" : "border-line/50 bg-panel/45"
-                  }`}
-                  key={card.playerId}
-                >
-                  <MidweekMiniCard
-                    injured={card.card.injured}
-                    ovr={card.card.liveOvr}
-                    rarityTier={card.card.rarityTier}
-                  />
-                  <div className="min-w-0">
-                    <p className="leading-tight font-extrabold [overflow-wrap:anywhere]">
-                      {card.displayName}
-                    </p>
-                    <p className="text-[12.5px] text-ink-dim">
-                      {card.archetypeLabel} &middot; {card.tierLabel} &middot; OVR{" "}
-                      {card.card.liveOvr}
-                      {card.card.injured && " · injured"}
-                      {card.copies > 1 && <> &middot; &times;{card.copies} copies</>}
-                    </p>
-                    {plussesLine(card.archetype) && (
-                      <p className="text-[12px] font-extrabold tracking-[0.06em] text-ink-faint">
-                        <span aria-hidden="true">{plussesLine(card.archetype)!.text}</span>
-                        <span className="sr-only">{plussesLine(card.archetype)!.label}</span>
-                      </p>
-                    )}
-                    {card.change && <ChangeNote text={card.change} />}
-                  </div>
-                  {isIn ? (
-                    <span className="inline-flex items-center rounded-full border border-moss-line bg-moss-bg px-2 py-0.5 text-[10.5px] font-extrabold tracking-[0.08em] whitespace-nowrap text-moss uppercase">
-                      &#10003; In<span className="sr-only"> your five: {card.displayName}</span>
-                    </span>
-                  ) : (
-                    <button
-                      aria-label={`${activeSlot !== null ? `Put in slot ${activeSlot + 1}` : "Add to your five"}: ${card.displayName}${card.card.injured ? ", injured" : ""}`}
-                      className={ROW_BUTTON}
-                      disabled={target === null}
-                      onClick={() => place(card.playerId)}
-                      type="button"
-                    >
-                      {activeSlot !== null ? `Slot ${activeSlot + 1}` : "Add"}
-                    </button>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-          <ul className="hidden grid-cols-5 gap-x-5 gap-y-6 lg:grid">
-            {shown.map((card) => {
-              const isIn = inSquad.has(card.playerId);
-              return (
-                <li className="grid content-start gap-2" key={card.playerId}>
-                  <div
-                    className={`relative ${
-                      isIn
-                        ? "[&_.live-card]:outline-3 [&_.live-card]:outline-offset-3 [&_.live-card]:outline-moss"
-                        : ""
-                    }`}
-                  >
-                    <LiveCard badge={nextBadge(card)} player={card.card} />
-                    {card.copies > 1 && (
-                      <span className="absolute -top-1.5 -right-1 z-10 rounded-full border border-line bg-panel-2 px-2 py-0.5 text-[11px] font-black text-ink-dim">
-                        &times;{card.copies} copies
-                      </span>
-                    )}
-                  </div>
-                  {isIn ? (
-                    <p className="flex min-h-11 items-center justify-center gap-1.5 rounded-[10px] border border-moss-line bg-moss-bg text-[13px] font-black text-moss">
-                      &#10003; In your five
-                      <span className="sr-only">: {card.displayName}</span>
-                    </p>
-                  ) : (
-                    <button
-                      aria-label={`${activeSlot !== null ? `Put in slot ${activeSlot + 1}` : "Add to your five"}: ${card.displayName}${card.card.injured ? ", injured" : ""}`}
-                      className="flex min-h-11 items-center justify-center gap-1.5 rounded-[10px] border border-brass-line bg-brass-bg/60 text-[13px] font-black text-brass disabled:opacity-45"
-                      disabled={target === null}
-                      onClick={() => place(card.playerId)}
-                      type="button"
-                    >
-                      {activeSlot !== null ? `Put in slot ${activeSlot + 1}` : "Add to your five"}
-                    </button>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+          <p className="text-small text-ink-dim">
+            Members see the five you enter from {formatClock(lockAt)}.{" "}
+            <Link
+              className={`font-semibold whitespace-nowrap text-brass hover:underline ${FOCUS}`}
+              href="/how-it-works#privacy"
+            >
+              Privacy&nbsp;›
+            </Link>
+          </p>
+        </form>
       </div>
+
+      <section aria-labelledby="cards-h" className="grid scroll-mt-24 content-start gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-heading font-semibold" id="cards-h">
+            Your cards
+          </h2>
+          <FilterButton
+            aria-haspopup="dialog"
+            on={filter === "all" ? 0 : 1}
+            onClick={() => setSheetOpen(true)}
+            ref={filterButton}
+          />
+        </div>
+        <p className="text-small text-ink-dim">
+          {filter === "all"
+            ? `${cards.length} Players`
+            : `${filterLabel} · ${shown.length} of ${cards.length}`}
+          {full && " · your five is full: remove a card to add another"}
+        </p>
+        <FilterSheet
+          onApply={() => setSheetOpen(false)}
+          onClear={() => setFilter("all")}
+          onClose={() => setSheetOpen(false)}
+          open={sheetOpen}
+          result={`Show ${shown.length} ${shown.length === 1 ? "Player" : "Players"}`}
+          returnFocusRef={filterButton}
+        >
+          <ChoiceGroup
+            legend="Archetype"
+            name="archetype"
+            onChange={setFilter}
+            options={filters.map((chip) => ({
+              value: chip.key,
+              label: `${chip.label} ${chip.count}`,
+            }))}
+            value={filter}
+          />
+        </FilterSheet>
+        {shown.length === 0 && (
+          <p className="text-small text-ink-dim">None of your cards play that this week.</p>
+        )}
+
+        {/* Below lg one row per Player; from lg the card grid. Each width has
+            exactly one list, the other is `hidden`. */}
+        <ul className="grid gap-1.5 lg:hidden">
+          {shown.map((card) => {
+            const isIn = inSquad.has(card.playerId);
+            const plusses = plussesLine(card.archetype);
+            return (
+              <li
+                className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-2.5 py-2 ${
+                  isIn ? "bg-moss-bg/60" : "bg-panel/60"
+                }`}
+                key={card.playerId}
+              >
+                <MidweekMiniCard
+                  injured={card.card.injured}
+                  ovr={card.card.liveOvr}
+                  rarityTier={card.card.rarityTier}
+                />
+                <span className="grid min-w-0">
+                  <span className="text-body font-semibold [overflow-wrap:anywhere]">
+                    {card.displayName}
+                  </span>
+                  <span className="text-small text-ink-dim">
+                    {card.archetypeLabel} &middot; {card.tierLabel} &middot; OVR {card.card.liveOvr}
+                    {card.card.injured && " · injured"}
+                    {card.copies > 1 && <> &middot; &times;{card.copies}</>}
+                  </span>
+                  {plusses && (
+                    <span className="text-small text-ink-faint">
+                      <span aria-hidden="true">{plusses.text}</span>
+                      <span className="sr-only">{plusses.label}</span>
+                    </span>
+                  )}
+                  {card.change && <ChangeNote text={card.change} />}
+                </span>
+                {isIn ? (
+                  <Tag tone="won">
+                    ✓ In<span className="sr-only"> your five: {card.displayName}</span>
+                  </Tag>
+                ) : (
+                  <button
+                    aria-label={addLabel(card)}
+                    className={`min-h-11 rounded-lg border border-line px-3 text-small font-semibold text-ink hover:border-brass-line disabled:opacity-50 ${FOCUS}`}
+                    disabled={full}
+                    onClick={() => add(card.playerId)}
+                    type="button"
+                  >
+                    Add
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        <ul className="hidden grid-cols-4 gap-x-4 gap-y-5 lg:grid">
+          {shown.map((card) => {
+            const isIn = inSquad.has(card.playerId);
+            return (
+              <li className="grid content-start gap-2" key={card.playerId}>
+                <div
+                  className={`relative ${
+                    isIn
+                      ? "[&_.live-card]:outline-3 [&_.live-card]:outline-offset-3 [&_.live-card]:outline-moss"
+                      : ""
+                  }`}
+                >
+                  <LiveCard badge={nextBadge(card)} player={card.card} />
+                  {card.copies > 1 && (
+                    <span className="absolute -top-1.5 -right-1 z-10">
+                      <Tag>&times;{card.copies}</Tag>
+                    </span>
+                  )}
+                </div>
+                {isIn ? (
+                  <p className="flex min-h-11 items-center justify-center rounded-xl border border-moss-line bg-moss-bg text-small font-semibold text-moss">
+                    ✓ In your five<span className="sr-only">: {card.displayName}</span>
+                  </p>
+                ) : (
+                  <button
+                    aria-label={addLabel(card)}
+                    className={`min-h-11 rounded-xl border border-line text-small font-semibold text-ink hover:border-brass-line disabled:opacity-50 ${FOCUS}`}
+                    disabled={full}
+                    onClick={() => add(card.playerId)}
+                    type="button"
+                  >
+                    Add
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
     </div>
   );
 }

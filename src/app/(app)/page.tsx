@@ -166,7 +166,6 @@ export default async function Home() {
       value: (
         <MidweekLiveCard
           button={midweek.button}
-          kicker={midweek.kicker}
           line={midweek.line}
           match={midweek.match}
           title={midweek.title}
@@ -187,14 +186,7 @@ export default async function Home() {
     nowCards.push({
       key: "midweek",
       deadline: championLeadsUntil(midweek.lockAt).getTime(),
-      value: (
-        <MidweekFinalCard
-          line={midweek.line}
-          lockAt={midweek.lockAt}
-          title={midweek.title}
-          weekStart={midweek.weekStart}
-        />
-      ),
+      value: <MidweekFinalCard line={midweek.line} title={midweek.title} />,
     });
   }
   if (openReport) {

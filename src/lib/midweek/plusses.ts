@@ -90,8 +90,8 @@ export function keeperLine(count: Extract<LineCount, { kind: "count" }>): string
 
 export const LINE_RULE = `Each line needs ${MIDWEEK.balance.minPlusses} plusses from the four cards not in goal; every plus short costs the whole five ${factorText(MIDWEEK.balance.shortfallPpm)}.`;
 
-export const NO_KEEPER_COUNT =
-  "Add a Goalkeeper to see your count. Without one, who stands in goal is only settled at the lock, so the picker can’t say which four cards count.";
+/** Why there is no count is on How it works (`#plusses`, DR5-13). */
+export const NO_KEEPER_COUNT = "Add a Goalkeeper to see your count.";
 
 /** The sticky save bar's second row on a phone. */
 export function lineCountShort(count: LineCount): { tone: "ok" | "short" | "none"; text: string } {

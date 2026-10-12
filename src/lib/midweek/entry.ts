@@ -335,43 +335,6 @@ export function archetypeFilters(cards: readonly { archetype: string }[]): Arche
 }
 
 /**
- * `MidweekKeeperCheck`, from archetypes alone: no factor is known before the
- * lock, so "strongest on the night" is the most the page can promise.
- */
-export function keeperCheck(picked: readonly { archetype: string; displayName: string }[]): {
-  tone: "ok" | "warn";
-  segments: Segment[];
-} {
-  const keepers = picked.filter((card) => card.archetype === "goalkeeper");
-  if (keepers.length === 1) {
-    return {
-      tone: "ok",
-      segments: [{ text: keepers[0].displayName, strong: true }, { text: " goes in goal." }],
-    };
-  }
-  if (keepers.length > 1) {
-    return {
-      tone: "ok",
-      segments: [
-        { text: "Your strongest Goalkeeper on the night goes in goal; " },
-        {
-          text: keepers.length > 2 ? "the others play outfield" : "the other plays outfield",
-          strong: true,
-        },
-        { text: "." },
-      ],
-    };
-  }
-  return {
-    tone: "warn",
-    segments: [
-      { text: "No Goalkeeper in your five.", strong: true },
-      { text: " Your best defender goes in goal, and keeps goal much worse than a real one." },
-    ],
-  };
-}
-
-/**
  * "Load last week's five" (§44.2: pre-filling saves nothing). Each slot keeps
  * its position; a Player the member no longer owns any copy of leaves the slot
  * open and is named in the notice. A Player still owned stays, whichever copy
@@ -473,6 +436,25 @@ export function lastWeekSummary(input: {
     return `You reached ${stageName(furthestWon + 1, input.rounds)}. +${coins} ${BRAND.currency}.${champion}`;
   }
   return input.entered ? `You went out in round 1.${champion}` : `You sat it out.${champion}`;
+}
+
+/**
+ * The hub's Last week tile (DR5-12): the same outcome as `lastWeekSummary`,
+ * short enough for a tile. `Out in the quarter-finals · +50`.
+ */
+export function lastWeekTileState(input: {
+  rounds: number;
+  rewards: readonly Pick<MyRewardRow, "round_no" | "amount">[];
+  entered: boolean;
+  isChampion: boolean;
+}): string {
+  const coins = input.rewards.reduce((sum, row) => sum + Number(row.amount), 0);
+  if (input.isChampion) return `Champion · +${coins}`;
+  if (input.rewards.length > 0) {
+    const furthestWon = Math.max(...input.rewards.map((row) => row.round_no));
+    return `Out in ${stageName(furthestWon + 1, input.rounds)} · +${coins}`;
+  }
+  return input.entered ? "Out in round 1" : "Sat it out";
 }
 
 /**
