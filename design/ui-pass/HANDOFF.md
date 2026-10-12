@@ -8,9 +8,9 @@ this note doesn't change. Where this note and an artboard disagree, this note
 wins; where either disagrees with an ADR, the ADR wins until a new ADR
 changes it.
 
-**Status: awaiting the owner's review** (S2, 12 Oct 2026). The questions are
-at the end. Nothing here is built yet. S3 adds the rest of the app to this
-note.
+**Status: answered by the owner, 12 Oct 2026.** Q1 to Q4 as recommended, plus
+three changes the canvas now shows (see "Owner decisions" at the end).
+Nothing here is built yet. S3 adds the rest of the app to this note.
 
 ## The canvas
 
@@ -18,7 +18,7 @@ note.
   <https://claude.ai/artifact/UwL1GERjSw4DMSxmY1rDJM>, which only the owner
   can open. A build agent reads an artboard with the Artifact tool's `read`
   action (`path: project/<file>`).
-- **54 artboards from 27 boards on six pages, A to F.** Most boards are at
+- **56 artboards from 28 boards on six pages, A to F.** Most boards are at
   320 and 412 px, some also at 1440 px. The file name says which:
   `B5-Hub-YourMatch-412.dc.html`. A blue sticky beside each row says what it
   shows and why.
@@ -95,6 +95,7 @@ Player.
 | `D2-Night-Out` (320, 412) | `/midweek/[week]/night` | 20:35:10 | Your rounds, your five rated for the last match |
 | `D3-Calls-Open` (320, 412) | `/midweek/[week]/calls` | 20:35:10 | Calls, one open with a pick |
 | `D4-PreMatch` (320, 412) | `/midweek/[week]/next/3/1` | 20:20:10 | The pre-match, restyled |
+| `D5-PreMatch-Call` (320, 412) | `/midweek/[week]/next/4/0` | 20:35:10 | Out: a pre-match with its call block on top |
 | `E1-Hub-Champion` (320, 412, 1440) | `/midweek` | 21:08 | After the final: the champion, your result, next week |
 | `E2-Week-Past` (320, 412) | `/midweek/[week]` | later | A past week |
 | `E3-Night-Complete` (320, 412) | `/midweek/[week]/night` | 21:08 | The night's ratings, your calls, share |
@@ -145,7 +146,7 @@ S4 adds these six tokens to `globals.css` as they stand in the generator's
   | `/midweek/pick` editing | 5 | 8 | 6 |
 
   Every size on every board is one of the six. The "at most five text
-  colours" rule does not hold on a match page: see question Q2.
+  colours" rule does not hold on a match page; the owner amended it (Q2).
 
 ### Primitives (`ui.tsx`; S4 moves them into `src/components/ui/`)
 
@@ -169,10 +170,10 @@ S4 adds these six tokens to `globals.css` as they stand in the generator's
 `LiveMarker`. `PageHeader` replaces `MidweekPageHead`, `Block` the ad hoc
 `PANEL` and `NOW_CARD` strings.
 
-## Decisions (S2, proposed)
+## Decisions (S2, approved by the owner)
 
 **DR5-11. The routes behind the tiles (C2).** Each tile opens a page of its
-own (question Q1):
+own (Q1, approved):
 
 - **`/midweek`:** the hub, with Compete's tabs.
 - **`/midweek/pick`:** the picker; after the lock, your locked five,
@@ -196,14 +197,16 @@ Sub-pages have a back link and no Compete tabs (one tab row per screen).
 | Picking, not picked | Midweek Madness · `Wed 14 Oct · locks 19:55` | Your five (brass): empty slots, `Locks in 2 days, 7 h`, **Pick your five** | Last week · Bracket (dashed) · Past weeks · How it works |
 | Picking, saved | the same | Your five (plain): mini cards, ✓ Saved, Change your five | the same |
 | Draw (lock to round 1) | `Wed 7 Oct · the draw is out` | Your first match: `firstMatch`'s line, each five as mini cards | Your night · Bracket · Your five · Past weeks |
-| Your match live | `… · quarter-finals are live` | Your match (brass): scoreboard, the newest moment, **Watch it** | the same; Bracket in live pink |
+| Your match live | `… · quarter-finals are live` | Your match (brass): scoreboard and **Watch it**; no moment (owner) | the same; Bracket in live pink |
 | Between rounds, still in | `… · round 2 is live` | Your next match (brass): the pairing, the countdown, **Pre-match** once open | the same |
 | Out | `… · you're out` | You're out: where it ended, coins so far, **Make your calls** while one is open | **Calls** · Bracket · Your five · Past weeks |
 | The final | `… · the final is live` | The final (brass), as Your match | as before |
 | After the final (D4) | **`{Club} are champions`** · `Midweek Madness · Wed 7 Oct` | Your night: the coins (Figure), your finish (Heading), **Pick next week's five** when next week is open | Your night · Bracket · Calls · Past weeks; the final and the champion's five as mini cards below (Q4) |
 
-- **The sticky evening clock** (`MidweekClock`, ADR-113) is not on the hub.
-  The Now block and the Bracket tile carry the moment (question Q3).
+- **The sticky evening clock** (`MidweekClock`, ADR-113) is retired (Q3). The
+  Now block and the Bracket tile carry the moment.
+- **No moments on the hub:** the Now block shows a live match's score and
+  minute only; its chances are on the match page (owner).
 - **From `lg`** the tiles sit beside the Now block, two by two.
 
 **DR5-13. The picker on its own page.** From the top:
@@ -227,7 +230,9 @@ Sub-pages have a back link and no Compete tabs (one tab row per screen).
   `Played` or `Kick-off 20:45`.
 - **Rows** (`MidweekMatchRow` restyled): two club lines with scores (pens in
   brackets), the state on the right (`64′` or `Pens` tag, the kick-off,
-  `Pre-match`), your pairing in brass. One link per row.
+  `Pre-match`), your pairing in brass. One link per row. Once you're out a
+  row also carries `Your call: Niels` or `Call open` (`rowCalls`), and a
+  settled pairing links to its pre-match.
 - **From `lg`** the tree stays `MidweekBracket`'s (DR4-10). S5 moves its type
   onto the scale without changing its structure.
 - **Your night:** `Round by round` as link rows, then the ratings block. Until
@@ -237,7 +242,13 @@ Sub-pages have a back link and no Compete tabs (one tab row per screen).
   `★ Best`. The per-match chips go.
 - **Calls:** one Small line with `How calls work ›` replaces `CALLS_FOOT`.
   Each call is a block with two buttons; an open call you haven't made is
-  the brass block.
+  the brass block. Each call links to its match: `Pre-match ›` while it is
+  open, `Watch it ›` in play, `Report ›` once ended (owner).
+- **Ways to the calls**, once you're out:
+  - the hub's **Make your calls** while one is open, and its Calls tile;
+  - each bracket row you can call, which opens its pre-match;
+  - the pre-match itself, which carries the call block above both fives
+    (DR4-7, `D5-PreMatch-Call`), so reading the fives and calling is one page.
 - **The pre-match:** the pairing as the Title, a Small line with the
   kick-off and countdown. Each five is a block with its colour as a 3 px top
   rail. The Power foot goes behind `How Power works ›`.
@@ -258,7 +269,8 @@ Sub-pages have a back link and no Compete tabs (one tab row per screen).
   - the facts as Body bullets;
   - `How it went` (oldest first) or `How it's going · Newest first` live;
   - rows with a 3 px rail on the moment's side, one tag style;
-  - the newest live item outlined in brass.
+  - the newest live item slides in, with no outline (owner: it fought the
+    team rails); screen readers still hear it first.
 - **Lanes:** from 520 px of the list's own width the moments sit in two lanes
   round a minute-and-score spine. That covers the desktop column (about
   595 px); a phone's list is about 380 px. DR4 said 600 px.
@@ -377,7 +389,9 @@ ones go to How it works (#233, S8).
   - `Call the winners still to come. Everyone sees the split from kick-off.
     How calls work ›` replaces `CALLS_FOOT` (moved);
   - `settledStatus` kept;
-  - `{6} picked`, `✓ Right`, `Wrong`.
+  - `{6} picked`, `✓ Right`, `Wrong`;
+  - `Pre-match ›`, `Watch it ›`, `Report ›`;
+  - on bracket rows: `Your call: {Niels}`, `Call open`.
 - Bracket: `Bracket`, `Live`, `Played`, `Kick-off {20:45}`, `Bye`, `Pens`,
   `Pre-match`.
 - Pre-match:
@@ -446,39 +460,30 @@ ones go to How it works (#233, S8).
 - **Retired:**
   - `MidweekPageHead`'s kicker, `MidweekSectionHead`'s serif;
   - `Chip` and `LiveMarker` (into `Tag`);
-  - `MidweekClock` on the hub (Q3);
+  - `MidweekClock` (Q3);
+  - the latest moment on the hub's live block;
+  - the newest item's brass outline on the live feed (the slide stays);
   - the Week-Complete champion banner and its `Stat` strip (Q4);
   - `MidweekJumpLinks`.
 
-## Questions for the owner
+## Owner decisions (DR5, round 2)
 
-Each has a recommendation. The owner's answers amend DR5-11 to DR5-16 where they differ.
+The owner's answers of 12 Oct 2026:
 
-- **Q1. The routes (DR5-11).**
-  - **Recommended:** sub-pages under `/midweek/[week]/`.
-  - **The alternative:** one `/midweek/[week]` page with tabs
-    (Bracket · Your night · Calls). That needs four tabs on some weeks and
-    keeps one long page per tab.
-- **Q2. Text colours.** "At most five text colours on a screen" (`review.md`
-  B) can't hold on a match page:
-  - ink, ink-dim, ink-faint and brass already make four;
-  - the two team colours (DR3-10) and Power's four bands (DR2-8) both stay.
-
-  **Recommended:** ink, ink-dim, ink-faint and brass, plus only the colours
-  with a job on that screen (sides, live, a good or bad number, Power bands).
-- **Q3. The evening clock** (`MidweekClock`, ADR-113).
-  - **Recommended:** retire it.
-  - **Why:** in C2 the Now block says what is happening to you and the
-    Bracket tile says where the evening is (`Quarter-finals · 4 live`). The
-    strip would be a second tab-like row on a hub that should fit one screen.
-- **Q4. After the final** (presentation of owner decision D4).
-  - **Recommended:** the hub's title names the champion
-    (`Joristown Rovers are champions`).
-  - **Their five:** mini cards in a `The final` block, not five full cards
-    under a 54 px serif banner.
-  - **Your night:** two figures and next week's button.
-  - **Why:** it fits the one-screen hub; the full cards are a tap away on
-    the final's report.
+- **Q1:** as recommended. The tiles open sub-pages under `/midweek/[week]/`
+  (DR5-11).
+- **Q2:** as recommended. Text is ink, ink-dim, ink-faint and brass, plus only
+  the colours with a job on that screen: sides, live, a good or bad number,
+  Power bands.
+- **Q3:** as recommended. `MidweekClock` is retired. Also, the hub's live
+  block shows no moment, only the score, the minute and Watch it.
+- **Q4:** as recommended. After the final the hub's title names the champion,
+  and their five are mini cards.
+- **Calls lead to their pre-match.** Each call block links to its match
+  (`Pre-match ›`, `Watch it ›`, `Report ›`). Bracket rows show your call
+  and link to the pre-match, which carries the call (DR5-14).
+- **No newest outline.** The live feed's newest item loses its brass outline
+  (amends DR4-1 and DR5-5); it still slides in.
 
 ## Records the build needs
 
@@ -489,12 +494,12 @@ Each build session adds its ADR (from ADR-153) and updates `docs/PRODUCT.md`:
 - **S5:**
   - the hub, the routes, the picker's move, the evening's pages and Home's
     block;
-  - amends ADR-107 (`/midweek` lands on the hub), ADR-113 (the clock, if
+  - amends ADR-107 (`/midweek` lands on the hub), ADR-113 (the clock,
     retired), ADR-114 (Home's block), ADR-091 (the privacy line), ADR-118
     and DR3-6 (calls on their page), ADR-117 and DR3 (rating rows, the
     plusses rule).
 - **S6:** the report. Amends ADR-111 and ADR-115/147 (its layout), DR4-1 (the
-  520 px lanes) and DR2's Why foot. Closes #279.
+  520 px lanes, no newest outline) and DR2's Why foot. Closes #279.
 
 No migration. Gating is unchanged: every page reads what today's pages read,
 at the same moments.
