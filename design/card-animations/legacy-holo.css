@@ -1,0 +1,89 @@
+/* Original holo finish, retained only for design comparison. */
+.study-current .live-card[data-rarity="holo"] .live-card__grain {
+  opacity: 0.5;
+  background-image:
+    repeating-linear-gradient(78deg, rgb(255 255 255 / 16%) 0 1px, transparent 1px 2.5px),
+    radial-gradient(rgb(0 0 0 / 14%) 0.5px, transparent 0.6px);
+  background-size:
+    auto,
+    3px 3px;
+  mix-blend-mode: overlay;
+}
+
+/* Refraction. A real holographic card only fires when the light catches it,
+   so this is periodic rather than continuous: a band of thin coloured lines
+   sweeps across the card in about 2.5s, then the card rests for six. The
+   lines are a repeating-linear-gradient; the band is a single-layer
+   `mask-image` envelope, so the lines fade in and out at its edges instead of
+   showing as a moving rectangle. (Single-layer masks are well supported —
+   it was `mask-composite` that failed here, see the prism-edge note below.)
+   The layer is wider than the card so it can travel without its own edges
+   ever entering frame. */
+.study-current .live-card[data-rarity="holo"] .live-card__film {
+  inset: -14% -50%;
+  opacity: 0;
+  border-radius: 0;
+  background-image: repeating-linear-gradient(
+    100deg,
+    transparent 0 13px,
+    rgb(64 214 200 / 62%) 13px 14.4px,
+    transparent 14.4px 20px,
+    rgb(150 138 255 / 58%) 20px 21.3px,
+    transparent 21.3px 31px,
+    rgb(206 104 220 / 55%) 31px 32.4px,
+    transparent 32.4px 40px,
+    rgb(255 206 104 / 50%) 40px 41.2px,
+    transparent 41.2px 52px,
+    rgb(126 226 158 / 48%) 52px 53.2px,
+    transparent 53.2px 68px
+  );
+  -webkit-mask-image: linear-gradient(100deg, transparent 30%, #000 44%, #000 56%, transparent 70%);
+  mask-image: linear-gradient(100deg, transparent 30%, #000 44%, #000 56%, transparent 70%);
+  animation: study-legacy-prism 9s cubic-bezier(0.42, 0, 0.3, 1) infinite;
+}
+
+/* A soft, slow shimmer over the top of it. */
+.study-current .live-card[data-rarity="holo"] .live-card__sheen {
+  opacity: 0.5;
+  background: linear-gradient(104deg, transparent 38%, rgb(255 255 255 / 46%) 50%, transparent 62%);
+  transform: translateX(-125%);
+  mix-blend-mode: screen;
+  animation: card-glide 11s linear infinite;
+}
+
+/* Prism edge. This was a conic-gradient ring masked to the border with
+   `mask-composite: exclude`; Chromium never excluded the interior, so the
+   gradient's colour-stop boundaries painted as stray diagonals across the
+   whole card. Layered inset shadows split the light at the four edges
+   instead — same read, no masking, and supported everywhere. */
+.study-current .live-card[data-rarity="holo"] .live-card__frame {
+  box-shadow:
+    inset 0 0 0 0.1em rgb(255 255 255 / 80%),
+    inset 0 0.14em 0.45em rgb(94 211 200 / 30%),
+    inset 0 -0.14em 0.45em rgb(199 111 214 / 30%),
+    inset 0.16em 0 0.45em rgb(123 126 224 / 26%),
+    inset -0.16em 0 0.45em rgb(255 214 120 / 22%),
+    inset 0 0 1.4em rgb(150 120 255 / 20%);
+}
+
+@keyframes study-legacy-prism {
+  0%,
+  70% {
+    opacity: 0;
+    transform: translate3d(-46%, 0, 0);
+  }
+  76% {
+    opacity: 0.62;
+  }
+  93% {
+    opacity: 0.58;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(46%, 0, 0);
+  }
+}
+
+
+.study-current .live-card[data-rarity="holo"] .live-card__film { mix-blend-mode: normal; }
+.study-current .live-card[data-rarity="holo"] .live-card__sheen { inset: 0; }

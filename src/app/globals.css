@@ -141,7 +141,7 @@ body {
      bronze  coated stock            one specular pass, on hover
      silver  cold-foil stamped       brushed metal plate with anisotropy
      gold    hot foil, embossed      continuous 9s foil cycle, raised OVR
-     holo    refraction film         two layers drifting at 17s and 23s
+     holo    pearlescent film        lilac reflections, seamless 11s cycle
      elite   lacquer and gold leaf   the only inverted card; tilts to pointer
 
    Rarity stays readable three ways at once (hue, pennant shape, tier word on
@@ -553,8 +553,9 @@ body {
 
 .live-card[data-rarity="gold"] .live-card__plate,
 .live-card[data-rarity="gold"] .live-card__pennant {
+  /* Matching horizontal tile edges, advanced by exactly one tile per cycle. */
   background-image: linear-gradient(
-    100deg,
+    90deg,
     #6b4a0d 0%,
     #b98f33 18%,
     #f2dd9a 30%,
@@ -563,8 +564,9 @@ body {
     #d8b45c 82%,
     #6b4a0d 100%
   );
-  background-size: 260% 100%;
-  animation: card-foil 9s linear infinite;
+  background-size: 200% 100%;
+  background-repeat: repeat-x;
+  animation: card-gold-foil 9s linear infinite;
 }
 
 .live-card[data-rarity="gold"] .live-card__plate h2 {
@@ -586,9 +588,8 @@ body {
   animation: card-glide 9s linear infinite;
 }
 
-/* ===== TIER 5 — HOLO: refraction film ======================================
-   Two diffraction layers drifting at 17s and 23s, so the pattern beats slowly
-   and never visibly loops. */
+/* ===== TIER 5 — HOLO: pearlescent film =====================================
+   Broad lilac, ice-blue and blush reflections gently travel out and back. */
 .live-card[data-rarity="holo"] {
   --stock: #ece7f4;
   --ci: #3a2a52;
@@ -602,70 +603,54 @@ body {
 }
 
 .live-card[data-rarity="holo"] .live-card__grain {
-  opacity: 0.5;
-  background-image:
-    repeating-linear-gradient(78deg, rgb(255 255 255 / 16%) 0 1px, transparent 1px 2.5px),
-    radial-gradient(rgb(0 0 0 / 14%) 0.5px, transparent 0.6px);
-  background-size:
-    auto,
-    3px 3px;
+  opacity: 0.3;
+  background-image: radial-gradient(rgb(45 22 78 / 12%) 0.5px, transparent 0.6px);
+  background-size: 3px 3px;
   mix-blend-mode: overlay;
 }
 
-/* Refraction. A real holographic card only fires when the light catches it,
-   so this is periodic rather than continuous: a band of thin coloured lines
-   sweeps across the card in about 2.5s, then the card rests for six. The
-   lines are a repeating-linear-gradient; the band is a single-layer
-   `mask-image` envelope, so the lines fade in and out at its edges instead of
-   showing as a moving rectangle. (Single-layer masks are well supported —
-   it was `mask-composite` that failed here, see the prism-edge note below.)
-   The layer is wider than the card so it can travel without its own edges
-   ever entering frame. */
+/* Overscan keeps the layer's edges outside the card throughout its travel. */
 .live-card[data-rarity="holo"] .live-card__film {
-  inset: -14% -50%;
-  opacity: 0;
+  inset: -50%;
+  opacity: 0.32;
   border-radius: 0;
-  background-image: repeating-linear-gradient(
-    100deg,
-    transparent 0 13px,
-    rgb(64 214 200 / 62%) 13px 14.4px,
-    transparent 14.4px 20px,
-    rgb(150 138 255 / 58%) 20px 21.3px,
-    transparent 21.3px 31px,
-    rgb(206 104 220 / 55%) 31px 32.4px,
-    transparent 32.4px 40px,
-    rgb(255 206 104 / 50%) 40px 41.2px,
-    transparent 41.2px 52px,
-    rgb(126 226 158 / 48%) 52px 53.2px,
-    transparent 53.2px 68px
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    118deg,
+    transparent 15%,
+    rgb(115 69 231 / 28%) 30%,
+    rgb(178 141 255 / 64%) 40%,
+    rgb(217 242 255 / 69%) 49%,
+    rgb(238 165 243 / 55%) 58%,
+    rgb(141 81 224 / 26%) 70%,
+    transparent 85%
   );
-  -webkit-mask-image: linear-gradient(100deg, transparent 30%, #000 44%, #000 56%, transparent 70%);
-  mask-image: linear-gradient(100deg, transparent 30%, #000 44%, #000 56%, transparent 70%);
-  animation: card-prism 9s cubic-bezier(0.42, 0, 0.3, 1) infinite;
+  animation: card-pearl 11s ease-in-out infinite;
 }
 
-/* A soft, slow shimmer over the top of it. */
+/* A softer highlight shares the film's motion without washing out the text. */
 .live-card[data-rarity="holo"] .live-card__sheen {
-  opacity: 0.5;
-  background: linear-gradient(104deg, transparent 38%, rgb(255 255 255 / 46%) 50%, transparent 62%);
-  transform: translateX(-125%);
+  inset: -50%;
+  opacity: 0;
+  transform: none;
+  background: linear-gradient(
+    118deg,
+    transparent 24%,
+    rgb(185 156 255 / 13%) 38%,
+    rgb(235 248 255 / 35%) 48%,
+    rgb(247 203 255 / 15%) 58%,
+    transparent 72%
+  );
   mix-blend-mode: screen;
-  animation: card-glide 11s linear infinite;
+  animation: card-pearl 11s ease-in-out infinite;
 }
 
-/* Prism edge. This was a conic-gradient ring masked to the border with
-   `mask-composite: exclude`; Chromium never excluded the interior, so the
-   gradient's colour-stop boundaries painted as stray diagonals across the
-   whole card. Layered inset shadows split the light at the four edges
-   instead — same read, no masking, and supported everywhere. */
+/* Inset light catches the edge without painting diagonals across the face. */
 .live-card[data-rarity="holo"] .live-card__frame {
   box-shadow:
     inset 0 0 0 0.1em rgb(255 255 255 / 80%),
-    inset 0 0.14em 0.45em rgb(94 211 200 / 30%),
-    inset 0 -0.14em 0.45em rgb(199 111 214 / 30%),
-    inset 0.16em 0 0.45em rgb(123 126 224 / 26%),
-    inset -0.16em 0 0.45em rgb(255 214 120 / 22%),
-    inset 0 0 1.4em rgb(150 120 255 / 20%);
+    inset 0 0 0.6em rgb(201 174 255 / 58%),
+    inset 0 0 1.5em rgb(150 120 255 / 28%);
 }
 
 /* ===== TIER 6 — ELITE: lacquer and gold leaf ===============================
@@ -1085,6 +1070,16 @@ body {
   }
 }
 
+@keyframes card-gold-foil {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    /* With a 200%-wide image, 200% position moves exactly one image width. */
+    background-position: 200% 50%;
+  }
+}
+
 @keyframes card-drift-a {
   from {
     background-position: 0% 50%;
@@ -1103,23 +1098,15 @@ body {
   }
 }
 
-/* Long rest, then one pass. The transform holds at the start position for
-   the whole idle stretch, so nothing drifts between sweeps. */
-@keyframes card-prism {
+@keyframes card-pearl {
   0%,
-  70% {
-    opacity: 0;
-    transform: translate3d(-46%, 0, 0);
-  }
-  76% {
-    opacity: 0.62;
-  }
-  93% {
-    opacity: 0.58;
-  }
   100% {
-    opacity: 0;
-    transform: translate3d(46%, 0, 0);
+    opacity: 0.54;
+    transform: translate3d(-19%, -5%, 0);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate3d(19%, 5%, 0);
   }
 }
 

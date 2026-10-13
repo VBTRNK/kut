@@ -1,0 +1,102 @@
+/* Proposal overrides only; these never load in the game. */
+.study .live-card[data-rarity="holo"] .live-card__grain {
+  background-image: radial-gradient(rgb(45 22 78 / 12%) 0.5px, transparent 0.6px);
+  background-size: 3px 3px;
+  opacity: 0.3;
+}
+.study .live-card[data-rarity="holo"] .live-card__film {
+  inset: -45%;
+  border-radius: 0;
+  mask-image: none;
+  -webkit-mask-image: none;
+  mix-blend-mode: screen;
+}
+.study .live-card[data-rarity="holo"] .live-card__sheen {
+  inset: 0;
+  transform: none;
+  opacity: 0;
+  animation: none;
+}
+.study .live-card[data-rarity="holo"] .live-card__frame {
+  box-shadow: inset 0 0 0 0.1em rgb(255 255 255 / 80%),
+    inset 0 0 0.6em rgb(201 174 255 / 58%),
+    inset 0 0 1.5em rgb(150 120 255 / 28%);
+}
+
+/* A broad, diffused reflection; return journey is equally slow. */
+.study-pearl .live-card[data-rarity="holo"] .live-card__film {
+  inset: -50%;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(118deg, transparent 15%, rgb(115 69 231 / 28%) 30%,
+    rgb(178 141 255 / 64%) 40%, rgb(217 242 255 / 69%) 49%,
+    rgb(238 165 243 / 55%) 58%, rgb(141 81 224 / 26%) 70%, transparent 85%);
+  animation: study-pearl 11s ease-in-out infinite;
+}
+.study-pearl .live-card[data-rarity="holo"] .live-card__sheen {
+  inset: -50%;
+  mix-blend-mode: screen;
+  background: linear-gradient(118deg, transparent 24%, rgb(185 156 255 / 13%) 38%,
+    rgb(235 248 255 / 35%) 48%, rgb(247 203 255 / 15%) 58%, transparent 72%);
+  animation: study-pearl 11s ease-in-out infinite;
+}
+@keyframes study-pearl {
+  0%, 100% { opacity: 0.54; transform: translate3d(-19%, -5%, 0); }
+  50% { opacity: 0.9; transform: translate3d(19%, 5%, 0); }
+}
+
+/* No hard bands: the light changes in place as well as drifting. */
+.study-aurora .live-card[data-rarity="holo"] .live-card__film {
+  mix-blend-mode: hard-light;
+  background: radial-gradient(ellipse at 22% 30%, rgb(138 79 248 / 75%), transparent 50%),
+    radial-gradient(ellipse at 78% 65%, rgb(235 139 249 / 58%), transparent 45%),
+    radial-gradient(ellipse at 50% 85%, rgb(163 183 255 / 52%), transparent 50%);
+  animation: study-aurora 13s ease-in-out infinite;
+}
+@keyframes study-aurora {
+  0%, 100% { opacity: 0.43; transform: translate3d(-8.5%, 5%, 0) rotate(-10deg) scale(0.96); }
+  50% { opacity: 0.81; transform: translate3d(8.5%, -5%, 0) rotate(10deg) scale(1.09); }
+}
+
+/* Glints stay sparse, leaving the face and text clear. */
+.study-glints .live-card[data-rarity="holo"] .live-card__film {
+  inset: 0;
+  opacity: 0.9;
+  background: linear-gradient(135deg, rgb(147 96 238 / 25%), transparent 48%, rgb(218 174 255 / 37%));
+  animation: none;
+}
+.study-glints .live-card__film::before,
+.study-glints .live-card__film::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 330 462'%3E%3Cg fill='%23f7ebff' stroke='%23bc8ff4' stroke-width='.4'%3E%3Cpath d='M34.5 91.5l2.5-11 2.5 11 11 2.5-11 2.5-2.5 11-2.5-11-11-2.5z'/%3E%3Cpath d='M281.5 167.5l2.5-14.5 2.5 14.5 14.5 2.5-14.5 2.5-2.5 14.5-2.5-14.5-14.5-2.5z'/%3E%3Cpath d='M67.5 297.5l2.5-9 2.5 9 9 2.5-9 2.5-2.5 9-2.5-9-9-2.5z'/%3E%3Cpath d='M266.5 432.5l1.5-7.5 1.5 7.5 7.5 1.5-7.5 1.5-1.5 7.5-1.5-7.5-7.5-1.5z'/%3E%3Cpath d='M196.5 212.5l1.5-8 1.5 8 8 1.5-8 1.5-1.5 8-1.5-8-8-1.5z'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100%;
+  filter: drop-shadow(0 0 2px rgb(218 182 255 / 55%));
+  animation: study-glints 7s ease-in-out infinite;
+}
+.study-glints .live-card__film::after {
+  rotate: 180deg;
+  animation-delay: -3.5s;
+}
+@keyframes study-glints {
+  0%, 15%, 85%, 100% { opacity: 0; transform: scale(0.97); }
+  42%, 58% { opacity: 0.95; transform: scale(1.02); }
+}
+.study-glints .live-card[data-rarity="holo"] .live-card__sheen {
+  inset: -50%;
+  background: linear-gradient(115deg, transparent 25%, rgb(221 203 255 / 27%) 50%, transparent 75%);
+  animation: study-pearl 14s ease-in-out infinite;
+}
+
+/* Keep injury and OS stillness stronger than the proposals. */
+.study .live-card[data-injured] :is(.live-card__film, .live-card__sheen) { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .study .live-card__film::before, .study .live-card__film::after { animation: none !important; }
+  .study .live-card[data-rarity="holo"] .live-card__film { opacity: 0.32; }
+}
+
+.study-old .live-card[data-rarity="gold"] :is(.live-card__plate, .live-card__pennant) {
+  background-image: linear-gradient(100deg, #6b4a0d 0%, #b98f33 18%, #f2dd9a 30%,
+    #c79b3d 44%, #7a560f 62%, #d8b45c 82%, #6b4a0d 100%);
+  background-size: 260% 100%;
+  animation: card-foil 9s linear infinite;
+}
