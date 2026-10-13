@@ -10,6 +10,7 @@ need for the area you are changing.
 | `decisions.md`                                | Current ADRs (ADR-140 onward), including deletion tiers and `tidy` (ADR-142).                 |
 | `RELEASING.md`                                | Merge-to-deploy flow, the check afterwards, and rollback (ADR-140).                           |
 | `OPERATIONS.md`, `BACKUP.md`                  | Runbooks: hosted migrations (ADR-032), alpha ops, encrypted backups and restore.              |
+| `E2E_QUARANTINE.md`                           | Evidence required before skipping a failing browser test; preserved #216 diagnosis.         |
 | `SECURITY_REVIEW.md`                          | The MVP-era security review. A reference, not a runbook.                                      |
 | `RATING_BALANCE_REVIEW.md`                    | Point-in-time analysis behind the ADR-063 rating balance.                                     |
 | `design/`, and `../design/README.md`          | Rendered mockups and the design packages' decisions.                                          |
