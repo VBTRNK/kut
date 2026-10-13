@@ -53,6 +53,8 @@ and recording it in `docs/decisions.md`. Never silently "improve" a formula.
   `kut-down` profile commands. `supabase db reset` is deny-listed, so apply a
   migration or run pgTAP with `docker exec supabase_db_kut psql`. Fixtures
   create and delete real rows, so they refuse any non-loopback target.
+- Before quarantining a failing E2E test, preserve the diagnostic record in
+  its issue and link it from the skip; follow `docs/E2E_QUARANTINE.md` (#278).
 
 ## Workspace and branches
 
