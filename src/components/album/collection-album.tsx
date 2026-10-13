@@ -73,6 +73,7 @@ function AlbumSlotView({
     return (
       <SlotFrame index={slot.index}>
         <Link
+          prefetch={false}
           aria-label={`${slot.player.display_name} — not collected`}
           className="relative block aspect-[5/7] rounded-[0.9rem] border border-dashed border-brass/40 bg-board-deep/70 p-3 shadow-inner outline-offset-4 outline-brass focus-visible:outline-2"
           href={`/players/${slot.player.slug}`}
@@ -111,6 +112,7 @@ function AlbumSlotView({
         />
       )}
       <Link
+        prefetch={false}
         aria-label={`${slot.player.display_name} — collected`}
         className="relative z-10 block rounded-[0.9rem] outline-offset-4 outline-brass focus-visible:outline-2"
         href={`/club/collection/${card.card_id}`}
@@ -129,6 +131,7 @@ function AlbumSlotView({
       )}
       {slot.copies.length > 1 && (
         <Link
+          prefetch={false}
           className="absolute bottom-1 right-1 z-20 rounded-full bg-brass px-2 py-0.5 text-xs font-black text-ink-on-accent"
           href={`/club/collection?view=manage&q=${encodeURIComponent(slot.player.display_name)}`}
         >
@@ -243,6 +246,7 @@ export function CollectionAlbum({
         </span>
         {(["all", "gaps", "specialists"] as const).map((value) => (
           <Link
+            prefetch={false}
             className={`min-h-10 rounded-full border px-4 py-2 text-xs font-extrabold ${selectedLens === value ? "border-brass/60 bg-brass/12 text-brass" : "border-line text-ink-dim"}`}
             href={href(value, 1)}
             key={value}
@@ -278,6 +282,7 @@ export function CollectionAlbum({
             <div className="hidden lg:block">
               {previousSpread && (
                 <Link
+                  prefetch={false}
                   aria-label={`Previous pages, pages ${previousSpread}–${previousSpread + 1}`}
                   className="grid h-12 w-12 place-items-center rounded-full border border-line text-2xl text-ink-dim hover:border-brass hover:text-brass"
                   href={href(selectedLens, previousSpread)}
@@ -301,6 +306,7 @@ export function CollectionAlbum({
             <div className="hidden justify-end lg:flex">
               {nextSpread && (
                 <Link
+                  prefetch={false}
                   aria-label={`Next pages, pages ${nextSpread}${nextSpread + 1 <= total ? `–${nextSpread + 1}` : ""}`}
                   className="grid h-12 w-12 place-items-center rounded-full border border-brass/60 text-2xl text-brass hover:bg-brass/10"
                   href={href(selectedLens, nextSpread)}
@@ -313,6 +319,7 @@ export function CollectionAlbum({
           <div className="mt-3 grid grid-cols-2 gap-3 lg:hidden">
             {previousPage ? (
               <Link
+                prefetch={false}
                 className="min-h-11 rounded-xl border border-line px-4 py-3 text-center font-bold"
                 href={href(selectedLens, previousPage)}
               >
@@ -323,6 +330,7 @@ export function CollectionAlbum({
             )}
             {nextPage ? (
               <Link
+                prefetch={false}
                 className="min-h-11 rounded-xl border border-brass/60 px-4 py-3 text-center font-bold text-brass"
                 href={href(selectedLens, nextPage)}
               >
@@ -340,6 +348,7 @@ export function CollectionAlbum({
           const count = page.filter((slot) => slot.copies.length > 0).length;
           return (
             <Link
+              prefetch={false}
               aria-current={number === currentPage ? "page" : undefined}
               className={`w-14 rounded-lg border p-2 text-center text-xs font-black ${number === currentPage ? "border-brass text-brass" : number === partnerPage ? "border-line text-ink-dim lg:border-brass lg:text-brass" : "border-line text-ink-dim"}`}
               href={href(selectedLens, number)}
@@ -352,6 +361,7 @@ export function CollectionAlbum({
         })}
       </nav>
       <Link
+        prefetch={false}
         className="block text-center text-sm font-bold text-brass hover:underline"
         href={href(selectedLens, "all")}
       >

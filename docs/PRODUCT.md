@@ -35,9 +35,9 @@ Ground rules for every area:
 - **No scheduler.** Due work (survey finalization, Midweek steps, offer expiry)
   runs lazily from page visits through idempotent `for update skip locked`
   workers (ADR-061, ADR-098).
-- **UI** (ADR-153): six type roles and the primitives in `src/components/ui/`;
-  `policy:check` holds off-scale sizes to a falling ceiling. How it works
-  (`/how-it-works`) has a topic tile and anchor per area.
+- **UI** (ADR-153): six type roles, `src/components/ui/`, sizes checked by
+  `policy:check`; `/how-it-works` has topic anchors. Shared nav,
+  card lists, filters and album controls disable prefetch (ADR-157).
 
 | If you are changing… | Read |
 | --- | --- |

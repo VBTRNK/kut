@@ -394,3 +394,22 @@ newest outline), DR2's Why foot and DR1-5 (as DR5-4). Closes #279.
   takes a focused explanation away. Escape hides all until the next focus or
   hover.
 - `Chip`, `LiveMarker`, `MidweekPageHead` and `MIDWEEK_PAGE` are retired.
+
+## ADR-157 — Reduce speculative authenticated navigation requests
+
+Date: 2026-10-13.
+
+- Shared primary/section navigation, card lists, filters and album controls
+  use `Link prefetch={false}`. Clicks retain client navigation and loading UI.
+  Home's directory links and card/listing detail back links also opt out.
+- Next 16.3.8 production probes with synthetic local member data confirmed
+  viewport/scroll prefetch requests: Players 49, album 48, manage 36, Market 26.
+  These fetched route shells and ran session processing, without fetching the
+  detail pages' data. All four fell to zero after the change; clicks still
+  rendered the expected details without reloading the document.
+- Cookie-dependent pages and nonce CSP remain dynamic/private/no-store.
+  No shared member/photo cache, auth bypass, or change to live polling or lazy
+  jobs. This preserves membership revocation, ownership and market freshness.
+- The production fraction of speculative traffic and CPU savings are unproven.
+  Compare equal traffic windows after release, separating prefetch RSC requests
+  (`Next-Router-Prefetch`) from navigations and live refreshes.

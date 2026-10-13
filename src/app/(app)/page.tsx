@@ -305,7 +305,11 @@ export default async function Home() {
           <div className="grid gap-1.5">
             <div className="flex flex-wrap items-baseline justify-between gap-3">
               <h2 className="display text-3xl">Top risers</h2>
-              <Link className="text-sm font-bold text-brass hover:underline" href="/players">
+              <Link
+                prefetch={false}
+                className="text-sm font-bold text-brass hover:underline"
+                href="/players"
+              >
                 Players &rarr;
               </Link>
             </div>
@@ -319,7 +323,11 @@ export default async function Home() {
             <p className="rounded-2xl border border-line/60 bg-panel/60 p-6 text-ink-dim">
               Movers appear once a second football week has been published. Meanwhile, browse every
               card in the{" "}
-              <Link className="font-bold text-brass hover:underline" href="/players">
+              <Link
+                prefetch={false}
+                className="font-bold text-brass hover:underline"
+                href="/players"
+              >
                 player directory
               </Link>
               .
@@ -328,6 +336,7 @@ export default async function Home() {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 lg:gap-6">
               {risers.map((player) => (
                 <Link
+                  prefetch={false}
                   aria-label={`Open ${player.display_name}'s profile`}
                   className="rounded-[0.9rem] outline-offset-4 outline-brass focus-visible:outline-2"
                   href={`/players/${player.slug}`}

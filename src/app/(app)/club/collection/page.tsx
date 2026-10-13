@@ -266,6 +266,7 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
                     const cardPlayer = toLiveCardPlayer(card, injuredPlayerIds, photoUrls);
                     return (
                       <Link
+                        prefetch={false}
                         aria-label={`Open ${card.display_name}'s card`}
                         className="relative block rounded-[0.9rem] outline-offset-4 outline-brass focus-visible:outline-2"
                         href={`/club/collection/${card.card_id}`}

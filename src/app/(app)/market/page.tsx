@@ -154,6 +154,7 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
                     {/* The card is the way into the listing: offers, and the full
                         stat breakdown, live on its detail page (ADR-051). */}
                     <Link
+                      prefetch={false}
                       aria-label={`${listing.display_name} — open this listing`}
                       className="block rounded-[0.9rem] outline-offset-4 outline-brass focus-visible:outline-2"
                       href={`/market/${listing.listing_id}`}

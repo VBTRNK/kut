@@ -96,6 +96,7 @@ export function PackReveal({
               <div className="pack-reveal__summary-card" key={`${card.cardId}-${i}`}>
                 {href ? (
                   <Link
+                    prefetch={false}
                     className="block rounded-[1.25rem] outline-offset-4 outline-brass focus-visible:outline-2"
                     href={href}
                   >

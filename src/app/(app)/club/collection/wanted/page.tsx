@@ -247,6 +247,7 @@ export default async function WantedPage() {
                             : "Not in your collection."}{" "}
                           {want.lowest_listing_price ? (
                             <Link
+                              prefetch={false}
                               className="font-bold text-brass hover:underline"
                               href={`/market?q=${encodeURIComponent(want.display_name)}`}
                             >

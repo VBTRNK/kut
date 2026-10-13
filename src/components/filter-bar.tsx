@@ -120,6 +120,7 @@ export function FilterBar({
   const chipRow = chips && (
     <div className="flex flex-wrap items-center gap-2">
       <Link
+        prefetch={false}
         className={`${chipBase} ${values[chips.name] ? chipOff : chipOn} ${focusRing}`}
         href={href({ [chips.name]: "" })}
       >
@@ -127,6 +128,7 @@ export function FilterBar({
       </Link>
       {chips.options.map((option) => (
         <Link
+          prefetch={false}
           className={`${chipBase} ${values[chips.name] === option.value ? chipOn : chipOff} ${focusRing}`}
           href={href({ [chips.name]: option.value })}
           key={option.value}
@@ -237,6 +239,7 @@ export function FilterBar({
               .filter(([name, value]) => !!value && name !== sortName)
               .map(([name, value]) => (
                 <Link
+                  prefetch={false}
                   aria-label={`Remove filter ${value}`}
                   className={`${chipBase} ${chipOn} ${focusRing} flex shrink-0 items-center gap-1.5`}
                   href={href({ [name]: "" })}
@@ -315,6 +318,7 @@ export function FilterBar({
         )}
         <div className="flex gap-2 pt-1">
           <Link
+            prefetch={false}
             className={`grid min-h-11 flex-1 place-items-center rounded-xl border border-line text-sm font-bold text-ink-dim ${focusRing}`}
             href={buildFilterHref({ basePath, values: {}, preserve, patch: {}, defaults: {} })}
             onClick={() => setSheetOpen(false)}

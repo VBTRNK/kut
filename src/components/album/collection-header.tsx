@@ -78,7 +78,11 @@ export function CollectionHeader({
           <p className="flex items-center gap-1.5 text-xs font-bold text-ink-faint">
             <IconScale aria-hidden="true" className="h-3.5 w-3.5" />
             Club Value
-            <Link className="font-black tabular-nums text-brass hover:underline" href="/club/value">
+            <Link
+              prefetch={false}
+              className="font-black tabular-nums text-brass hover:underline"
+              href="/club/value"
+            >
               {clubValue.toLocaleString()} FLUT Coins &rarr;
             </Link>
           </p>
@@ -88,6 +92,7 @@ export function CollectionHeader({
         <SectionNav active={mode} label="Collection view" tabs={VIEW_TABS} />
         {showArchetypeNudge && (
           <Link
+            prefetch={false}
             className="block rounded-full border border-brass-line bg-brass-bg/40 px-4 py-3 text-sm font-bold text-ink-dim hover:text-brass"
             href="/settings/card"
           >
