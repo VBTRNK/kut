@@ -14,6 +14,8 @@ import {
 import { CompeteBadge, CompeteBadgeWords } from "./compete-badge";
 import { buildPrimaryNavItems, type NavItem } from "./nav-items";
 
+// Authenticated route shells still invoke the server; fetch them only on navigation (ADR-157).
+
 type AppNavProps = {
   displayName: string;
   isAdmin: boolean;
@@ -67,6 +69,7 @@ function MessagesLink({ unreadCount, className }: { unreadCount: number; classNa
   const text = formatBadgeCount(unreadCount);
   return (
     <Link
+      prefetch={false}
       aria-current={active ? "page" : undefined}
       aria-label={unreadCount > 0 ? `Messages, ${unreadCount} unread` : "Messages"}
       className={`relative grid shrink-0 place-items-center rounded-full border transition-colors ${focusRing} ${className} ${active ? "border-brass/60 bg-brass/10 text-brass" : "border-line text-ink-dim hover:text-ink"}`}
@@ -114,6 +117,7 @@ export function AppNav({
             the link for screen readers and as its hover title. */}
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 lg:gap-6 lg:px-6">
           <Link
+            prefetch={false}
             className={`flex items-center gap-2.5 rounded-lg text-heading font-extrabold tracking-tight text-ink ${focusRing}`}
             href="/"
           >
@@ -123,6 +127,7 @@ export function AppNav({
           <nav aria-label="Primary" className="flex flex-1 items-center gap-1">
             {primaryItems.map((item) => (
               <Link
+                prefetch={false}
                 aria-current={ariaCurrent(item, pathname, activeKey)}
                 className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-small font-semibold transition-colors lg:px-3 ${focusRing} ${item.key === activeKey ? "bg-brass/10 text-brass" : "text-ink-dim hover:text-ink"}`}
                 href={item.href}
@@ -145,6 +150,7 @@ export function AppNav({
             </span>
             <MessagesLink className="h-9 w-9" unreadCount={unreadCount} />
             <Link
+              prefetch={false}
               aria-current={settingsActive ? "page" : undefined}
               aria-label={`Settings, ${displayName}`}
               className={`grid h-9 w-9 place-items-center rounded-full bg-brass text-label font-extrabold text-ink-on-accent ${focusRing} ${settingsActive ? "ring-2 ring-brass/40 ring-offset-2 ring-offset-board-deep" : ""}`}
@@ -158,6 +164,7 @@ export function AppNav({
 
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-2 border-b border-line/40 bg-board-deep/85 px-4 backdrop-blur sm:hidden">
         <Link
+          prefetch={false}
           className={`flex shrink-0 items-center gap-2 rounded-lg text-heading font-extrabold text-ink ${focusRing}`}
           href="/"
         >
@@ -176,6 +183,7 @@ export function AppNav({
           </span>
           <MessagesLink className="h-11 w-11" unreadCount={unreadCount} />
           <Link
+            prefetch={false}
             aria-current={settingsActive ? "page" : undefined}
             aria-label={`Settings, ${displayName}`}
             className={`grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brass text-label font-extrabold text-ink-on-accent ${focusRing} ${settingsActive ? "ring-2 ring-brass/40 ring-offset-2 ring-offset-board" : ""}`}
@@ -192,6 +200,7 @@ export function AppNav({
       >
         {primaryItems.map((item) => (
           <Link
+            prefetch={false}
             aria-current={ariaCurrent(item, pathname, activeKey)}
             className={`flex min-w-0 flex-1 flex-col items-center gap-1 py-2 text-label font-semibold ${focusRing} ${item.key === activeKey ? "text-brass" : "text-ink-faint"}`}
             href={item.href}

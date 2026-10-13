@@ -133,7 +133,11 @@ export default async function CardDetailPage({ params, searchParams }: CardPageP
   return (
     <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
       <section className="mx-auto max-w-5xl space-y-8 py-4 sm:py-8">
-        <Link className="text-sm font-bold text-brass hover:underline" href="/club/collection">
+        <Link
+          prefetch={false}
+          className="text-sm font-bold text-brass hover:underline"
+          href="/club/collection"
+        >
           &larr; Collection
         </Link>
 
@@ -167,6 +171,7 @@ export default async function CardDetailPage({ params, searchParams }: CardPageP
             )}
 
             <Link
+              prefetch={false}
               className="block text-sm font-bold text-brass hover:underline"
               href={`/players/${card.player_slug}`}
             >

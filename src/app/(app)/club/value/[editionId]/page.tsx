@@ -64,6 +64,7 @@ export default async function EditionCopiesPage({
                 <tr className="border-b border-line/50" key={copy.card_id}>
                   <td className="py-4">
                     <Link
+                      prefetch={false}
                       className="font-bold hover:text-brass"
                       href={`/club/collection/${copy.card_id}`}
                     >

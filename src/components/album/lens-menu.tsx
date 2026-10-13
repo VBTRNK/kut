@@ -29,6 +29,7 @@ export function LensMenu({ label, items }: LensMenuProps) {
         <div className="absolute z-20 mt-2 grid min-w-36 rounded-xl border border-line bg-board p-2 shadow-xl">
           {items.map((item) => (
             <Link
+              prefetch={false}
               className="rounded-lg px-3 py-2 text-sm hover:bg-panel"
               href={item.href}
               key={item.href}

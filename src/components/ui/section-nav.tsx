@@ -73,6 +73,7 @@ export function SectionNav({
         const on = tab.key === resolved;
         return (
           <Link
+            prefetch={false}
             aria-current={active ? (on ? "page" : undefined) : ariaCurrent(tab, pathname, resolved)}
             className={`flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 text-small font-semibold ${
               on ? "bg-brass-bg text-brass" : "text-ink-dim hover:text-ink"

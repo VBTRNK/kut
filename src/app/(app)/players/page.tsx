@@ -128,6 +128,7 @@ export default async function PlayerDirectoryPage({ searchParams }: PlayerDirect
               const cardPlayer = toLiveCardPlayer(player, injuredPlayerIds, photoUrls);
               return (
                 <Link
+                  prefetch={false}
                   aria-label={`Open ${player.display_name}'s profile`}
                   className="block rounded-[0.9rem] outline-offset-4 outline-brass focus-visible:outline-2"
                   href={`/players/${player.slug}`}

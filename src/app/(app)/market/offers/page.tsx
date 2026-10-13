@@ -47,7 +47,11 @@ function OfferCard({ offer }: { offer: TradeOffer }) {
             {offer.is_outgoing ? `To ${offer.seller_name}` : `From ${offer.proposer_name}`}
           </p>
           <h2 className="mt-1 text-xl font-black">
-            <Link className="hover:text-brass" href={`/players/${offer.listing_card_slug}`}>
+            <Link
+              prefetch={false}
+              className="hover:text-brass"
+              href={`/players/${offer.listing_card_slug}`}
+            >
               {offer.listing_card_name}
             </Link>
           </h2>

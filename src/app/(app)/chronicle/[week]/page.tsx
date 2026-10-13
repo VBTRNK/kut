@@ -298,6 +298,7 @@ export default async function ChronicleIssuePage({
                           <li className="border-b border-line/30 py-3" key={row.player_id}>
                             <div className="flex justify-between gap-4">
                               <Link
+                                prefetch={false}
                                 className="font-semibold hover:text-brass hover:underline"
                                 href={`/players/${row.slug}`}
                               >
@@ -364,6 +365,7 @@ export default async function ChronicleIssuePage({
                     >
                       {row.players?.slug ? (
                         <Link
+                          prefetch={false}
                           className="font-semibold hover:text-brass hover:underline"
                           href={`/players/${row.players.slug}`}
                         >
@@ -399,6 +401,7 @@ export default async function ChronicleIssuePage({
                   key={row.player_id}
                 >
                   <Link
+                    prefetch={false}
                     className="min-w-0 truncate font-black hover:text-brass"
                     href={`/players/${row.slug}`}
                   >
