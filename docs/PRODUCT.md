@@ -1,25 +1,26 @@
 # FLUT product reference
 
-Current behaviour and code, per area. Read only the section you need.
+Current behaviour and code by area.
 `BUILD_SPEC §N` and ADR-001–141 live at tag `docs-archive-2026-10`;
-new ADRs are in `docs/decisions.md`, open work in GitHub issues.
+New ADRs: `docs/decisions.md`; open work: GitHub issues.
 
 Ground rules for every area:
 
 - **SQL is authoritative.** Economy and ratings run in schema `kut`, never
   client writes. `src/game/` holds display constants/helpers; only Midweek has
   a TS engine twin checked against golden vectors (ADR-064).
-- **Part L** (`docs/INVARIANTS.md`, 1–28): each area names its invariants.
-  A change needs an ADR, a spec update and its own PR.
-- **Values** in `src/game/{config,economy,midweek/config}.ts` mirror SQL;
-  change their migration and constants together.
+- **Part L** (`docs/INVARIANTS.md`, 1–28): a change needs an ADR, a spec
+  update and its own PR.
+- **Values:** `src/game/{config,economy,midweek/config}.ts` mirrors SQL;
+  change migrations and constants together.
 - **Reads:** member projections require `kut.is_active_member()` (ADR-079);
   never flip to `security_invoker` (KB-013). Tests: `supabase/tests/database/`
   and `tests/integration/`.
 - **No scheduler.** Surveys, Midweek and offer expiry run from page visits via
   idempotent `for update skip locked` workers (ADR-061, ADR-098).
-- **UI:** six roles in `src/components/ui/`, checked by `policy:check` (ADR-153).
-  How it works has anchors; nav/card lists/filters disable prefetch (ADR-157).
+- **UI:** six roles in `src/components/ui/`, enforced by `policy:check`.
+  The type ceiling is zero outside cards/crest. How it works is a six-topic FAQ
+  with help anchors (ADR-161); nav/card lists/filters disable prefetch (ADR-157).
 
 | If you are changing… | Read |
 | --- | --- |
@@ -102,9 +103,9 @@ Ground rules for every area:
   - accepted trades never enter `market_sales`.
 - **Wants.** 100 private wants, 30 available copies (ADR-058); matches show
   the owner's display name and a copyable prompt.
-- **UI** (ADR-159): Buy · Selling · Offers. Buy filters tier/price/sort in a
-  sheet. Selling rows show time left and offer counts; list/cancel stays on
-  the Collection card. Offers separates incoming/sent, highlighting one open
+- **UI** (ADR-159/161): Buy · Selling · Offers. Buy filters tier/price/sort in a
+  sheet at every width. Selling rows show time left and offer counts; list/cancel
+  stays on the Collection card. Offers separates incoming/sent, highlighting one open
   incoming. Listing details keep phone-pinned Buy,
   escrow notice, discard value (ADR-103) and ownership across all copies
   (ADR-100/102).
@@ -264,7 +265,7 @@ Part L item).
   roll × pick factor × fitness × handicap, and a fresh day roll every match.
 - **Shape** (ADR-116):
   - archetypes give 0–3 plusses per line;
-  - each outfield line short of 3 plusses multiplies the squad by 0.88;
+  - each plus short of 3 in an outfield line multiplies the squad by 0.88;
   - one card plays in goal.
 - **Archetypes for the week.** They are frozen when the week opens (ADR-099).
   Unclaimed Players draw a new archetype each week from the week's seed

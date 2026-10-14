@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
   EXEMPT,
+  CEILING,
   checkCeiling,
   countOffScale,
   tally,
 } from "../../scripts/policy/check-type-scale.mjs";
 
 describe("type-scale ratchet (ADR-153)", () => {
+  it("rejects any off-scale size after the UI pass close-out", () => {
+    expect(CEILING).toBe(0);
+    expect(checkCeiling(0)).toBeNull();
+    expect(checkCeiling(1)).toMatch(/over the ceiling of 0/);
+  });
   it("counts Tailwind size steps and arbitrary lengths, with their variants", () => {
     expect(
       countOffScale(

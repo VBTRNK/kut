@@ -479,3 +479,21 @@ Date: 2026-10-14 (flut-ui-pass S10, #294, DR5-21–24/26). Amends ADR-043
   uses Fields; Welcome keeps the cosmetic reveal. The shared crest is exempt
   from the type ratchet (Q5); the card face and fonts do not change.
 - No migration, dependency, economy, server action, privacy or timing change.
+
+## ADR-161 — FAQ and UI pass close-out
+
+Date: 2026-10-14 (flut-ui-pass S11, #294, DR5-25; closes #233).
+Amends ADR-043/153 (the final type ceiling) and ADR-091 (reveal copy).
+
+- How it works is the FAQ: six topic tiles, six blocks and direct answers
+  with Body headings. Existing help anchors remain; `#ratings`/`#calls`
+  alias the Midweek answers. Each block links back to the topics.
+- Rules and config-derived tables remain. Privacy is its own topic; entered
+  cards show from the lock, weekly factors from the first kick-off and counts
+  after payment, as the existing views enforce. Settings also names the lock.
+- The off-scale ceiling is zero outside the existing card/crest exemptions.
+  Loading, recovery and trialist frames finish the scale; unused FilterBar
+  layouts and the temporary `sheetOnly` switch are removed.
+- The whole PRODUCT reference was checked; the shape description now says
+  0.88 per missing plus, matching the engine. No formula changes.
+- No migration, dependency, server read/action, economy or gating change.

@@ -9,7 +9,7 @@ import {
   isLockedTonight,
   isPickingOpen,
   nextEntryWeekLabel,
-  roundOneClock,
+  lockClock,
   scheduleVersionOf,
 } from "@/lib/midweek/entry";
 import { loadMidweekEntryState } from "@/lib/midweek/load";
@@ -52,7 +52,7 @@ export default async function SettingsPage() {
             }
             locked={isLockedTonight(midweek.current, now)}
             optedOut={midweek.current.opted_out}
-            roundOne={roundOneClock(scheduleVersionOf(midweek.current))}
+            revealAt={lockClock(scheduleVersionOf(midweek.current))}
             weekLabel={nextEntryWeekLabel(midweek.current, now)}
           />
         )}
