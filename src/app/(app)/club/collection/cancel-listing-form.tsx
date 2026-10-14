@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
+import { Block } from "@/components/ui/block";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import { cancelListing, type ListingState } from "./market-actions";
 
@@ -20,24 +22,22 @@ export function CancelListingForm({
 }) {
   const [state, action, pending] = useActionState(cancelListing, initialState);
   return (
-    <form action={action} className="rounded-2xl border border-steel-line/35 bg-steel-bg/20 p-4">
-      <input name="cardId" type="hidden" value={cardId} />
-      <input name="listingId" type="hidden" value={listingId} />
-      <p className="font-black text-steel">Listed for {price} FLUT Coins</p>
-      <p className="mt-1 text-sm text-steel/80">
-        This card is locked while the listing is active
-        {expiresAt ? `, until ${formatDate(expiresAt)}` : ""}.
-      </p>
-      {state.error && (
-        <p className="mt-3 rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
-      )}
-      <button
-        className="mt-4 min-h-11 rounded-xl border border-steel px-4 font-black text-steel disabled:border-line disabled:text-ink-faint"
-        disabled={pending}
-        type="submit"
-      >
-        {pending ? "Cancelling..." : "Cancel listing"}
-      </button>
-    </form>
+    <Block title="On the market">
+      <form action={action} className="grid gap-3">
+        <input name="cardId" type="hidden" value={cardId} />
+        <input name="listingId" type="hidden" value={listingId} />
+        <p className="text-body font-semibold">Listed for {price} FLUT Coins</p>
+        <p className="mt-1 text-small text-ink-dim">
+          This card is locked while the listing is active
+          {expiresAt ? `, until ${formatDate(expiresAt)}` : ""}.
+        </p>
+        {state.error && (
+          <p className="mt-3 rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
+        )}
+        <Button kind="secondary" disabled={pending} type="submit">
+          {pending ? "Cancelling..." : "Cancel listing"}
+        </Button>
+      </form>
+    </Block>
   );
 }

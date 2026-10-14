@@ -274,7 +274,8 @@ export default async function HowItWorksPage() {
           </table>
           <p>
             Every Live copy of a player shares the same current rating, so crossing a tier upgrades
-            them all at once.
+            them all at once. Tier follows the live rating, so a card can climb the ladder without
+            you doing anything.
           </p>
         </Section>
 
@@ -340,7 +341,7 @@ export default async function HowItWorksPage() {
             A <strong>TFH Pack</strong> costs {ECONOMY.basicPackPrice} FLUT Coins and gives{" "}
             {ECONOMY.basicPackCardCount} Live Cards. Draws are weighted by rarity, so Common players
             come up far more often than Gold or better. The result is fixed the moment you open
-            &mdash; refreshing never rerolls it.
+            &mdash; refreshing never rerolls it. Duplicates can happen.
           </p>
           <Link className="inline-block font-semibold text-brass underline" href="/club/packs">
             Open a pack &rarr;
@@ -375,6 +376,17 @@ export default async function HowItWorksPage() {
         </Section>
 
         <Section id="market" title="9. Transfer market & trade offers">
+          <div id="trading" className="scroll-mt-20 space-y-3">
+            <p>
+              Wanted cards stay private. Another member sees your name only when you make a matching
+              copy available. Listed cards and cards held in an offer cannot also be available.
+            </p>
+            <p>
+              Contact each other and agree the terms together. The owner can then list the card in
+              Market and you can offer cards and/or coins. Listings are public and are never
+              reserved, so complete an agreed trade promptly.
+            </p>
+          </div>
           <p>
             List any card at a buy-now price (within server-set bounds), choosing whether it runs
             for {ECONOMY.listingDurationChoiceHours.join(" or ")} hours. When it sells, a{" "}

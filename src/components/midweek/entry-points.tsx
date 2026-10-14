@@ -17,12 +17,6 @@ import { MidweekScoreboard } from "./report";
  * the evening as it stood at page load.
  */
 
-/** Home's other Now cards, until S8 moves Home onto the DR5 blocks. */
-export const NOW_CARD = "grid gap-3 rounded-2xl border p-4 sm:px-6 sm:py-5";
-export const NOW_BRASS = "border-brass/50 bg-brass-bg/30 hover:border-brass";
-export const NOW_KICKER =
-  "text-[0.7rem] font-extrabold tracking-[0.26em] text-brass uppercase [overflow-wrap:anywhere]";
-
 /** Before the lock: pick your five, or they're in. */
 export function MidweekEntryCard({
   lockAt,

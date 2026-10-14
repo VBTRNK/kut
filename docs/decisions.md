@@ -413,3 +413,25 @@ Date: 2026-10-13.
 - The production fraction of speculative traffic and CPU savings are unproven.
   Compare equal traffic windows after release, separating prefetch RSC requests
   (`Next-Router-Prefetch`) from navigations and live refreshes.
+
+## ADR-158 — Home, Collection and Packs on the UI scale
+
+Date: 2026-10-14 (flut-ui-pass S8, #294, DR5-17–19). Amends ADR-114
+(Home/pack summary), ADR-048 (album controls), ADR-053 (Collection header)
+and ADR-074 (card detail; the full rating story stays on the Player page).
+
+- Home has one Now block: earliest due item, with your live match first. Other
+  items are tiles; Club Value and Rank stack below 360 px, beside Now from
+  `lg`. Open a pack is primary only when nothing is due. Risers are rows
+  below `lg`, cards above; the Chronicle has its own tile with a standfirst.
+- Collection has one summary and completion bar above its tabs. Album lenses
+  live in Filter (one lens at a time, as before); Manage uses the toolbar and
+  tier/sort sheet. Album buttons are below the pages and step by spread at `lg`.
+- Trading uses wanted rows, an add sheet and copy controls; listed/escrowed
+  copies stay disabled. Card details use rating insets, listing and discard
+  blocks; the irreversible confirmation and server actions stay.
+- Packs keep their art, shortened copy and price confirmation; errors and
+  stale-price/idempotency handling stay. Summary tags sit below cards.
+- Removed explanations live at How it works `#cards`, `#packs`, `#trading`.
+  Sheets retain focus through edits, contain Tab and return focus on Escape.
+- No migration, dependency, economy or Midweek privacy/timing change.

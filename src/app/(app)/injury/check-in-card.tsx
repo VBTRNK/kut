@@ -1,5 +1,7 @@
 "use client";
 
+import { Block } from "@/components/ui/block";
+import { Button } from "@/components/ui/button";
 import { useActionState } from "react";
 import { checkInInjury, type CheckInState } from "./actions";
 
@@ -17,40 +19,26 @@ export function InjuryCheckInCard({
 
   if (state?.ok) {
     return (
-      <p className="rounded-2xl border border-moss-line bg-moss-bg p-5 text-sm font-bold text-moss">
+      <p className="rounded-2xl border border-moss-line bg-moss-bg p-5 text-small font-semibold text-moss">
         {state.message}
       </p>
     );
   }
 
   return (
-    <form
-      action={action}
-      className="flex min-h-20 flex-wrap items-center justify-between gap-4 rounded-2xl border border-brass/50 bg-brass-bg/25 p-5"
-    >
-      <input name="week_start" type="hidden" value={weekStart} />
-      <span className="min-w-0">
-        <span className="text-xs font-black uppercase tracking-wider text-brass">
-          Rehab check-in → +{stipend} FLUT Coins
-        </span>
-        <span className="display mt-1 block text-2xl">Keep your card protected</span>
-        <span className="mt-1 block text-sm text-ink-dim">
-          For the football week of {weekLabel}. Your card rating won&rsquo;t drop for a week you
-          check in.
-        </span>
+    <Block title="Rehab check-in" tone="now">
+      <form action={action} className="grid gap-3">
+        <input name="week_start" type="hidden" value={weekStart} />
+        <p className="text-small text-ink-dim">
+          +{stipend} coins · week of {weekLabel}. Keep your card protected.
+        </p>
         {state && !state.ok && (
-          <span className="mt-2 block rounded-xl bg-brick-bg p-3 text-sm text-brick">
-            {state.error}
-          </span>
+          <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
         )}
-      </span>
-      <button
-        className="inline-flex min-h-11 items-center rounded-xl bg-gradient-to-b from-[#eebd63] to-[#d29a34] px-5 font-black text-ink-on-accent hover:brightness-105 disabled:opacity-60"
-        disabled={pending}
-        type="submit"
-      >
-        {pending ? "Checking in…" : "Check in"}
-      </button>
-    </form>
+        <Button disabled={pending} type="submit" wide>
+          {pending ? "Checking in…" : "Check in"}
+        </Button>
+      </form>
+    </Block>
   );
 }

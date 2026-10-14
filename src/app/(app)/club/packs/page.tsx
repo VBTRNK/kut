@@ -1,3 +1,6 @@
+import { Block } from "@/components/ui/block";
+import { InfoLink } from "@/components/ui/links";
+import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
 import { requireUser } from "@/lib/auth/user";
 import { createClient } from "@/lib/supabase/server";
 import { OpenPackForm } from "./open-pack-form";
@@ -34,20 +37,11 @@ export default async function PacksPage() {
   const balance = walletResponse.data?.balance ?? 0;
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-6xl space-y-8 py-4 sm:py-8">
-        <header className="space-y-3">
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            Pack store
-          </p>
-          <h1 className="display text-3xl sm:text-6xl">Packs</h1>
-          <p className="hidden max-w-2xl text-base leading-relaxed text-ink-dim sm:block">
-            Spend FLUT Coins on server-selected Live Cards. You have {balance.toLocaleString()} FLUT
-            Coins.
-          </p>
-        </header>
+    <main className={PAGE}>
+      <section className={`${COLUMN} lg:max-w-5xl`}>
+        <PageHeader title="Packs" />
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
           {packs.length === 0 ? (
             <p className="rounded-3xl border border-dashed border-line bg-panel/60 p-10 text-center text-ink-dim">
               No packs are available right now.
@@ -68,26 +62,20 @@ export default async function PacksPage() {
             </div>
           )}
 
-          <aside className="rounded-2xl border border-line/60 bg-panel/60 p-6">
-            <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.15em] text-ink-faint">
-              What is in the ladder
-            </p>
+          <Block title="The tier ladder">
             <dl className="mt-4">
               {TIER_BANDS.map(([tier, label, band]) => (
                 <div className="flex items-center gap-3.5 border-b border-line/30 py-3" key={tier}>
                   <span aria-hidden="true" className="tier-chip" data-rarity={tier}>
                     <span className={`live-card__tier-icon--${tier}`} />
                   </span>
-                  <dt className="grow text-sm font-extrabold">{label}</dt>
-                  <dd className="text-xs font-bold tabular-nums text-ink-faint">OVR {band}</dd>
+                  <dt className="grow text-body font-semibold">{label}</dt>
+                  <dd className="text-small tabular-nums text-ink-faint">OVR {band}</dd>
                 </div>
               ))}
             </dl>
-            <p className="pt-4 text-xs leading-relaxed text-ink-faint">
-              Tier follows the card&rsquo;s live rating, so a card can climb the ladder without you
-              doing anything.
-            </p>
-          </aside>
+            <InfoLink href="/how-it-works#cards">How tiers work</InfoLink>
+          </Block>
         </div>
       </section>
     </main>

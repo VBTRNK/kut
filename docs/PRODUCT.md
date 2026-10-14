@@ -1,18 +1,14 @@
 # FLUT product reference
 
-What the game does today, per area, and where each rule lives. This is the first
-stop before changing behaviour. Read only the section you need. It replaces
-reading the old build spec, roadmap and ADR log for orientation. Those were
-archived at the git tag `docs-archive-2026-10`; read a `BUILD_SPEC §N` or an
-older ADR (ADR-001 to ADR-141) from there:
+Current behaviour and code, per area. Read the section you need. Old
+`BUILD_SPEC §N` and ADR-001–141 are at `docs-archive-2026-10`:
 
 ```powershell
 git show docs-archive-2026-10:docs/BUILD_SPEC.md | rg "^## 44\."
 git show docs-archive-2026-10:docs/archive/decisions-2026.md | rg "ADR-099"
 ```
 
-Newer ADRs are in `docs/decisions.md`. Open work is in GitHub issues
-(`gh issue list`).
+New ADRs: `docs/decisions.md`. Open work: `gh issue list`.
 
 Ground rules for every area:
 
@@ -20,8 +16,8 @@ Ground rules for every area:
   functions in schema `kut` (`supabase/migrations/`, where the latest
   `create or replace` wins). The browser never writes `wallets`, `user_cards`
   or `market_listings`. `src/game/` holds constants and display helpers only.
-  ADR-064 deleted the TypeScript mirrors of the rating and economy formulas.
-  The one TS twin with golden-vector parity is the Midweek engine.
+  Only the Midweek engine has a TS twin, checked against golden vectors
+  (ADR-064).
 - **Part L** (`docs/INVARIANTS.md`, items 1–28) lists the invariants. Each area
   below names the items that apply. Changing one needs an ADR, a spec change and
   its own PR.
@@ -72,6 +68,11 @@ Ground rules for every area:
 - Club Value (`/club/value`, Standings) is coins + owned discard value + 4× the
   discard value of the member's own linked Player. Duplicates of one edition
   count 100/20/5/0% (v3, ADR-056). Discard always pays in full.
+- Collection (ADR-158): one summary/bar and Album · Manage · Trading; album
+  lenses and Manage's tier/sort live in Filter at every width. Trading has
+  wanted rows, an add sheet and copy controls. Cards show rating insets,
+  listing and discard blocks; history is on the Player page.
+- Packs use a confirmation sheet; summaries put tags below cards (ADR-158).
 - The starter reveal on `/welcome` is cosmetic. The grant already happened in
   `claim_invitation` (ADR-031).
 
@@ -90,8 +91,7 @@ Ground rules for every area:
 **History.**
 - Pack price: 175 (ADR-057, 6 Sep) → 250 (ADR-136, 7 Oct).
 - Attendance reward: 75 → 250 (ADR-029, 29 Aug), not retroactive.
-- Club Value: v1 used wallet + reference value; v2 used the discard sum
-  (ADR-041); v3 added the duplicate discount.
+- Club Value v3 added duplicate discounts to v2’s discard sum (ADR-056).
 - "Untradeable" starter cards were retired (ADR-033). Every card is tradeable
   and discardable.
 - Ideas, not built: silver and gold packs (issue #223).
@@ -423,11 +423,11 @@ The `edition_type` check still lacks a `groundmaster` value.
 - Every message opens its subject through `/messages/[id]/open`, which also
   marks it read (ADR-114).
 - **Home:**
-  - leads with a "now" stack of what's due: the Midweek block (brass while
-    your five isn't picked or your match plays, ADR-154), the open report,
-    the rehab check-in;
-  - then top risers and the club activity feed, which excludes superadmin
-    activity (ADR-038, ADR-039, ADR-054).
+  - one Now block, soonest due first (your live match first); other items are
+    tiles. Club Value/Rank stack below 360 px; packs are primary only when
+    nothing is due (ADR-158).
+  - risers are rows below `lg`, then cards; a Chronicle tile shows the latest
+    week's standfirst; activity excludes superadmin (ADR-038/039/054).
 - No push, email or realtime delivery exists.
 
 **Part L:** none directly. Messages ride the economy transactions, so a sale
@@ -510,9 +510,8 @@ never misses one side's message.
   with a **307**.
 - Sign-in cookies are per host. Invite links use `APP_URL`.
 
-**History.** Slice 5 (switching the redirect to 308) was **declined** on
-9 Oct. The redirect stays a 307 so a rollback reaches members at once.
-Reopen this only if the legacy host is retired. `/club/midweek/*` → `/midweek/*`
+**History.** A 308 was declined on 9 Oct: the 307 permits an immediate rollback.
+Reopen only if the legacy host is retired. `/club/midweek/*` → `/midweek/*`
 is a separate permanent redirect (ADR-107).
 
 **Where.** `next.config.ts` and `tests/unit/legacy-host-redirect.test.ts`.

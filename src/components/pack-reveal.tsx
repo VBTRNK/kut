@@ -2,6 +2,9 @@
 
 import { useEffect, useReducer } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page";
+import { Tag } from "@/components/ui/tag";
 import { LiveCard, type LiveCardPlayer } from "@/components/live-card";
 import {
   initialRevealState,
@@ -26,7 +29,7 @@ const RARITY_LABEL: Record<LiveCardPlayer["rarityTier"], string> = {
 export type RevealCard = {
   cardId: string;
   player: LiveCardPlayer;
-  /** The summary's chip on the card face (ADR-114): "New · fills slot 14" or "×3 · discards for 63". */
+  /** The summary's tag below the card (ADR-158): "New · fills slot 14" or "×3 · discards for 63". */
   chip?: string | null;
 };
 
@@ -72,26 +75,14 @@ export function PackReveal({
   if (state.phase === "summary") {
     return (
       <div className="pack-reveal">
-        {title && (
-          <p className="text-center text-sm font-black uppercase tracking-[0.25em] text-brass">
-            {title}
-          </p>
-        )}
-        <h1 className="mt-2 text-center text-3xl font-black tracking-tight sm:text-4xl">
-          Your new Live Cards
-        </h1>
-        {summaryLine && (
-          <p className="mt-2 text-center text-sm font-bold text-ink-dim">{summaryLine}</p>
-        )}
-        <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-5">
+        <PageHeader
+          title="Your new Live Cards"
+          sub={[title, summaryLine].filter(Boolean).join(" · ")}
+        />
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
           {cards.map((card, i) => {
             const href = cardHrefBase ? `${cardHrefBase}${card.cardId}` : null;
-            const cardEl = (
-              <LiveCard
-                badge={card.chip ? <PackChip text={card.chip} /> : undefined}
-                player={card.player}
-              />
-            );
+            const cardEl = <LiveCard player={card.player} />;
             return (
               <div className="pack-reveal__summary-card" key={`${card.cardId}-${i}`}>
                 {href ? (
@@ -105,24 +96,21 @@ export function PackReveal({
                 ) : (
                   cardEl
                 )}
+                {card.chip && (
+                  <div className="mt-2 flex justify-center">
+                    <Tag tone={card.chip.startsWith("New") ? "won" : "neutral"}>{card.chip}</Tag>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link
-            className="inline-flex min-h-12 items-center rounded-xl bg-gradient-to-b from-[#eebd63] to-[#d29a34] px-5 font-black text-ink-on-accent hover:brightness-105"
-            href={doneHref}
-          >
-            {doneLabel}
-          </Link>
+        <div className="mt-8 grid gap-3 sm:flex sm:justify-center">
+          <Button href={doneHref}>{doneLabel}</Button>
           {secondaryHref && secondaryLabel && (
-            <Link
-              className="inline-flex min-h-12 items-center rounded-xl border border-brass px-5 font-black text-brass"
-              href={secondaryHref}
-            >
+            <Button href={secondaryHref} kind="secondary">
               {secondaryLabel}
-            </Link>
+            </Button>
           )}
         </div>
       </div>
@@ -134,12 +122,12 @@ export function PackReveal({
 
   return (
     <div className="pack-reveal">
-      <div className="flex items-center justify-between text-sm font-bold text-ink-faint">
+      <div className="flex items-center justify-between text-small font-semibold text-ink-faint">
         <span>
           Card {state.index + 1} of {total}
         </span>
         <button
-          className="rounded-lg border border-line px-3 py-1 font-black text-ink-dim hover:text-ink"
+          className="rounded-lg border border-line min-h-11 px-3 py-1 font-semibold text-ink-dim hover:text-ink"
           onClick={() => dispatch({ type: "skipAll" })}
           type="button"
         >
@@ -155,42 +143,33 @@ export function PackReveal({
       >
         {state.step === 0 && (
           <div className="pack-reveal__focus text-center">
-            <p className="pack-reveal__rarity inline-flex items-center gap-2 rounded-full bg-brass/15 px-4 py-2 text-lg font-black uppercase tracking-[0.2em] text-brass">
+            <p className="pack-reveal__rarity inline-flex items-center gap-2 rounded-full bg-brass/15 px-4 py-2 text-heading font-semibold text-brass">
               {RARITY_LABEL[card.rarityTier]}
             </p>
-            <p className="mt-3 text-sm text-ink-dim">Tap to reveal the rating</p>
+            <p className="mt-3 text-small text-ink-dim">Tap to reveal the rating</p>
           </div>
         )}
 
         {state.step === 1 && (
           <div className="pack-reveal__focus text-center">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-brass">
-              {RARITY_LABEL[card.rarityTier]}
+            <p className="text-label font-semibold text-brass">{RARITY_LABEL[card.rarityTier]}</p>
+            <p className="pack-reveal__ovr mt-2 text-figure font-extrabold text-ink">
+              {card.liveOvr}
             </p>
-            <p className="pack-reveal__ovr mt-2 text-7xl font-black text-ink">{card.liveOvr}</p>
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-ink-faint">OVR</p>
-            <p className="mt-3 text-sm text-ink-dim">Tap to reveal the player</p>
+            <p className="text-label font-semibold text-ink-faint">OVR</p>
+            <p className="mt-3 text-small text-ink-dim">Tap to reveal the player</p>
           </div>
         )}
 
         {state.step === 2 && (
           <div className="pack-reveal__focus w-full max-w-[240px]">
             <LiveCard player={card} />
-            <p className="mt-3 text-center text-sm text-ink-dim">
+            <p className="mt-3 text-center text-small text-ink-dim">
               {state.index + 1 < total ? "Tap for the next card" : "Tap to see all three"}
             </p>
           </div>
         )}
       </button>
     </div>
-  );
-}
-
-/** A summary card's chip, riding the card face like the market's ownership chip (ADR-102). */
-function PackChip({ text }: { text: string }) {
-  return (
-    <p className="max-w-full truncate rounded-full border border-ink/20 bg-board-deep/85 px-2.5 py-0.5 text-[0.7rem] font-black whitespace-nowrap text-ink tabular-nums shadow-[0_2px_6px_rgb(0_0_0/35%)] backdrop-blur-sm">
-      {text}
-    </p>
   );
 }

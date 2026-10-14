@@ -54,6 +54,7 @@ export function LinkTile({
   );
   return href ? (
     <Link
+      prefetch={false}
       className={`${TILE_FRAME} border-line/60 bg-panel/60 hover:border-brass-line ${FOCUS}`}
       href={href}
     >
@@ -80,6 +81,7 @@ export function FigureTile({
 }) {
   return (
     <Link
+      prefetch={false}
       className={`grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-1 rounded-2xl border border-line/60 bg-panel/60 p-4 hover:border-brass-line ${FOCUS}`}
       href={href}
     >
@@ -113,6 +115,7 @@ export function LinkRow({
   return (
     <li className="border-b border-line/40 last:border-b-0">
       <Link
+        prefetch={false}
         className={`grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md py-2.5 hover:text-brass ${FOCUS}`}
         href={href}
       >
@@ -138,6 +141,7 @@ export function LinkRow({
 export function InfoLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link
+      prefetch={false}
       className={`inline-flex min-h-11 items-center justify-self-start rounded-md text-small font-semibold text-brass hover:underline ${FOCUS}`}
       href={href}
     >

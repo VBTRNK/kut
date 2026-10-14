@@ -1748,52 +1748,139 @@ test.describe("Midweek Madness share images (F8, ADR-120)", () => {
   });
 });
 
+test(
+  "Collection filters, spread buttons, trading sheet and card blocks (DR5-18)",
+  { tag: "@narrow" },
+  async ({ page }) => {
+    // A standalone run has not rebuilt the fixture's ratings yet; listing bounds need them.
+    await withDatabase(async (database) => {
+      await database.query(
+        `insert into kut.player_season_state
+        (player_id, season_id, activity_score, form_score, live_ovr, pac, sho, pas, dri, def, phy, rarity_tier)
+        select p.id, s.id, 0, 0, 30, 30, 30, 30, 30, 30, 30, 'common'
+        from kut.players p cross join kut.seasons s
+        where p.id::text like '00000097-%' and s.is_active
+        on conflict (player_id, season_id) do nothing`,
+      );
+    });
+    await signIn(page, "release_member");
+    await page.goto("/club/collection");
+    await expect(page.getByRole("heading", { level: 1, name: "Collection" })).toBeVisible();
+    await expect(page.getByText(/^\d+ of \d+ Players · \d+ cards/)).toBeVisible();
+    await page.getByRole("button", { name: "Filter", exact: true }).click();
+    const sheet = page.getByRole("dialog", { name: "Filter" });
+    const gaps = sheet.getByRole("radio", { name: "Gaps", exact: true });
+    await gaps.locator("..").click();
+    await expect(gaps).toBeFocused();
+    await expect(gaps).toBeChecked();
+    await sheet.getByRole("button", { name: /^Show \d+ Players$/ }).click();
+    await expect(page).toHaveURL(/lens=gaps/);
+    await expect(page.locator('main a[aria-label$="— collected"]')).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/club/collection");
+    await expect(page.getByRole("heading", { name: "Page 1", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Page 2", exact: true })).toBeVisible();
+    const next = page
+      .getByRole("navigation", { name: "Album spreads" })
+      .getByRole("link", { name: /^Pages 3/ });
+    await next.click();
+    await expect(page).toHaveURL(/page=3/);
+    await expect(page.getByRole("heading", { name: "Page 3", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Filter", exact: true }).click();
+    await expect(sheet).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("button", { name: "Filter", exact: true })).toBeFocused();
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/club/collection?view=manage");
+    await page.getByRole("button", { name: "Filter", exact: true }).click();
+    await sheet.getByRole("radio", { name: "Gold", exact: true }).locator("..").click();
+    await sheet.getByRole("button", { name: "Show cards" }).click();
+    await expect(page).toHaveURL(/view=manage/);
+    await expect(page).toHaveURL(/rarity=gold/);
+    await page.goto("/club/collection?view=manage");
+    await page
+      .locator('main a[href^="/club/collection/"]')
+      .filter({ has: page.locator(".live-card") })
+      .first()
+      .click();
+    await expect(page.getByRole("region", { name: "Why this rating" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "List on the market" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Discard" })).toContainText(
+      "This can’t be undone.",
+    );
+    await expect(page.getByLabel("Price")).toHaveAttribute("min", /^\d+$/);
+    await expectNoHorizontalOverflow(page);
+    await page.goto("/club/collection/wanted");
+    await expect(page.getByRole("heading", { level: 1, name: "Collection" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Your copies" })).toBeVisible();
+    await page.getByRole("button", { name: "Add a wanted card" }).click();
+    const add = page.getByRole("dialog", { name: "Add a wanted card" });
+    const edition = add.locator("form").first();
+    const wantedName = await edition.locator("span.text-body").innerText();
+    await edition.getByRole("button", { name: "Want", exact: true }).click();
+    await expect(edition.getByRole("button", { name: "Remove", exact: true })).toBeVisible();
+    await add.getByRole("button", { name: "Done" }).click();
+    const wanted = page.getByRole("region", { name: "Wanted" });
+    await expect(wanted).toContainText(wantedName);
+    await wanted.getByRole("button", { name: "Remove", exact: true }).first().click();
+    await expect(wanted).toContainText("Nothing wanted yet.");
+    const available = page
+      .getByRole("region", { name: "Your copies" })
+      .getByRole("button", { name: "Make available", exact: true })
+      .first();
+    await available.click();
+    const makePrivate = page.getByRole("button", { name: "Make private", exact: true }).first();
+    await expect(makePrivate).toHaveAttribute("aria-pressed", "true");
+    await makePrivate.click();
+    await expect(page.getByRole("button", { name: "Make private", exact: true })).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+  },
+);
+
 test.describe("Home and Messages (F4, ADR-114)", () => {
   test.afterEach(async () => {
     await withDatabase(endFixtureEvening);
   });
 
-  test(
-    "Home leads with what's due: a short header, the now stack, two tiles",
-    { tag: "@narrow" },
-    async ({ page }) => {
-      await resetMidweek("release_member");
-      await signIn(page, "release_member");
-      await expect(
-        page.getByRole("heading", { level: 1, name: `This week in ${BRAND.shortName}` }),
-      ).toBeVisible();
-      const now = page.getByRole("region", { name: "Now" });
-      // Home's Midweek block (DR5-16): brass, the countdown, one primary.
-      await expect(now.getByRole("region", { name: "Pick your five" })).toContainText(
-        /^Pick your five ?Locks in /,
-      );
-      await expect(now.getByRole("link", { name: "Pick your five" })).toHaveAttribute(
-        "href",
-        "/midweek/pick",
-      );
-      // The coins tile went: the coin pill shows the balance.
-      await expect(page.getByText("Wallet balance")).toHaveCount(0);
-      await expect(
-        page.getByRole("link", { name: /^Club Value .* See the maths →$/ }),
-      ).toBeVisible();
-      await expect(page.getByRole("link", { name: /^Rank .* Standings →$/ })).toBeVisible();
-      await expect(page.getByRole("heading", { level: 2, name: "Top risers" })).toBeVisible();
-      await expect(page.getByRole("link", { name: "This week’s Chronicle →" })).toBeVisible();
-      await expect(
-        page.getByRole("link", { name: `New here? How ${BRAND.shortName} works →` }),
-      ).toBeVisible();
-      await expectNoHorizontalOverflow(page);
+  test("Home leads with one due block and tiles (DR5-17)", { tag: "@narrow" }, async ({ page }) => {
+    await resetMidweek("release_member");
+    await signIn(page, "release_member");
+    await expect(
+      page.getByRole("heading", { level: 1, name: `This week in ${BRAND.shortName}` }),
+    ).toBeVisible();
+    const now = page.getByRole("region", { name: "Now" });
+    // Home's Midweek block (DR5-16): brass, the countdown, one primary.
+    await expect(now.getByRole("region", { name: "Pick your five" })).toContainText(
+      /^Pick your five ?Locks in /,
+    );
+    await expect(now.getByRole("link", { name: "Pick your five" })).toHaveAttribute(
+      "href",
+      "/midweek/pick",
+    );
+    // The coins tile went: the coin pill shows the balance.
+    await expect(page.getByText("Wallet balance")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /^Club Value .*$/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Rank .*$/ })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: "Top risers" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^This week's Chronicle/ })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: `New here? How ${BRAND.shortName} works →` }),
+    ).toHaveCount(0);
+    await expect(now.getByRole("region")).toHaveCount(1);
+    await expectNoHorizontalOverflow(page);
 
-      await page.setViewportSize({ width: 1440, height: 900 });
-      await page.reload();
-      await expect(now.getByRole("link", { name: /Pick your five/ })).toBeVisible();
-      const tile = await page.getByRole("link", { name: /^Club Value/ }).boundingBox();
-      const pack = await page.getByRole("link", { name: "Open a pack" }).boundingBox();
-      // From `sm` the two tiles and the pack button share one row.
-      expect(Math.abs(tile!.y - pack!.y)).toBeLessThan(2);
-      await expectNoHorizontalOverflow(page);
-    },
-  );
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.reload();
+    await expect(now.getByRole("link", { name: /Pick your five/ })).toBeVisible();
+    const tile = await page.getByRole("link", { name: /^Club Value/ }).boundingBox();
+    const pack = await page.getByRole("link", { name: /^Open a pack/ }).boundingBox();
+    // At desktop the tiles sit beside Now, with the pack tile below the figures.
+    const lead = await now.boundingBox();
+    expect(tile!.x).toBeGreaterThan(lead!.x + lead!.width);
+    expect(pack!.y).toBeGreaterThan(tile!.y);
+    await expectNoHorizontalOverflow(page);
+  });
 
   test("during the evening the live card leads Home, as it stood at page load", async ({
     page,
@@ -1952,16 +2039,23 @@ test(
     await signIn(page, "release_member");
     await page.goto("/club/packs");
     try {
-      await page
-        .getByRole("button", { name: new RegExp(`^Open for \\d+ ${BRAND.currency}$`) })
-        .click();
-      await page.getByRole("button", { name: /^Pay \d+$/ }).click();
+      await page.getByRole("button", { name: /^Open for \d+ coins$/ }).click();
+      const confirm = page.getByRole("dialog", { name: /^Open a / });
+      await expect(confirm).toBeVisible();
+      await confirm.getByRole("button", { name: /^Pay \d+$/ }).focus();
+      await page.keyboard.press("Tab");
+      await expect(confirm.getByRole("button", { name: "Not now" })).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(confirm).toBeHidden();
+      await expect(page.getByRole("button", { name: /^Open for/ })).toBeFocused();
+      await page.getByRole("button", { name: /^Open for/ }).click();
+      await confirm.getByRole("button", { name: /^Pay \d+$/ }).click();
       // The first opening on a dev server compiles the reveal page.
       await expect(page).toHaveURL(/\/club\/packs\/[0-9a-f-]{36}$/, { timeout: 30_000 });
       await page.getByRole("button", { name: "Skip all" }).click();
       await expect(page.getByRole("heading", { name: "Your new Live Cards" })).toBeVisible();
       await expect(
-        page.getByText(/^(No new Players|\d+ new Players?)\. Album \d+ \/ \d+\.$/),
+        page.getByText(/^TFH Pack · (No new Players|\d+ new Players?)\. Album \d+ \/ \d+\.$/),
       ).toBeVisible();
       await expect(
         page.getByText(/^(New · fills slot \d+|×\d+ · discards for \d+)$/).first(),
