@@ -139,7 +139,8 @@ Ground rules for every area:
     age.
   - Each input is the G+A score plus the kudos score, capped at 3.5.
   - G+A scores 0/1/1.25/1.5 for 0/1/2/3+.
-  - Kudos score 0/1/1.5/2 for 0/1/2/3+ recognised categories.
+  - Kudos score 0/1/1.5/2 for 0/1/2/3+ recognised categories, including Safe
+    Hands on new ballots (ADR-162); no separate keeper bonus.
   - Earlier sessions keep the v1 weekly goal formula (§13.1).
 - **Live OVR** = `clamp(round(activity OVR + round(Form)), 30, 83)`.
 - **Tiers:** Common 30–39, Bronze 40s, Silver 50s, Gold 60s, Holo 70s,
@@ -147,8 +148,7 @@ Ground rules for every area:
 - **Attributes** are OVR plus the archetype offsets (seven archetypes; each
   offset set sums to 0). SHO gets `+min(8, 2 × last week's count)`.
 - Every Live copy of a Player shows the same current stats.
-- Cards explain their own rating in Form terms: the rating story, the
-  breakdown and the history graph over tier bands (ADR-047, ADR-074, ADR-076).
+- Rating story, breakdown and tier-band history explain Form (ADR-047/074/076).
 
 **Part L:** 12, 13, 15, 16.
 
@@ -162,17 +162,11 @@ Ground rules for every area:
 - Tests: `rating_breakdown.test.sql`, `goals_assists_cutover.test.sql`.
 
 **History.**
-- The first-appearance bonus went from 8 to 14 (ADR-024, 18 Aug).
-- **Goals → G+A (ADR-101).**
-  - From the week of **28 Sep 2026** the reported count is goals plus assists
-    combined, stored as one integer.
-  - Earlier sessions keep the goals-only meaning and the "goals" label
-    everywhere. Nothing was backfilled.
-  - Column names (`goals`, `p_goals`, `effective_goals`) are compatibility
-    names.
-  - The cutover lives in `GOALS_ASSISTS_CUTOVER` (`src/game/reported-count.ts`)
-    and in `kut._uses_combined_count`, pinned to the same date by tests.
-  - Midweek's simulated goals and assists are separate and unaffected.
+- **Goals → G+A (ADR-101):** from **28 Sep 2026**, one combined integer;
+  earlier sessions keep goals-only meaning/labels, without backfill.
+  `goals`/`p_goals`/`effective_goals` remain compatibility names. Cutover:
+  `GOALS_ASSISTS_CUTOVER` (`src/game/reported-count.ts`), SQL
+  `kut._uses_combined_count`, pinned by tests. Midweek statistics are separate.
 - Archetype self-service is limited to once per 336 hours, admins exempt
   (ADR-094).
 
@@ -213,26 +207,27 @@ Ground rules for every area:
 **Behaviour.**
 - Publishing opens a **24-hour report** for each linked attendee
   (`/sessions/[sessionId]/report`, the Home "now" card).
-- The member reports their G+A and nominates teammates. The ballot shows
-  three of the seven positive kudos categories, chosen deterministically.
-  An unanswered category is not a Skip (ADR-068).
+- Members report G+A and distinct nominees (or Skip) in three rotating
+  categories. Unanswered is not Skip (ADR-068).
+- New reports add **Safe Hands** last: “Who impressed you most in goal?” It may
+  repeat a regular nominee; any other attendee qualifies, no statistics needed.
+  Desktop puts G+A/actions beside kudos; phones stack them (ADR-162).
 - A complete form (zero G+A and skipped kudos included) pays **50 once**.
   A submitted report never goes back to draft (ADR-078).
 - **At finalization:**
   - a category is recognised when at least two distinct teammates nominated
     it, and only once at least three reporters gave kudos;
+  - Safe Hands: one outright leader across both teams, ≥2 distinct submitted
+    nominators, same participation gate; ties get nothing. Ordinary scoring;
   - results and rating snapshots are versioned and the ratings rebuilt;
   - each linked attendee gets `session_results`;
   - each recognised Player gets `kudos_awarded`, which names the categories
     and the OVR change, never the nominators (ADR-069).
 - Ballots and per-player provisional values stay private until then.
-- **Admin options:**
-  - correct a G+A with a reason, which never pays;
-  - close a window early with a reason, which keeps `closes_at` on the record
-    (ADR-067).
+- Admins can correct G+A (never pays) or close early, both with a reason;
+  early closure preserves `closes_at` (ADR-067).
 
-**Part L:** 4, 5, 16 (the paid-once reward is an ADR-059 contract, not a
-Part L item).
+**Part L:** 4, 5, 16. Paid-once reward: ADR-059.
 
 **Where.**
 - `submit_session_report`, `finalize_session_surveys` → `_finalize_one_session`,
@@ -244,7 +239,7 @@ Part L item).
 
 **History.**
 - The kudos ladder rose to +2 and the session cap to 3.5 (ADR-060, ADR-063).
-- A planned cutover move was withdrawn and never shipped (ADR-062).
+- Safe Hands: only reports opened after rollout; no backfill (#264).
 
 ## Midweek Madness
 

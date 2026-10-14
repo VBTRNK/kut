@@ -172,7 +172,7 @@ select is((select sho-pac from kut.player_season_state where season_id='41000000
 
 select is((select body from kut.user_notifications where user_id='41000000-0000-4000-8000-000000000001' and event_type='session_results' and reference_id='41000000-0000-4000-8000-000000000042'),'Reported G+A and recognized kudos are now in the Chronicle.','POST: the results notice says G+A');
 select is((select body from kut.user_notifications where user_id='41000000-0000-4000-8000-000000000001' and event_type='kudos_awarded' and reference_id='41000000-0000-4000-8000-000000000042'),
-  'Teammates recognized you for '||(select kut._join_names(array_agg(c.title order by array_position(s.category_ids,c.id))) from kut.session_surveys s join kut.kudos_categories c on c.id=any(s.category_ids) where s.session_id='41000000-0000-4000-8000-000000000042')||' this session. Your 4 G+A and these kudos lifted your card rating +3 OVR this week.',
+  'Teammates recognized you for '||(select kut._join_names(array_agg(c.title order by array_position(s.category_ids,c.id))) from kut.session_surveys s join kut.kudos_categories c on c.id=any(s.category_ids[1:3]) where s.session_id='41000000-0000-4000-8000-000000000042')||' this session. Your 4 G+A and these kudos lifted your card rating +3 OVR this week.',
   'POST: the kudos notice states one combined G+A count, never goals and assists apart');
 
 -- ---------------------------------------------------------------------------
