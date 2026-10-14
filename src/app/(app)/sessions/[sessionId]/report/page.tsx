@@ -1,4 +1,4 @@
-import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
+import { PageHeader } from "@/components/ui/page";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { countLabelLong } from "@/game/reported-count";
@@ -81,8 +81,8 @@ export default async function SessionReportPage({ params }: Props) {
     );
   const closed = report.survey_status !== "open" || new Date(report.closes_at) <= new Date();
   return (
-    <main className={PAGE}>
-      <section className={COLUMN}>
+    <main className="board-ground px-4 py-4 text-ink sm:px-8">
+      <section className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] gap-4">
         <PageHeader
           title={`${countLabelLong(report.session_date)} & kudos`}
           back={{ href: "/", label: "Home" }}

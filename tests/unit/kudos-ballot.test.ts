@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   SKIP,
+  SAFE_HANDS_CATEGORY_ID,
   UNDECIDED,
   ballotPayload,
   duplicateNominees,
@@ -31,6 +32,35 @@ describe("kudos ballot seeding", () => {
 });
 
 describe("kudos ballot validation", () => {
+  it("allows Safe Hands to repeat a regular pick, but keeps regular picks unique", () => {
+    const categories = [...CAT, SAFE_HANDS_CATEGORY_ID];
+    const ballot = { [CAT[0]]: ANN, [CAT[1]]: BOB, [CAT[2]]: SKIP, [SAFE_HANDS_CATEGORY_ID]: ANN };
+    expect(duplicateNominees(categories, ballot)).toEqual([]);
+    expect(ballotPayload(categories, ballot, "submit")).toEqual({
+      ok: true,
+      nominations: { [CAT[0]]: ANN, [CAT[1]]: BOB, [CAT[2]]: null, [SAFE_HANDS_CATEGORY_ID]: ANN },
+    });
+    expect(duplicateNominees(categories, { ...ballot, [CAT[1]]: ANN })).toEqual([ANN]);
+    expect(ballotPayload(categories, { ...ballot, [CAT[1]]: ANN }, "draft").ok).toBe(false);
+  });
+
+  it("keeps Safe Hands unanswered until nominated or explicitly skipped", () => {
+    const categories = [...CAT, SAFE_HANDS_CATEGORY_ID];
+    const ballot = seedBallot(categories, { [CAT[0]]: ANN }, [CAT[1], CAT[2]]);
+    expect(undecidedCategories(categories, ballot)).toEqual([SAFE_HANDS_CATEGORY_ID]);
+    expect(ballotPayload(categories, ballot, "submit").ok).toBe(false);
+    expect(ballotPayload(categories, ballot, "draft")).toEqual({
+      ok: true,
+      nominations: { [CAT[0]]: ANN, [CAT[1]]: null, [CAT[2]]: null },
+    });
+    expect(
+      ballotPayload(categories, { ...ballot, [SAFE_HANDS_CATEGORY_ID]: SKIP }, "submit").ok,
+    ).toBe(true);
+    expect(seedBallot(categories, {}, categories)[SAFE_HANDS_CATEGORY_ID]).toBe(SKIP);
+    expect(
+      seedBallot(categories, { [SAFE_HANDS_CATEGORY_ID]: ANN }, [])[SAFE_HANDS_CATEGORY_ID],
+    ).toBe(ANN);
+  });
   it("reports a teammate picked in two categories", () => {
     expect(duplicateNominees(CAT, { [CAT[0]]: ANN, [CAT[1]]: ANN, [CAT[2]]: BOB })).toEqual([ANN]);
     expect(duplicateNominees(CAT, { [CAT[0]]: ANN, [CAT[1]]: BOB, [CAT[2]]: SKIP })).toEqual([]);

@@ -11,6 +11,7 @@ import { isUuid } from "@/lib/uuid";
  */
 export const UNDECIDED = "";
 export const SKIP = "skip";
+export const SAFE_HANDS_CATEGORY_ID = "10000000-0000-4000-8000-000000000008";
 export type BallotChoice = typeof UNDECIDED | typeof SKIP | string;
 export type Ballot = Record<string, BallotChoice>;
 
@@ -38,13 +39,13 @@ export function undecidedCategories(categoryIds: string[], ballot: Ballot): stri
 }
 
 /**
- * Player ids nominated in more than one category. The database enforces this
- * (`unique(session_id, nominator_player_id, recipient_player_id)`), so catching
- * it here turns a whole rejected save into an inline hint.
+ * Regular picks must be unique; Safe Hands may repeat any regular pick.
+ * The database enforces the same rule with a partial unique index.
  */
 export function duplicateNominees(categoryIds: string[], ballot: Ballot): string[] {
   const seen = new Map<string, number>();
   for (const categoryId of categoryIds) {
+    if (categoryId === SAFE_HANDS_CATEGORY_ID) continue;
     const choice = ballot[categoryId] ?? UNDECIDED;
     if (choice === UNDECIDED || choice === SKIP) continue;
     seen.set(choice, (seen.get(choice) ?? 0) + 1);
