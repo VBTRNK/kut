@@ -184,19 +184,26 @@ export default async function HowItWorksPage() {
           <Question title="How do reports and kudos add Form?" id="form">
             <p>
               Report your goals and assists as one total (G+A) within 24 hours of attendance being
-              published, and nominate teammates in three kudos categories. Only the combined total
-              is kept. Kudos count when at least two teammates nominate a category and at least
-              three reporters give kudos.
+              published, and nominate teammates in three rotating kudos categories. Only the
+              combined total is kept. Kudos count when at least two teammates nominate a category
+              and at least three reporters give kudos.
+            </p>
+            <p>
+              Newly opened reports after the Safe Hands rollout add a fourth category: who impressed
+              you most in goal? You may repeat a regular nominee. One player across both teams wins
+              with the outright most nominations, at least two distinct nominators, and at least
+              three reporters giving kudos. Tied leaders receive no award. Safe Hands counts as one
+              ordinary kudos category; existing reports keep their original three categories.
             </p>
             <p>
               G+A adds up to 1.5 Form: 1 G+A gives 1 Form, 2 give 1.25, and 3 or more give 1.5. One
-              recognized kudos category gives 1 Form; two give 1.5 and three give 2. A single
-              session contributes at most 3.5 Form combined. Each session contribution fades across
-              the next four published sessions at 100%, 75%, 50%, 25%, then zero; total Form is
-              capped at {GAME_CONFIG.formCap}. Your G+A in the latest published football week lifts
-              Shooting (SHO) by 2 each, up to +8, until the next week is published. Completing every
-              field, including an explicit zero and Skip choices, pays {ECONOMY.sessionReportReward}{" "}
-              FLUT Coins once.
+              recognized kudos category gives 1 Form; two give 1.5 and three or more give 2. A
+              single session contributes at most 3.5 Form combined. Each session contribution fades
+              across the next four published sessions at 100%, 75%, 50%, 25%, then zero; total Form
+              is capped at {GAME_CONFIG.formCap}. Your G+A in the latest published football week
+              lifts Shooting (SHO) by 2 each, up to +8, until the next week is published. Completing
+              every field, including an explicit zero and Skip choices, pays{" "}
+              {ECONOMY.sessionReportReward} FLUT Coins once.
             </p>
             <p>
               Sessions before {cutoverLabel} counted goals only, and keep that meaning: their

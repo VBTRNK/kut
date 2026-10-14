@@ -317,9 +317,8 @@ roles, the kicker), DR1-5 (as DR5-4) and ADR-107 (Compete's section badge).
   for screen readers, so Pick now reaches Standings and Players.
 - **Chrome:** `AppNav` is on the scale; 12 px tab-bar labels fit at 320 px.
   Compete's `Pick`/`Live` chip is sentence case and sits beside its icon.
-- **Ratchet:** `check-type-scale.mjs` (in `policy:check`) counts off-scale text
-  sizes in `src/` outside the card face (931 on main, 914 now) and fails unless
-  its ceiling equals the count. S11 takes it to zero.
+- **Ratchet:** `check-type-scale.mjs` (`policy:check`) counts off-scale text
+  outside cards/crest; ADR-161 sets the ceiling to zero.
 - `BottomSheet` gains `everyWidth` for the one filter sheet (Q7). How it works
   gets topic tiles and an anchor per topic; sessions move cut text there.
 
@@ -337,7 +336,6 @@ ADR-119 (Home's Midweek card).
 - **Routes.** `/midweek/pick` (from the lock, your locked five). A week gains
   `bracket`, `night`, `calls`, `picks`: back link, no Compete tabs, the same
   reads at the same moments, so no gating changed. `?view=pick` redirects.
-  S6 restyles them and turns `/midweek/[weekStart]` into the week page.
 - **Picker.** Five slots and the plusses; the save bar with one privacy line
   (`Members see the five you enter from 19:55. Privacy ›`); your cards with
   the archetypes in the Filter sheet. Add fills the first empty slot. The
@@ -443,19 +441,14 @@ and ADR-074 (card detail; the full rating story stays on the Player page).
 Date: 2026-10-14 (flut-ui-pass S9, #294, DR5-20). Amends ADR-053
 (Market tabs) and ADR-051 (listing presentation); closes #237.
 
-- Buy · Selling · Offers share the Market title. Buy uses the toolbar and
-  an all-width Filter sheet for tier, price and sort; the secondary Buy
-  button carries the price, with the ownership chip still on the card.
-- Selling reads `my_collection_cards` and `my_trade_offers`, showing active
-  listings, time left, incoming offer counts and prices. Each row opens its
-  listing; creating or cancelling one remains on its Collection card.
-- Listing details use Buy now and Or make an offer blocks, the existing
-  phone-pinned Buy button, seller/discard context and the escrow notice.
-- Offers separates On your listings and You sent. Only the first active
-  incoming offer has a brass block and primary Accept; other actions are
-  secondary. Answered offers retain their status and received-coin record.
-- Removed explanations already live in How it works `#market` (tax and
-  escrow) and `#packs` (discard); tax also stays by the listing price field.
+- Market tabs: Buy · Selling · Offers. Buy uses the toolbar, all-width
+  tier/price/sort Filter sheet, secondary priced Buy and card ownership chip.
+- Selling reads `my_collection_cards`/`my_trade_offers`: active listings,
+  expiry, offer counts, prices and detail links. List/cancel stays on Collection.
+- Details keep Buy now/Or make an offer blocks, phone-pinned Buy, seller,
+  discard and escrow context. Offers separates incoming/sent; only the first
+  open incoming has brass/primary Accept. Answered status/coin records remain.
+- Tax/escrow/discard explanations live at `#market`/`#packs`; tax stays by price.
 - No migration, dependency, economy, action validation or privacy change.
 
 ## ADR-160 — The remaining pages on the UI scale
@@ -464,20 +457,17 @@ Date: 2026-10-14 (flut-ui-pass S10, #294, DR5-21–24/26). Amends ADR-043
 (type roles), the archived §39/KB-005 (phone standings counts), ADR-049
 (Chronicle presentation), ADR-114 (message rows) and ADR-091 (Settings copy).
 
-- Standings uses a block, ink ranks/value and a You tag. Phones show only the
-  club under the member; Cards and Players join as columns from `sm`. The
-  formula stays on Club Value and How it works `#value`.
-- Players uses the all-width tier/archetype/sort Filter sheet. Profiles,
-  Club Value/copies, My card, reports, invites and Admin use the foundations.
-- Chronicle uses a latest-issue block and earlier link rows; issues use session
-  blocks and tier tags. Provisional aggregates, report actions and result gates
-  remain; the weekly rating explanation already lives at `#cards`.
-- Message titles use Body (600 unread, 400 read), with Small body/time and a
-  New tag. Day groups, mark-all-read and the never-prefetched open route remain.
-- Settings uses Your club/Midweek blocks and navigation rows. Three shortened
-  privacy lines, the scheduled reveal time and two-step opt-out remain. Login
-  uses Fields; Welcome keeps the cosmetic reveal. The shared crest is exempt
-  from the type ratchet (Q5); the card face and fonts do not change.
+- Standings: block, ink ranks/value, You tag; club under member on phones,
+  Cards/Players from `sm`. Formula stays at Club Value/`#value`.
+- Players: all-width tier/archetype/sort Filter. Profiles, Club Value/copies,
+  My card, reports, invites and Admin use the foundations.
+- Chronicle: latest block/earlier rows, session blocks/tier tags; provisional
+  aggregates, actions and result gates stay; ratings explanation is at `#cards`.
+- Messages: Body titles (600 unread/400 read), Small body/time, New tag;
+  day groups, mark-all-read and never-prefetched open route stay.
+- Settings: club/Midweek blocks, navigation rows, three privacy lines, reveal
+  time and two-step opt-out. Login Fields; Welcome cosmetic reveal. Crest
+  exempt from type ratchet (Q5); card face/fonts unchanged.
 - No migration, dependency, economy, server action, privacy or timing change.
 
 ## ADR-161 — FAQ and UI pass close-out
@@ -485,15 +475,32 @@ Date: 2026-10-14 (flut-ui-pass S10, #294, DR5-21–24/26). Amends ADR-043
 Date: 2026-10-14 (flut-ui-pass S11, #294, DR5-25; closes #233).
 Amends ADR-043/153 (the final type ceiling) and ADR-091 (reveal copy).
 
-- How it works is the FAQ: six topic tiles, six blocks and direct answers
-  with Body headings. Existing help anchors remain; `#ratings`/`#calls`
-  alias the Midweek answers. Each block links back to the topics.
-- Rules and config-derived tables remain. Privacy is its own topic; entered
-  cards show from the lock, weekly factors from the first kick-off and counts
-  after payment, as the existing views enforce. Settings also names the lock.
-- The off-scale ceiling is zero outside the existing card/crest exemptions.
-  Loading, recovery and trialist frames finish the scale; unused FilterBar
-  layouts and the temporary `sheetOnly` switch are removed.
-- The whole PRODUCT reference was checked; the shape description now says
-  0.88 per missing plus, matching the engine. No formula changes.
+- FAQ: six topic tiles/blocks, Body headings and back-to-topics links. Existing
+  help anchors stay; `#ratings`/`#calls` alias Midweek answers. Rules/tables stay.
+- Privacy has its own topic: cards from lock, factors from first kick-off,
+  counts after payment. Settings names the lock; view gates stay unchanged.
+- Off-scale ceiling zero outside cards/crest, including loading/recovery/
+  trialists. Removed unused FilterBar layouts/temporary `sheetOnly`.
+- PRODUCT shape now says 0.88 per missing plus, matching the unchanged engine.
 - No migration, dependency, server read/action, economy or gating change.
+
+## ADR-162 — Safe Hands on newly opened session reports
+
+Date: 2026-10-14 (#264). Amends ADR-059/063/068 (kudos ballots and recognition).
+
+- New surveys snapshot three rotating categories plus Safe Hands last (version
+  3). Existing version 2 ballots keep three slots; no historical backfill.
+- Prompt: “Who impressed you most in goal?” Any other attendee, any archetype;
+  no keeper-role/statistics records or admin work. Safe Hands may repeat a
+  regular pick; a partial unique index/RPC keep regular nominees distinct.
+- Submission requires a nominee or explicit Skip in every slot; drafts may
+  omit slots. The RPC rejects category keys outside the recorded ballot.
+- One winner across both teams: outright leader, ≥2 distinct submitted
+  nominators, ≥3 submitted reporters giving any kudos. Ties get no award;
+  draft keeper votes do not count. Ordinary category recognition is unchanged.
+- Safe Hands uses ordinary 0/1/1.5/2 kudos scoring for 0/1/2/3+ categories.
+  G+A, fading, 3.5 session cap, 8 Form cap and once-only 50 coins stay unchanged.
+  Re-finalization uses the ballot snapshot and recorded nominations.
+- Existing design tokens; G+A/actions beside kudos on desktop, stacked on
+  phones. Safe Hands follows regular picks with collapsed rules.
+- Tolerant UI first, catalogue migration second; no hosted changes authorised.
