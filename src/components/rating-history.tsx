@@ -116,7 +116,7 @@ function GoalFootball({
         // them outside it cannot be hovered at all, so the week's tooltip was
         // unreachable from the one mark that invites a hover (KB-019).
         <text
-          className="fill-brass text-[11px] font-black"
+          className="fill-brass text-label font-extrabold"
           textAnchor={labelOnLeft ? "end" : "start"}
           x={labelOnLeft ? x - 9 : x + 9}
           y={y - 7}
@@ -131,7 +131,7 @@ function GoalFootball({
 export function RatingHistory({ snapshots, goalsByWeek, playerName }: RatingHistoryProps) {
   if (snapshots.length === 0) {
     return (
-      <p className="text-sm font-semibold text-ink-faint">
+      <p className="text-small font-semibold text-ink-faint">
         {playerName}&rsquo;s rating history starts with the next published session.
       </p>
     );
@@ -174,13 +174,13 @@ export function RatingHistory({ snapshots, goalsByWeek, playerName }: RatingHist
       <div className="flex items-end justify-between gap-4">
         <h2
           id="rating-history-title"
-          className="max-w-[15rem] text-[0.65rem] font-extrabold uppercase tracking-[0.15em] text-ink-faint"
+          className="max-w-[15rem] text-small font-semibold text-ink-dim"
         >
           Rating over {snapshots.length} published {snapshots.length === 1 ? "week" : "weeks"}
         </h2>
-        <p className="text-4xl font-black tabular-nums leading-none text-brass">
+        <p className="text-heading font-extrabold tabular-nums leading-none text-brass">
           {latest.live_ovr}
-          <span className="ml-1 text-[0.65rem] uppercase tracking-[0.16em]">now</span>
+          <span className="ml-1 text-label">now</span>
         </p>
       </div>
       <svg
@@ -210,11 +210,7 @@ export function RatingHistory({ snapshots, goalsByWeek, playerName }: RatingHist
                 y1={bandBottom}
                 y2={bandBottom}
               />
-              <text
-                className="fill-ink-faint text-[10px] font-bold uppercase tracking-[0.12em]"
-                x="4"
-                y={bandBottom + 3}
-              >
+              <text className="fill-ink-faint text-label font-semibold" x="4" y={bandBottom + 3}>
                 {band.tier} {band.min}
               </text>
             </g>
@@ -269,7 +265,7 @@ export function RatingHistory({ snapshots, goalsByWeek, playerName }: RatingHist
               <circle cx={x(index)} cy={y(snapshot.live_ovr)} fill="transparent" r={hoverRadius} />
               {showLabel && (
                 <text
-                  className="fill-ink-faint text-[10px] font-bold"
+                  className="fill-ink-faint text-label font-semibold"
                   textAnchor="middle"
                   x={x(index)}
                   y={height - 27}
@@ -282,12 +278,12 @@ export function RatingHistory({ snapshots, goalsByWeek, playerName }: RatingHist
         })}
       </svg>
       {snapshots.length === 1 && (
-        <p className="text-sm text-ink-dim">
+        <p className="text-small text-ink-dim">
           One published week so far. The line begins with the next published session.
         </p>
       )}
       {snapshots.length === 1 && nextBand && (
-        <p className="text-sm font-bold text-brass">
+        <p className="text-small font-semibold text-brass">
           {nextBand.min - latest.live_ovr} OVR from{" "}
           {nextBand.tier[0].toUpperCase() + nextBand.tier.slice(1)}.
         </p>

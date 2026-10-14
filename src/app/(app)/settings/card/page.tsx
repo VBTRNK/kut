@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
 import { type Archetype, formatArchetypeChangeAt, nextArchetypeChangeAt } from "@/game/archetypes";
 import { requireUser } from "@/lib/auth/user";
 import { resolvePhotoUrls } from "@/lib/player-photos";
@@ -29,18 +29,10 @@ export default async function MyCardPage() {
   if (profileError) throw new Error("Could not load your profile.");
 
   const shell = (children: React.ReactNode) => (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-2xl space-y-8">
-        <header>
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            Account
-          </p>
-          <h1 className="display mt-3 text-5xl sm:text-6xl">My card</h1>
-        </header>
+    <main className={PAGE}>
+      <section className={COLUMN}>
+        <PageHeader title="My card" back={{ href: "/settings", label: "Settings" }} />
         {children}
-        <Link className="inline-block text-sm font-semibold text-brass underline" href="/settings">
-          &larr; Back to settings
-        </Link>
       </section>
     </main>
   );
@@ -48,7 +40,7 @@ export default async function MyCardPage() {
   if (!profile?.player_id) {
     return shell(
       <div className="rounded-3xl border border-dashed border-line bg-panel/60 p-8 text-center text-ink-dim">
-        <h2 className="display text-2xl text-ink">No player linked yet</h2>
+        <h2 className="font-semibold text-heading text-ink">No player linked yet</h2>
         <p className="mx-auto mt-2 max-w-md">
           Your account isn&rsquo;t linked to a TFH player, so there&rsquo;s no card to edit yet. Ask
           an admin to link your account to your player.
@@ -68,7 +60,7 @@ export default async function MyCardPage() {
   if (!player) {
     return shell(
       <div className="rounded-3xl border border-dashed border-line bg-panel/60 p-8 text-center text-ink-dim">
-        <h2 className="display text-2xl text-ink">Player not found</h2>
+        <h2 className="font-semibold text-heading text-ink">Player not found</h2>
         <p className="mt-2">
           Your linked player could not be loaded. Ask an admin to check your account.
         </p>

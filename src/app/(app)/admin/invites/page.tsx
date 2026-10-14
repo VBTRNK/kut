@@ -29,10 +29,10 @@ export default async function InvitesPage() {
   );
 
   return (
-    <main className="board-ground min-h-screen p-6 text-ink sm:p-10">
+    <main className="board-ground min-h-screen px-4 pt-4 pb-8 text-body text-ink sm:px-8 sm:pt-8">
       <section className="mx-auto max-w-xl space-y-8">
         <header className="space-y-3">
-          <h1 className="text-4xl font-black tracking-tight">Invite a player</h1>
+          <h1 className="font-serif text-title font-normal sm:text-title-lg">Invite a player</h1>
           <p className="text-ink-dim">
             Each link can create one FLUT account tied to one real player. It expires after 14 days.
           </p>

@@ -48,14 +48,14 @@ export function Switch({ on, label, type = "button", ...rest }: SwitchProps) {
     <button
       aria-checked={on}
       aria-label={label}
-      className={`relative inline-block h-8 w-[52px] flex-none rounded-full disabled:opacity-50 ${on ? "bg-moss" : "bg-line"} ${FOCUS}`}
+      className={`relative inline-block min-h-11 w-[52px] flex-none rounded-full disabled:opacity-50 ${on ? "bg-moss" : "bg-line"} ${FOCUS}`}
       role="switch"
       type={type}
       {...rest}
     >
       <span
         aria-hidden="true"
-        className={`absolute top-1 h-6 w-6 rounded-full transition-[left] motion-reduce:transition-none ${on ? "left-6 bg-board-deep" : "left-1 bg-ink-dim"}`}
+        className={`absolute top-1/2 -mt-3 h-6 w-6 rounded-full transition-[left] motion-reduce:transition-none ${on ? "left-6 bg-board-deep" : "left-1 bg-ink-dim"}`}
       />
     </button>
   );

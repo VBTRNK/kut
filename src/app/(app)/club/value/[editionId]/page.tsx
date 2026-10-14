@@ -1,3 +1,4 @@
+import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/user";
@@ -36,23 +37,16 @@ export default async function EditionCopiesPage({
   if (!copies.length) notFound();
   const first = copies[0];
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-3xl space-y-8 py-4 sm:py-8">
-        <Link className="text-sm font-bold text-brass hover:underline" href="/club/value">
-          &larr; Club Value
-        </Link>
-        <header>
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            {first.edition_title}
-          </p>
-          <h1 className="display mt-3 text-3xl sm:text-6xl">Your copies</h1>
-          <p className="mt-4 text-ink-dim">
-            {copies.length} copies. Each can be discarded for {first.discard_value} FLUT Coins.
-          </p>
-        </header>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[28rem] text-left">
-            <thead className="border-b border-line text-xs uppercase tracking-wider text-ink-faint">
+    <main className={PAGE}>
+      <section className={COLUMN}>
+        <PageHeader
+          title="Your copies"
+          back={{ href: "/club/value", label: "Club Value" }}
+          sub={`${first.edition_title} · ${copies.length} copies. Each can be discarded for ${first.discard_value} FLUT Coins.`}
+        />
+        <div className="min-w-0 rounded-2xl border border-line/60 bg-panel/60 p-4">
+          <table className="w-full text-left text-small">
+            <thead className="border-b border-line text-label text-ink-faint">
               <tr>
                 <th className="py-3">Copy</th>
                 <th>Weight</th>
@@ -65,14 +59,14 @@ export default async function EditionCopiesPage({
                   <td className="py-4">
                     <Link
                       prefetch={false}
-                      className="font-bold hover:text-brass"
+                      className="inline-flex min-h-11 items-center font-semibold hover:text-brass"
                       href={`/club/collection/${copy.card_id}`}
                     >
                       Copy {copy.copy_position}
                     </Link>
                   </td>
                   <td>{copy.weight_percent}%</td>
-                  <td className="text-right font-black tabular-nums">
+                  <td className="text-right font-extrabold tabular-nums">
                     {copy.club_value_contribution}
                   </td>
                 </tr>
@@ -80,7 +74,7 @@ export default async function EditionCopiesPage({
             </tbody>
           </table>
         </div>
-        <p className="text-sm text-ink-dim">
+        <p className="text-small text-ink-dim">
           Positions are recalculated after every sale, transfer, or discard. No physical copy is
           permanently privileged.
         </p>

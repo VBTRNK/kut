@@ -25,14 +25,16 @@ export function RosterTable({ players, today }: { players: RosterRow[]; today: s
 
   return (
     <div className="space-y-3">
-      <h2 className="display text-2xl">Current roster ({players.length})</h2>
+      <h2 className="font-semibold text-heading">Current roster ({players.length})</h2>
       {state && !state.ok && (
-        <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+        <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
       )}
-      {state?.ok && <p className="rounded-xl bg-moss-bg p-3 text-sm text-moss">{state.message}</p>}
+      {state?.ok && (
+        <p className="rounded-xl bg-moss-bg p-3 text-small text-moss">{state.message}</p>
+      )}
       <div className="overflow-x-auto rounded-2xl border border-line bg-panel">
-        <table className="w-full text-left text-sm">
-          <thead className="text-xs font-black uppercase tracking-[0.1em] text-ink-faint">
+        <table className="w-full text-left text-small">
+          <thead className="text-label font-semibold text-ink-faint">
             <tr className="border-b border-line">
               <th className="px-4 py-3">Display name</th>
               <th className="px-4 py-3">Slug</th>
@@ -68,7 +70,7 @@ export function RosterTable({ players, today }: { players: RosterRow[]; today: s
                         value={player.is_active ? "false" : "true"}
                       />
                       <button
-                        className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-ink-dim hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                        className="min-h-11 rounded-lg border border-line px-3 py-1.5 text-label font-semibold text-ink-dim hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={isPending}
                         type="submit"
                       >
@@ -90,7 +92,7 @@ export function RosterTable({ players, today }: { players: RosterRow[]; today: s
                       <input name="intent" type="hidden" value="delete" />
                       <input name="player_id" type="hidden" value={player.id} />
                       <button
-                        className="rounded-lg border border-brick-line/60 px-3 py-1.5 text-xs font-bold text-brick hover:bg-brick-bg disabled:cursor-not-allowed disabled:opacity-40"
+                        className="min-h-11 rounded-lg border border-brick-line/60 px-3 py-1.5 text-label font-semibold text-brick hover:bg-brick-bg disabled:cursor-not-allowed disabled:opacity-40"
                         disabled={isPending || player.has_history}
                         title={
                           player.has_history
@@ -109,12 +111,12 @@ export function RosterTable({ players, today }: { players: RosterRow[]; today: s
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-ink-faint">
+      <p className="text-small text-ink-faint">
         Deactivating hides a player from Live Ratings and pack pools but keeps their history and any
         cards people own — it is reversible. Delete is permanent and only goes through for a player
         with no attendance, account, invite, or owned cards.
       </p>
-      <p className="text-sm text-ink-faint">
+      <p className="text-small text-ink-faint">
         Injury mode protects a long-term injured player&rsquo;s card: each football week they sit
         out, they check in from Home for 100 FLUT Coins and their rating doesn&rsquo;t drop that
         week. It ends by itself when they play a published session again. The note is visible to
@@ -124,9 +126,9 @@ export function RosterTable({ players, today }: { players: RosterRow[]; today: s
   );
 }
 
-const INPUT = "min-h-9 w-full rounded-lg border border-line bg-panel-2 px-2 text-xs text-ink";
+const INPUT = "min-h-11 w-full rounded-lg border border-line bg-panel-2 px-2 text-label text-ink";
 const BUTTON =
-  "rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-ink-dim hover:text-ink disabled:cursor-not-allowed disabled:opacity-50";
+  "min-h-11 rounded-lg border border-line px-3 py-1.5 text-label font-semibold text-ink-dim hover:text-ink disabled:cursor-not-allowed disabled:opacity-50";
 
 function InjuryCell({
   player,
@@ -145,7 +147,7 @@ function InjuryCell({
     const weeks = player.injury.protected_weeks;
     return (
       <details className="min-w-44">
-        <summary className="cursor-pointer text-xs font-bold text-brick">
+        <summary className="min-h-11 cursor-pointer text-label font-semibold text-brick">
           Injured since {formatDate(player.injury.started_on)} · {weeks}{" "}
           {weeks === 1 ? "week" : "weeks"} protected
         </summary>
@@ -170,16 +172,18 @@ function InjuryCell({
   }
 
   if (!player.has_account || !player.is_active) {
-    return <span className="text-xs text-ink-faint">Needs an active account</span>;
+    return <span className="text-label text-ink-faint">Needs an active account</span>;
   }
 
   return (
     <details className="min-w-44">
-      <summary className="cursor-pointer text-xs font-bold text-ink-dim">Mark injured…</summary>
+      <summary className="min-h-11 cursor-pointer text-label font-semibold text-ink-dim">
+        Mark injured…
+      </summary>
       <form action={formAction} className="mt-2 space-y-2">
         <input name="intent" type="hidden" value="start_injury" />
         <input name="player_id" type="hidden" value={player.id} />
-        <label className="block space-y-1 text-xs text-ink-faint">
+        <label className="block space-y-1 text-label text-ink-faint">
           <span>Injury date</span>
           <input
             className={INPUT}

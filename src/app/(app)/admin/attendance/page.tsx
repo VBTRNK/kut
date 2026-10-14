@@ -79,10 +79,10 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
     : null;
 
   return (
-    <main className="board-ground min-h-screen p-6 text-ink sm:p-10">
+    <main className="board-ground min-h-screen px-4 pt-4 pb-8 text-body text-ink sm:px-8 sm:pt-8">
       <section className="mx-auto max-w-xl space-y-8">
         <header className="space-y-3">
-          <h1 className="text-4xl font-black tracking-tight">Record attendance</h1>
+          <h1 className="font-serif text-title font-normal sm:text-title-lg">Record attendance</h1>
           <p className="text-ink-dim">
             Signed in as {admin.displayName}. Publishing rebuilds every Live Card from season
             history.
@@ -128,8 +128,8 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
         <AttendanceForm players={players} v2StartsWeek={ratingRules?.v2_starts_week ?? null} />
 
         <section className="space-y-3 border-t border-panel-2 pt-8">
-          <h2 className="display text-2xl">Review published and cancelled sessions</h2>
-          <p className="text-sm leading-6 text-ink-dim">
+          <h2 className="font-semibold text-heading">Review published and cancelled sessions</h2>
+          <p className="text-small leading-6 text-ink-dim">
             Open a session to amend attendance, date, or type. Member-reported goals (G+A from 28
             September 2026) are managed under Session reports. Cancelled sessions stay available for
             review and reactivation.

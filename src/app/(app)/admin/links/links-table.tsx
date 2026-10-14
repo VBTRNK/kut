@@ -36,11 +36,13 @@ export function LinksTable({
 
   return (
     <div className="space-y-3">
-      <h2 className="display text-2xl">Accounts ({accounts.length})</h2>
+      <h2 className="font-semibold text-heading">Accounts ({accounts.length})</h2>
       {state && !state.ok && (
-        <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+        <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
       )}
-      {state?.ok && <p className="rounded-xl bg-moss-bg p-3 text-sm text-moss">{state.message}</p>}
+      {state?.ok && (
+        <p className="rounded-xl bg-moss-bg p-3 text-small text-moss">{state.message}</p>
+      )}
 
       <ul className="space-y-3">
         {accounts.map((account) => {
@@ -59,20 +61,20 @@ export function LinksTable({
           return (
             <li className="rounded-2xl border border-line/60 bg-board-deep/40 p-4" key={account.id}>
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span className="font-bold">{account.display_name}</span>
+                <span className="font-semibold">{account.display_name}</span>
                 {isPrivileged && (
-                  <span className="rounded bg-panel-2 px-1.5 py-0.5 text-xs font-bold text-ink-faint">
+                  <span className="rounded bg-panel-2 px-1.5 py-0.5 text-label font-semibold text-ink-faint">
                     {account.role}
                   </span>
                 )}
                 {account.is_disabled && (
-                  <span className="rounded bg-brick-bg px-1.5 py-0.5 text-xs font-bold text-brick">
+                  <span className="rounded bg-brick-bg px-1.5 py-0.5 text-label font-semibold text-brick">
                     disabled
                   </span>
                 )}
-                {isSelf && <span className="text-xs text-ink-faint">(you)</span>}
+                {isSelf && <span className="text-label text-ink-faint">(you)</span>}
               </div>
-              <p className="mt-1 text-sm text-ink-dim">
+              <p className="mt-1 text-small text-ink-dim">
                 Username: {account.username ?? "—"} · Linked player:{" "}
                 {account.linked_player_name ?? "not linked"} · Wallet:{" "}
                 {account.wallet_balance.toLocaleString("en-GB")} FLUT Coins
@@ -84,7 +86,7 @@ export function LinksTable({
                     <input name="intent" type="hidden" value="unlink" />
                     <input name="user_id" type="hidden" value={account.id} />
                     <button
-                      className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-ink-dim hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                      className="min-h-11 rounded-lg border border-line px-3 py-1.5 text-label font-semibold text-ink-dim hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={isPending}
                       type="submit"
                     >
@@ -96,7 +98,7 @@ export function LinksTable({
                     <input name="intent" type="hidden" value="link" />
                     <input name="user_id" type="hidden" value={account.id} />
                     <select
-                      className="min-h-9 rounded-lg border border-line bg-board-deep/60 px-2 text-xs"
+                      className="min-h-11 rounded-lg border border-line bg-board-deep/60 px-2 text-label"
                       disabled={isPending || availablePlayers.length === 0}
                       name="player_id"
                       required
@@ -109,7 +111,7 @@ export function LinksTable({
                       ))}
                     </select>
                     <button
-                      className="rounded-lg border border-brass px-3 py-1.5 text-xs font-bold text-brass disabled:cursor-not-allowed disabled:opacity-50"
+                      className="min-h-11 rounded-lg border border-brass px-3 py-1.5 text-label font-semibold text-brass disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={isPending || availablePlayers.length === 0}
                       type="submit"
                     >
@@ -127,7 +129,7 @@ export function LinksTable({
                     />
                     <input name="user_id" type="hidden" value={account.id} />
                     <button
-                      className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-ink-dim hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+                      className="min-h-11 rounded-lg border border-line px-3 py-1.5 text-label font-semibold text-ink-dim hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={isPending}
                       type="submit"
                     >
@@ -157,7 +159,7 @@ export function LinksTable({
                       value={account.reset_idempotency_key}
                     />
                     <button
-                      className="rounded-lg border border-brick-line/60 px-3 py-1.5 text-xs font-bold text-brick hover:bg-brick-bg disabled:cursor-not-allowed disabled:opacity-40"
+                      className="min-h-11 rounded-lg border border-brick-line/60 px-3 py-1.5 text-label font-semibold text-brick hover:bg-brick-bg disabled:cursor-not-allowed disabled:opacity-40"
                       disabled={isPending}
                       type="submit"
                     >
@@ -182,7 +184,7 @@ export function LinksTable({
                     <input name="intent" type="hidden" value="delete" />
                     <input name="user_id" type="hidden" value={account.id} />
                     <button
-                      className="rounded-lg border border-brick-line/60 px-3 py-1.5 text-xs font-bold text-brick hover:bg-brick-bg disabled:cursor-not-allowed disabled:opacity-40"
+                      className="min-h-11 rounded-lg border border-brick-line/60 px-3 py-1.5 text-label font-semibold text-brick hover:bg-brick-bg disabled:cursor-not-allowed disabled:opacity-40"
                       disabled={isPending}
                       type="submit"
                     >
@@ -198,7 +200,7 @@ export function LinksTable({
                   <input name="user_id" type="hidden" value={account.id} />
                   <input
                     aria-label={`Coin adjustment for ${account.display_name}`}
-                    className="min-h-9 w-24 rounded-lg border border-line bg-board-deep/60 px-2 text-xs"
+                    className="min-h-11 w-24 rounded-lg border border-line bg-board-deep/60 px-2 text-label"
                     inputMode="numeric"
                     name="amount"
                     placeholder="+/- coins"
@@ -207,7 +209,7 @@ export function LinksTable({
                   />
                   <input
                     aria-label={`Reason for adjusting ${account.display_name}`}
-                    className="min-h-9 flex-1 rounded-lg border border-line bg-board-deep/60 px-2 text-xs"
+                    className="min-h-11 flex-1 rounded-lg border border-line bg-board-deep/60 px-2 text-label"
                     maxLength={200}
                     name="reason"
                     placeholder="Reason (required)"
@@ -215,7 +217,7 @@ export function LinksTable({
                     type="text"
                   />
                   <button
-                    className="rounded-lg border border-brass px-3 py-1.5 text-xs font-bold text-brass disabled:cursor-not-allowed disabled:opacity-50"
+                    className="min-h-11 rounded-lg border border-brass px-3 py-1.5 text-label font-semibold text-brass disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isPending}
                     type="submit"
                   >
@@ -235,7 +237,7 @@ export function LinksTable({
                   />
                   <input
                     aria-label="Grant yourself coins"
-                    className="min-h-9 w-24 rounded-lg border border-line bg-board-deep/60 px-2 text-xs"
+                    className="min-h-11 w-24 rounded-lg border border-line bg-board-deep/60 px-2 text-label"
                     inputMode="numeric"
                     name="amount"
                     placeholder="+/- coins"
@@ -244,7 +246,7 @@ export function LinksTable({
                   />
                   <input
                     aria-label="Reason for granting yourself coins"
-                    className="min-h-9 flex-1 rounded-lg border border-line bg-board-deep/60 px-2 text-xs"
+                    className="min-h-11 flex-1 rounded-lg border border-line bg-board-deep/60 px-2 text-label"
                     maxLength={200}
                     name="reason"
                     placeholder="Reason (required)"
@@ -252,7 +254,7 @@ export function LinksTable({
                     type="text"
                   />
                   <button
-                    className="rounded-lg border border-brass px-3 py-1.5 text-xs font-bold text-brass disabled:cursor-not-allowed disabled:opacity-50"
+                    className="min-h-11 rounded-lg border border-brass px-3 py-1.5 text-label font-semibold text-brass disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isPending}
                     type="submit"
                   >
@@ -265,7 +267,7 @@ export function LinksTable({
         })}
       </ul>
 
-      <p className="text-sm text-ink-faint">
+      <p className="text-small text-ink-faint">
         Linking connects a member&rsquo;s account to a player card so they earn attendance coins and
         can edit that card; it does <strong>not</strong> back-pay coins for sessions before the
         link. <strong>Adjust coins</strong>

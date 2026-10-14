@@ -37,15 +37,15 @@ export function ClaimInviteForm({ token }: { token: string }) {
           type="password"
         />
       </label>
-      <p className="text-sm text-ink-faint">
+      <p className="text-small text-ink-faint">
         Username: 3–30 letters, numbers, or underscores — you&rsquo;ll sign in with it. Password: at
         least 12 characters. Your invite can only be claimed once.
       </p>
       {state.error && (
-        <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+        <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
       )}
       <button
-        className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-bold text-ink-on-accent disabled:bg-line disabled:text-ink-faint"
+        className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-semibold text-ink-on-accent disabled:bg-line disabled:text-ink-faint"
         disabled={isPending}
         type="submit"
       >

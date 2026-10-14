@@ -15,16 +15,16 @@ import {
 
 const PANEL = "rounded-2xl border border-line/60 bg-panel/60 p-5 sm:p-6";
 const SECONDARY =
-  "inline-flex min-h-11 items-center justify-center rounded-[10px] border border-line bg-panel/70 px-3.5 text-sm font-black text-ink hover:border-brass disabled:opacity-45";
+  "inline-flex min-h-11 items-center justify-center rounded-[10px] border border-line bg-panel/70 px-3.5 text-small font-extrabold text-ink hover:border-brass disabled:opacity-45";
 
 function Feedback({ state }: { state: AdminActionState }) {
   if (!state) return null;
   return state.ok ? (
-    <p className="text-sm font-bold text-moss" role="status">
+    <p className="text-small font-semibold text-moss" role="status">
       {state.message}
     </p>
   ) : (
-    <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick" role="alert">
+    <p className="rounded-xl bg-brick-bg p-3 text-small text-brick" role="alert">
       {state.error}
     </p>
   );
@@ -36,25 +36,25 @@ export function MidweekSwitch({ enabled }: { enabled: boolean }) {
   return (
     <section aria-labelledby="midweek-switch-h" className={`${PANEL} grid gap-3`}>
       <form action={action} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
-        <h2 className="text-lg font-black" id="midweek-switch-h">
+        <h2 className="text-heading font-semibold" id="midweek-switch-h">
           {enabled ? "Running" : "Paused"}
         </h2>
         <input name="enabled" type="hidden" value={enabled ? "false" : "true"} />
         <button
           aria-checked={enabled}
           aria-labelledby="midweek-switch-h"
-          className={`relative h-8 w-[52px] flex-none rounded-full disabled:opacity-60 ${enabled ? "bg-moss" : "bg-line"}`}
+          className={`relative min-h-11 w-[52px] flex-none rounded-full disabled:opacity-60 ${enabled ? "bg-moss" : "bg-line"}`}
           disabled={pending}
           role="switch"
           type="submit"
         >
           <span
             aria-hidden="true"
-            className={`absolute top-1 h-6 w-6 rounded-full transition-[left] ${enabled ? "left-6 bg-[#0f160b]" : "left-1 bg-ink-dim"}`}
+            className={`absolute top-1/2 -mt-3 h-6 w-6 rounded-full transition-[left] ${enabled ? "left-6 bg-[#0f160b]" : "left-1 bg-ink-dim"}`}
           />
         </button>
       </form>
-      <p className="text-[13px] leading-relaxed text-ink-dim">
+      <p className="text-small leading-relaxed text-ink-dim">
         While running, a new tournament opens as soon as the last one ends. Pausing stops new ones;
         a tournament that is already open still plays unless you void it.
       </p>
@@ -70,7 +70,7 @@ export function MidweekRehearsalPanel() {
   return (
     <section aria-labelledby="rehearsal-h" className={`${PANEL} grid gap-4`}>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-        <h2 className="text-lg font-black" id="rehearsal-h">
+        <h2 className="text-heading font-semibold" id="rehearsal-h">
           Rehearsal
         </h2>
         <form action={action}>
@@ -79,13 +79,13 @@ export function MidweekRehearsalPanel() {
           </button>
         </form>
       </div>
-      <p className="text-[13px] leading-relaxed text-ink-dim">
+      <p className="text-small leading-relaxed text-ink-dim">
         Runs the engine on the squads saved right now plus auto squads, with a throwaway seed.
         Writes nothing and pays nothing.
         {rehearsal && <> Last run {formatSavedAt(rehearsal.ran_at)}.</>}
       </p>
       {state && !state.ok && (
-        <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick" role="alert">
+        <p className="rounded-xl bg-brick-bg p-3 text-small text-brick" role="alert">
           {state.error}
         </p>
       )}
@@ -103,21 +103,19 @@ export function MidweekRehearsalPanel() {
               ],
             ].map(([label, value, note]) => (
               <div key={label}>
-                <dt className="text-[10.4px] font-extrabold tracking-[0.14em] text-ink-faint uppercase">
-                  {label}
-                </dt>
-                <dd className="mt-0.5 text-[22px] font-black tabular-nums">
+                <dt className="text-label font-semibold text-ink-faint">{label}</dt>
+                <dd className="mt-0.5 text-body font-extrabold tabular-nums">
                   {value}
-                  <small className="text-xs font-bold text-ink-faint">{note}</small>
+                  <small className="text-label font-semibold text-ink-faint">{note}</small>
                 </dd>
               </div>
             ))}
           </dl>
           {rehearsal.rounds && (
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-[13.5px]">
+              <table className="w-full border-collapse text-small">
                 <thead>
-                  <tr className="border-b border-line text-left text-[10.4px] font-extrabold tracking-[0.12em] text-ink-faint uppercase">
+                  <tr className="border-b border-line text-left text-label font-semibold text-ink-faint">
                     <th className="py-1.5 pr-2" scope="col">
                       Round
                     </th>
@@ -156,19 +154,19 @@ export function MidweekRehearsalPanel() {
               </table>
             </div>
           )}
-          <p className="text-[13px] text-ink-dim">
+          <p className="text-small text-ink-dim">
             <b className="text-ink">Auto squads:</b>{" "}
             {rehearsal.auto_managers.length > 0
               ? `${rehearsal.auto_managers.join(", ")}.`
               : "none."}
           </p>
           {rehearsal.champion && (
-            <p className="text-[13px] text-ink-dim">
+            <p className="text-small text-ink-dim">
               <b className="text-ink">Rehearsal champion:</b> {rehearsal.champion.name}.{" "}
               <span className="text-ink-faint">Throwaway seed, so not tonight&rsquo;s result.</span>
             </p>
           )}
-          <pre className="overflow-x-auto rounded-xl border border-line bg-board-deep px-3.5 py-3 font-mono text-xs leading-[1.7] whitespace-pre-wrap text-ink-dim">
+          <pre className="overflow-x-auto rounded-xl border border-line bg-board-deep px-3.5 py-3 font-mono text-label leading-[1.7] whitespace-pre-wrap text-ink-dim">
             {rehearsal.warnings.length === 0 ? (
               <>
                 <span className="text-moss">ok</span>
@@ -208,7 +206,7 @@ export function MidweekVoidForm({
     return (
       <div className="grid gap-3">
         <Feedback state={state} />
-        <Link className="text-sm font-bold text-brass hover:underline" href="/admin/midweek">
+        <Link className="text-small font-semibold text-brass hover:underline" href="/admin/midweek">
           &larr; Back to Midweek
         </Link>
       </div>
@@ -219,12 +217,12 @@ export function MidweekVoidForm({
       <input name="tournament_id" type="hidden" value={tournamentId} />
       <input name="lock_at" type="hidden" value={lockAt} />
       <div className="grid gap-1.5">
-        <label className="text-[13px] font-extrabold" htmlFor="void-note">
+        <label className="text-small font-extrabold" htmlFor="void-note">
           Reason, shown to every member
         </label>
         <textarea
           aria-describedby="void-note-hint"
-          className="min-h-24 w-full resize-y rounded-xl border border-line bg-board-deep p-3 text-[15px] text-ink"
+          className="min-h-24 w-full resize-y rounded-xl border border-line bg-board-deep p-3 text-small text-ink"
           id="void-note"
           maxLength={VOID_NOTE_MAX}
           minLength={3}
@@ -233,11 +231,11 @@ export function MidweekVoidForm({
           required
           value={note}
         />
-        <p className="text-xs text-ink-faint" id="void-note-hint">
+        <p className="text-label text-ink-faint" id="void-note-hint">
           Up to {VOID_NOTE_MAX} characters. {note.trim().length} used.
         </p>
       </div>
-      <label className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-2.5 text-sm text-ink-dim">
+      <label className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-2.5 text-small text-ink-dim">
         <input
           className="mt-0.5 h-[22px] w-[22px] accent-brick"
           name="confirm"
@@ -249,14 +247,14 @@ export function MidweekVoidForm({
       <Feedback state={state} />
       <div className="flex flex-wrap gap-2.5">
         <button
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brick px-5 text-[15px] font-black text-[#1d0e08] disabled:opacity-45"
+          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brick px-5 text-small font-extrabold text-[#1d0e08] disabled:opacity-45"
           disabled={pending}
           type="submit"
         >
           {pending ? "Voiding…" : `Void ${weekLabel}`}
         </button>
         <Link
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-panel/70 px-5 text-[15px] font-black text-ink hover:border-brass"
+          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line bg-panel/70 px-5 text-small font-extrabold text-ink hover:border-brass"
           href="/admin/midweek"
         >
           Cancel

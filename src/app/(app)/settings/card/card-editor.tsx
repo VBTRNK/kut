@@ -1,5 +1,7 @@
 "use client";
 
+import { InfoLink } from "@/components/ui/links";
+
 import {
   startTransition,
   useActionState,
@@ -40,9 +42,9 @@ type CardEditorProps = {
 function Feedback({ state }: { state: CardActionState }) {
   if (!state) return null;
   return state.ok ? (
-    <p className="rounded-xl bg-moss-bg p-3 text-sm font-bold text-moss">{state.message}</p>
+    <p className="rounded-xl bg-moss-bg p-3 text-small font-semibold text-moss">{state.message}</p>
   ) : (
-    <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+    <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
   );
 }
 
@@ -253,26 +255,22 @@ export function CardEditor({
     <div className="space-y-8">
       <section className="space-y-4 rounded-2xl border border-line bg-panel p-5">
         <div>
-          <h2 className="text-base font-extrabold">Archetype</h2>
-          <p className="mt-1 text-sm text-ink-faint">
-            This reshapes the six stats on your <strong>{displayName}</strong> card. It does not
-            change your OVR. Saving recalculates every stat. You can change it once every{" "}
-            {ARCHETYPE_CHANGE_COOLDOWN_DAYS} days. In Midweek Madness a change counts from the next
-            week: the week already open plays the archetype you had when it opened.
+          <h2 className="text-heading font-semibold">Archetype</h2>
+          <p className="mt-1 text-small text-ink-dim">
+            Change your stats once every {ARCHETYPE_CHANGE_COOLDOWN_DAYS} days. OVR stays the same;
+            Midweek uses your new archetype from the next week.
           </p>
-          <p className="mt-2 text-sm text-ink-faint">
-            Players with no linked account get a new archetype every week. Yours is linked, so it
-            stays as you set it.
-          </p>
+          <InfoLink href="/how-it-works#archetypes">How archetypes work</InfoLink>
         </div>
         {nextArchetypeChange && (
-          <p className="rounded-xl border border-line bg-board-deep/60 p-3 text-sm text-ink-dim">
+          <p className="rounded-xl border border-line bg-board-deep/60 p-3 text-small text-ink-dim">
             You changed your archetype recently. You can change it again from{" "}
             <strong className="text-ink">{nextArchetypeChange}</strong>.
           </p>
         )}
         <form className="space-y-3" onSubmit={submitArchetype}>
           <select
+            aria-label="Archetype"
             className={`${fieldClass} disabled:cursor-not-allowed disabled:text-ink-faint`}
             disabled={nextArchetypeChange !== null}
             name="archetype"
@@ -286,7 +284,7 @@ export function CardEditor({
             ))}
           </select>
           <button
-            className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-bold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
+            className="min-h-12 w-full rounded-xl border border-line bg-panel px-4 py-3 text-body font-semibold text-ink disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
             disabled={archetypePending || nextArchetypeChange !== null}
             type="submit"
           >
@@ -298,14 +296,20 @@ export function CardEditor({
 
       <section className="space-y-4 rounded-2xl border border-line bg-panel p-5">
         <div>
-          <h2 className="text-base font-extrabold">Card photo</h2>
-          <p className="mt-1 text-sm text-ink-faint">
+          <h2 className="text-heading font-semibold">Card photo</h2>
+          <p className="mt-1 text-small text-ink-faint">
             Upload a photo, then drag to reposition and use the slider to zoom. It&rsquo;s saved as
             a square.
           </p>
         </div>
 
-        <input accept="image/*" className={fieldClass} onChange={onFileChange} type="file" />
+        <input
+          aria-label="Card photo"
+          accept="image/*"
+          className={fieldClass}
+          onChange={onFileChange}
+          type="file"
+        />
 
         {fileUrl && (
           <div className="space-y-3">
@@ -325,7 +329,7 @@ export function CardEditor({
                 src={fileUrl}
               />
             </div>
-            <label className="block text-sm font-semibold">
+            <label className="block text-small font-semibold">
               Zoom
               <input
                 className="mt-1 w-full"
@@ -338,7 +342,7 @@ export function CardEditor({
               />
             </label>
             <button
-              className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-bold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
+              className="min-h-12 w-full rounded-xl border border-line bg-panel px-4 py-3 text-body font-semibold text-ink disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
               disabled={!natural || isUploading || isSubmittingPhoto}
               onClick={onSavePhoto}
               type="button"
@@ -349,13 +353,13 @@ export function CardEditor({
         )}
 
         {uploadError && (
-          <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{uploadError}</p>
+          <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{uploadError}</p>
         )}
         <Feedback state={photoState} />
 
         {currentPhotoUrl && !fileUrl && (
           <div className="space-y-3">
-            <p className="text-sm font-semibold text-ink-faint">Current photo</p>
+            <p className="text-small font-semibold text-ink-faint">Current photo</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt={`${displayName}'s current card photo`}
@@ -363,7 +367,7 @@ export function CardEditor({
               src={currentPhotoUrl}
             />
             <button
-              className="min-h-11 rounded-xl border border-line px-4 text-sm font-bold text-ink-dim hover:border-brick hover:text-brick disabled:text-ink-faint"
+              className="min-h-11 rounded-xl border border-line px-4 text-small font-semibold text-ink-dim hover:border-brick hover:text-brick disabled:text-ink-faint"
               disabled={removePending || isSubmittingPhoto}
               onClick={onRemovePhoto}
               type="button"

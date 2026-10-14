@@ -1,3 +1,4 @@
+import { PAGE, COLUMN, PageHeader, CardGrid } from "@/components/ui/page";
 import Link from "next/link";
 import { FilterBar } from "@/components/filter-bar";
 import { ARCHETYPES, ARCHETYPE_LABELS, isArchetype } from "@/game/archetypes";
@@ -77,28 +78,24 @@ export default async function PlayerDirectoryPage({ searchParams }: PlayerDirect
   ]);
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-6xl space-y-8 py-4 sm:py-8">
+    <main className={PAGE}>
+      <section className={`${COLUMN} lg:max-w-6xl`}>
         <CompeteTabs />
-        <header className="space-y-3">
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            FLUT roster
-          </p>
-          <h1 className="display text-3xl sm:text-6xl">Players</h1>
-          <p className="hidden max-w-2xl text-base leading-relaxed text-ink-dim sm:block">
-            Every collectible TFH player and their current Live Card. Tap a card for the full
-            profile.
-          </p>
-          <p className="text-xs font-bold text-ink-faint">
-            {players.length} {players.length === 1 ? "player" : "players"}
-          </p>
-        </header>
+        <PageHeader
+          title="Players"
+          sub={`${players.length} ${players.length === 1 ? "Player" : "Players"}`}
+        />
 
         <FilterBar
+          sheetOnly
+          result="Show Players"
+          summary={
+            SORT_OPTIONS.find((option) => option.value === query.sort)?.label ?? "Highest OVR first"
+          }
           basePath="/players"
           chips={{ name: "rarity", allLabel: "All tiers", options: TIER_OPTIONS }}
           defaultSort="ovr"
-          searchPlaceholder="Search player"
+          searchPlaceholder="Search Players"
           selects={[
             {
               name: "archetype",
@@ -123,7 +120,7 @@ export default async function PlayerDirectoryPage({ searchParams }: PlayerDirect
             No players match these filters.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 lg:gap-6">
+          <CardGrid>
             {players.map((player) => {
               const cardPlayer = toLiveCardPlayer(player, injuredPlayerIds, photoUrls);
               return (
@@ -138,7 +135,7 @@ export default async function PlayerDirectoryPage({ searchParams }: PlayerDirect
                 </Link>
               );
             })}
-          </div>
+          </CardGrid>
         )}
       </section>
     </main>

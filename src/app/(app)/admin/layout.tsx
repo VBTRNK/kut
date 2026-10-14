@@ -8,8 +8,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   return (
     <>
       <div className="border-b border-line/40 bg-board-deep/80">
-        <div className="mx-auto max-w-6xl px-5 py-4 sm:px-10">
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.24em] text-brass">Admin</p>
+        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-8">
+          <p className="mb-3 text-label font-semibold text-brass">Admin</p>
           <AdminTabs />
         </div>
       </div>

@@ -1957,11 +1957,11 @@ test.describe("Home and Messages (F4, ADR-114)", () => {
       await signIn(page, "release_member");
       await page.goto("/messages");
       await expect(page.getByRole("heading", { level: 1, name: "Messages" })).toBeVisible();
-      await expect(page.getByText(/^\d+ new · opening one marks it read$/)).toBeVisible();
+      await expect(page.getByText(/^\d+ new$/)).toBeVisible();
       const today = page.getByRole("region", { name: "Today" });
       const result = today.locator(`a[href="/messages/${resultId}/open"]`);
       await expect(result).toContainText("New");
-      await expect(result).toContainText("Bracket →");
+      await expect(result).not.toContainText("Bracket →");
       // A club notice has nowhere to go: no arrow, and opening it only marks it read.
       const notice = today.locator(`a[href="/messages/${noticeId}/open"]`);
       await expect(notice).toContainText("New");
@@ -1972,7 +1972,7 @@ test.describe("Home and Messages (F4, ADR-114)", () => {
       await expect(page).toHaveURL(new RegExp(`/midweek/${COMPLETED_WEEK}$`));
       await page.goto("/messages");
       await expect(result).not.toContainText("New");
-      await expect(result).toContainText("Bracket →");
+      await expect(result).not.toContainText("Bracket →");
 
       await notice.click();
       await expect(page).toHaveURL(/\/messages$/);

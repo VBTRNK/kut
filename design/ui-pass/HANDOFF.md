@@ -966,3 +966,13 @@ rule in `docs/decisions.md`, in the same PR:
 
 No migration. Gating is unchanged: every page reads what today's pages read,
 at the same moments.
+
+### S10 implementation (ADR-160)
+
+DR5-21–24/26 and the pages without mocks use the foundations. Report windows,
+provisional Chronicle aggregates and the opt-out confirmation remain. Crossings
+stack name and tier tags below 360 px to keep long names readable. Players uses
+`Show Players`, with no numeric preview of unapplied filters. The shared crest
+keeps Q5's own type; the sealed starter pack uses the approved 4:3 surface.
+Admin keeps its existing workflows and warnings, with the type scale and 44 px
+controls. S11 owns the FAQ rewrite and the final type/copy sweep.

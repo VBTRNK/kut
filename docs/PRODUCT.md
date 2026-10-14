@@ -1,39 +1,25 @@
 # FLUT product reference
 
-Current behaviour and code, per area. Read the section you need. Old
-`BUILD_SPEC §N` and ADR-001–141 are at `docs-archive-2026-10`:
-
-```powershell
-git show docs-archive-2026-10:docs/BUILD_SPEC.md | rg "^## 44\."
-git show docs-archive-2026-10:docs/archive/decisions-2026.md | rg "ADR-099"
-```
-
-New ADRs: `docs/decisions.md`. Open work: `gh issue list`.
+Current behaviour and code, per area. Read only the section you need.
+`BUILD_SPEC §N` and ADR-001–141 live at tag `docs-archive-2026-10`;
+new ADRs are in `docs/decisions.md`, open work in GitHub issues.
 
 Ground rules for every area:
 
-- **SQL is authoritative.** Every economy and rating rule runs in Postgres
-  functions in schema `kut` (`supabase/migrations/`, where the latest
-  `create or replace` wins). The browser never writes `wallets`, `user_cards`
-  or `market_listings`. `src/game/` holds constants and display helpers only.
-  Only the Midweek engine has a TS twin, checked against golden vectors
-  (ADR-064).
-- **Part L** (`docs/INVARIANTS.md`, items 1–28) lists the invariants. Each area
-  below names the items that apply. Changing one needs an ADR, a spec change and
-  its own PR.
-- **Values** (§145, `src/game/config.ts`, `ECONOMY` in `src/game/economy.ts`,
-  `src/game/midweek/config.ts`) each mirror a SQL literal. Change the
-  migration, the constant and §145 together.
-- **Reads** go through views. Member-wide views are definer projections gated
-  on `kut.is_active_member()` (ADR-079); never flip them to `security_invoker`
-  (KB-013). Tests: pgTAP in `supabase/tests/database/`, races in
-  `tests/integration/`.
-- **No scheduler.** Due work (survey finalization, Midweek steps, offer expiry)
-  runs lazily from page visits through idempotent `for update skip locked`
-  workers (ADR-061, ADR-098).
-- **UI** (ADR-153): six type roles, `src/components/ui/`, sizes checked by
-  `policy:check`; `/how-it-works` has topic anchors. Shared nav,
-  card lists, filters and album controls disable prefetch (ADR-157).
+- **SQL is authoritative.** Economy and ratings run in schema `kut`, never
+  client writes. `src/game/` holds display constants/helpers; only Midweek has
+  a TS engine twin checked against golden vectors (ADR-064).
+- **Part L** (`docs/INVARIANTS.md`, 1–28): each area names its invariants.
+  A change needs an ADR, a spec update and its own PR.
+- **Values** in `src/game/{config,economy,midweek/config}.ts` mirror SQL;
+  change their migration and constants together.
+- **Reads:** member projections require `kut.is_active_member()` (ADR-079);
+  never flip to `security_invoker` (KB-013). Tests: `supabase/tests/database/`
+  and `tests/integration/`.
+- **No scheduler.** Surveys, Midweek and offer expiry run from page visits via
+  idempotent `for update skip locked` workers (ADR-061, ADR-098).
+- **UI:** six roles in `src/components/ui/`, checked by `policy:check` (ADR-153).
+  How it works has anchors; nav/card lists/filters disable prefetch (ADR-157).
 
 | If you are changing… | Read |
 | --- | --- |
@@ -72,6 +58,8 @@ Ground rules for every area:
   album lenses and Manage's tier/sort. Trading has wanted rows, an add sheet
   and copy controls; summary errors omit counts/bar (#309). Cards have
   rating insets, listing/discard blocks; history is on the Player page.
+- Standings has ink ranks and a You tag; phones show club names, with Cards
+  and Players columns from `sm`. Club Value uses breakdown blocks (ADR-160).
 - Packs use a confirmation sheet; summaries put tags below cards (ADR-158).
 - The starter reveal on `/welcome` is cosmetic. The grant already happened in
   `claim_invitation` (ADR-031).
@@ -206,7 +194,8 @@ Ground rules for every area:
 - The **Chronicle** (`/chronicle`, `/chronicle/[week]`) has one issue per
   football week (ADR-049). It shows finalized per-player results. While a
   report is open it shows only aggregate progress, marked provisional
-  (ADR-060). `/sessions` redirects there.
+  (ADR-060). The index has a latest block and earlier link rows; issues use
+  session blocks and tier tags (ADR-160). `/sessions` redirects there.
 
 **Part L:** 5, 9, 15, 16, 17, 21.
 
@@ -419,6 +408,8 @@ The `edition_type` check still lacks a `groundmaster` value.
   `pack_opened`, `admin_notice`, `bibs_bonus`, `trade_offer`,
   `trade_response`, `session_report`, `session_results`, `report_correction`,
   `kudos_awarded`, `injury_check_in`, `midweek_result`.
+- Message rows use a title, body/time and New tag, grouped by day; no event
+  kicker or inline destination label (ADR-160).
 - Every message opens its subject through `/messages/[id]/open`, which also
   marks it read (ADR-114).
 - **Home:**
@@ -453,6 +444,7 @@ never misses one side's message.
   - **Account recovery** (`/admin/accounts`): audited password resets
     (ADR-011). **Pack health** (`/admin/economy`). **Midweek**: switch,
     rehearsal, void.
+- Admin uses the shared type scale and surfaces (ADR-160).
 - Admin work should stay tiny (§3.7). Midweek needs none weekly.
 - A superadmin may grant coins to their own wallet; `admin_adjust_wallet`
   refuses the caller's own (ADR-052).
@@ -478,6 +470,8 @@ never misses one side's message.
   - Midweek shows the five entered cards from the lock. Entry is the default
     and the opt-out is the consent (ADR-091);
   - an owner count appears only at 3 or more owners.
+- Settings uses club/Midweek blocks and navigation rows; sign-in uses Fields.
+  Players has search and an all-width Filter sheet (ADR-160).
 - **Photos.** A member sets their own Player's photo and archetype on
   `/settings/card` (ADR-027). Photos live in a private Storage bucket; reads
   require active membership (ADR-152). App-issued signed URLs last up to one

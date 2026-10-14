@@ -44,10 +44,10 @@ export default async function AccountsPage() {
   );
 
   return (
-    <main className="board-ground min-h-screen p-6 text-ink sm:p-10">
+    <main className="board-ground min-h-screen px-4 pt-4 pb-8 text-body text-ink sm:px-8 sm:pt-8">
       <section className="mx-auto max-w-xl space-y-8">
         <header className="space-y-3">
-          <h1 className="text-4xl font-black tracking-tight">Account recovery</h1>
+          <h1 className="font-serif text-title font-normal sm:text-title-lg">Account recovery</h1>
           <p className="text-ink-dim">
             Set a temporary password for a member who cannot sign in. Every attempt is recorded;
             passwords are never logged.
@@ -56,10 +56,10 @@ export default async function AccountsPage() {
         <ResetPasswordForm accounts={accounts} />
         {(eventsResponse.data ?? []).length > 0 && (
           <section className="space-y-3 border-t border-panel-2 pt-8">
-            <h2 className="display text-2xl">Recent reset activity</h2>
+            <h2 className="font-semibold text-heading">Recent reset activity</h2>
             <ul className="space-y-2">
               {(eventsResponse.data ?? []).map((event) => (
-                <li className="rounded-xl bg-panel p-4 text-sm text-ink-dim" key={event.id}>
+                <li className="rounded-xl bg-panel p-4 text-small text-ink-dim" key={event.id}>
                   <p className="font-semibold text-ink">
                     {displayNameByUserId.get(event.target_user_id) ?? "Unknown member"} ·{" "}
                     {event.status}

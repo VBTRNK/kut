@@ -282,7 +282,7 @@ export default async function HowItWorksPage() {
           </p>
         </Section>
 
-        <Section title="6. Archetypes reshape the six stats">
+        <Section id="archetypes" title="6. Archetypes reshape the six stats">
           <p>
             Your archetype doesn&rsquo;t change your OVR &mdash; it redistributes it across the six
             attributes. There&rsquo;s one for each style of player, including a Goalkeeper profile.

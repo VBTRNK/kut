@@ -1,4 +1,6 @@
-import Link from "next/link";
+import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
+import { Block } from "@/components/ui/block";
+import { InfoLink } from "@/components/ui/links";
 import { notFound } from "next/navigation";
 import { archetypeLabel } from "@/game/archetypes";
 import { AttributeBars } from "@/components/card-stats";
@@ -128,48 +130,40 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
   const cardPlayer = toLiveCardPlayer(player, injuredPlayerIds, photoUrls);
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-5xl space-y-8 py-4 sm:py-8">
-        <Link
-          prefetch={false}
-          className="text-sm font-bold text-brass hover:underline"
-          href="/players"
-        >
-          &larr; Players
-        </Link>
+    <main className={PAGE}>
+      <section className={`${COLUMN} lg:max-w-5xl`}>
+        <PageHeader
+          title={player.display_name}
+          back={{ href: "/players", label: "Players" }}
+          sub={`${archetypeLabel(player.archetype)} · ${player.live_ovr} OVR · ${player.rarity_tier}`}
+        />
 
-        <div className="grid gap-10 md:grid-cols-[minmax(240px,330px)_minmax(0,1fr)] md:items-start lg:gap-16">
-          <div>
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[minmax(240px,330px)_minmax(0,1fr)] md:items-start sm:gap-8">
+          <div className="min-w-0">
             <LiveCard size="detail" player={cardPlayer} />
           </div>
 
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-                Live card &middot; <span className="capitalize">{player.rarity_tier}</span>
-              </p>
-              <h1 className="display text-3xl sm:text-6xl">{player.display_name}</h1>
-              <p className="text-base text-ink-dim">
-                {archetypeLabel(player.archetype)} &middot; {player.live_ovr} OVR &middot; rises and
-                falls with published sessions
-              </p>
-            </div>
-
-            <AttributeBars player={player} />
-
-            <hr className="border-line/40" />
-            <RatingHistory
-              goalsByWeek={goalsByWeek}
-              playerName={player.display_name}
-              snapshots={snapshots}
-            />
+          <div className="min-w-0 space-y-6 sm:space-y-8">
+            <Block title="Attributes">
+              <AttributeBars player={player} />
+            </Block>
+            <Block title="Rating history">
+              <RatingHistory
+                goalsByWeek={goalsByWeek}
+                playerName={player.display_name}
+                snapshots={snapshots}
+              />
+            </Block>
 
             {ratingBreakdown && (
-              <RatingBreakdownStory
-                breakdown={ratingBreakdown}
-                contributions={formContributions}
-                playerName={player.display_name}
-              />
+              <div>
+                <RatingBreakdownStory
+                  breakdown={ratingBreakdown}
+                  contributions={formContributions}
+                  playerName={player.display_name}
+                />
+                <InfoLink href="/how-it-works#cards">How ratings move</InfoLink>
+              </div>
             )}
           </div>
         </div>

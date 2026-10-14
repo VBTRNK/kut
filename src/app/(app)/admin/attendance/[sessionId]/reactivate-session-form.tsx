@@ -15,8 +15,8 @@ export function ReactivateSessionForm({ sessionId }: { sessionId: string }) {
     >
       <input name="sessionId" type="hidden" value={sessionId} />
       <div className="space-y-1">
-        <h2 className="text-xl font-bold text-moss">Reactivate this session</h2>
-        <p className="text-sm leading-6 text-moss/85">
+        <h2 className="text-heading font-semibold text-moss">Reactivate this session</h2>
+        <p className="text-small leading-6 text-moss/85">
           Its current attendance will count again and Live Ratings will rebuild immediately.
         </p>
       </div>
@@ -32,10 +32,10 @@ export function ReactivateSessionForm({ sessionId }: { sessionId: string }) {
         />
       </label>
       {state.error && (
-        <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+        <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
       )}
       <button
-        className="min-h-12 w-full rounded-xl bg-moss px-4 py-3 font-bold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line"
+        className="min-h-12 w-full rounded-xl bg-moss px-4 py-3 font-semibold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line"
         disabled={isPending}
         type="submit"
       >
