@@ -79,19 +79,22 @@ export default async function WantedPage() {
     wantedResponse.error ||
     availabilityResponse.error ||
     editionsResponse.error ||
-    tradeResponse.error ||
-    collectionResponse.error ||
-    rosterResponse.error
+    tradeResponse.error
   ) {
     console.error("trading preferences read failed", {
       wanted: wantedResponse.error?.message,
       availability: availabilityResponse.error?.message,
       editions: editionsResponse.error?.message,
       copies: tradeResponse.error?.message,
+    });
+    throw new Error("Could not load trading preferences.");
+  }
+  const summaryAvailable = !collectionResponse.error && !rosterResponse.error;
+  if (!summaryAvailable) {
+    console.error("trading collection summary read failed", {
       collection: collectionResponse.error?.message,
       roster: rosterResponse.error?.message,
     });
-    throw new Error("Could not load trading preferences.");
   }
 
   const wanted = (wantedResponse.data ?? []) as Wanted[];
@@ -121,9 +124,11 @@ export default async function WantedPage() {
       <div className={`${COLUMN} lg:max-w-5xl`}>
         <CollectionHeader
           mode="trading"
-          cardCount={owned.length}
-          uniquePlayers={new Set(owned.map((card) => card.player_id)).size}
-          totalPlayers={roster.length}
+          cardCount={summaryAvailable ? owned.length : null}
+          uniquePlayers={
+            summaryAvailable ? new Set(owned.map((card) => card.player_id)).size : null
+          }
+          totalPlayers={summaryAvailable ? roster.length : null}
           clubValue={clubValueResponse.error ? null : (clubValueResponse.data?.club_value ?? null)}
           showArchetypeNudge={own?.archetype === "all_rounder"}
         />

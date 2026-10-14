@@ -68,10 +68,10 @@ Ground rules for every area:
 - Club Value (`/club/value`, Standings) is coins + owned discard value + 4× the
   discard value of the member's own linked Player. Duplicates of one edition
   count 100/20/5/0% (v3, ADR-056). Discard always pays in full.
-- Collection (ADR-158): one summary/bar and Album · Manage · Trading; album
-  lenses and Manage's tier/sort live in Filter at every width. Trading has
-  wanted rows, an add sheet and copy controls. Cards show rating insets,
-  listing and discard blocks; history is on the Player page.
+- Collection (ADR-158): summary/bar and Album · Manage · Trading; Filter holds
+  album lenses and Manage's tier/sort. Trading has wanted rows, an add sheet
+  and copy controls; summary errors omit counts/bar (#309). Cards have
+  rating insets, listing/discard blocks; history is on the Player page.
 - Packs use a confirmation sheet; summaries put tags below cards (ADR-158).
 - The starter reveal on `/welcome` is cosmetic. The grant already happened in
   `claim_invitation` (ADR-031).
