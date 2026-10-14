@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IconCoin } from "@/components/icons";
+import { CardGrid, COLUMN, PAGE, PageHeader } from "@/components/ui/page";
 import { FilterBar } from "@/components/filter-bar";
 import { SectionNav } from "@/components/ui/section-nav";
 import { LiveCard } from "@/components/live-card";
@@ -95,36 +95,19 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
   const marketTabs = buildMarketTabs(incomingOfferCount);
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-6xl space-y-8 py-4 sm:py-8">
-        <header className="space-y-3">
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            Transfer market
-          </p>
-          {/* "Market" everywhere — the tab, this heading and the back link from a
-              listing. The old "Buy Live Cards" named an action rather than a place,
-              and now sits above a tab that also says Buy (ADR-053). */}
-          <h1 className="display text-3xl sm:text-6xl">Market</h1>
-          <p className="hidden max-w-2xl text-base leading-relaxed text-ink-dim sm:block">
-            Buy now, or make a coin-and-card offer. Buy-now prices are paid in FLUT Coins; a 5% tax
-            is burned.
-          </p>
-        </header>
-
+    <main className={PAGE}>
+      <section className={`${COLUMN} lg:max-w-6xl`}>
+        <PageHeader title="Market" />
         <SectionNav label="Market" tabs={marketTabs} />
-
-        {/* The six controls used to stack full width on a phone (~352px), which
-            pushed the first listing below the fold; KB-008 cut that to a
-            two-column grid at ~232px. They now collapse to a Filters pill and a
-            sheet instead, so the bar costs one row at every width, and the price
-            bounds get the sheet's Apply button — the one control here that
-            genuinely wants a submit. */}
         <FilterBar
           basePath="/market"
+          sheetOnly
+          result="Show listings"
+          summary={`${listings.length} listings · ${query.sort === "price" ? "lowest price first" : query.sort === "ovr" ? "highest OVR first" : "newest first"}`}
           chips={{ name: "rarity", allLabel: "All tiers", options: TIER_OPTIONS }}
           defaultSort="newest"
           range={{ minName: "min", maxName: "max", minLabel: "Min", maxLabel: "Max" }}
-          searchPlaceholder="Search player"
+          searchPlaceholder="Search Players"
           sorts={SORT_OPTIONS}
           values={{
             q: query.q,
@@ -141,9 +124,7 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
             market.
           </p>
         ) : (
-          /* Two columns on a phone, matching Home's riser grid — one listing per
-             screen made the market unbrowsable on mobile (KB-006). */
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <CardGrid wide={4}>
             {listings.map((listing) => {
               const isOwnListing = listing.seller_id === user.id;
               const cardPlayer = toListedCardPlayer(listing, injuredPlayerIds, photoUrls);
@@ -166,14 +147,9 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
                         player={cardPlayer}
                       />
                     </Link>
-                    {/* Price rides the card: a market grid is scanned by price. */}
-                    <p className="absolute left-1/2 top-2.5 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-brass/55 bg-board-deep/90 px-3 py-1 text-xs font-black tabular-nums text-brass backdrop-blur-sm">
-                      <IconCoin aria-hidden="true" className="h-3 w-3" />
-                      {listing.price.toLocaleString()}
-                    </p>
                   </div>
 
-                  <p className="truncate text-[0.7rem] font-bold text-ink-faint">
+                  <p className="truncate text-small text-ink-dim">
                     Sold by {listing.seller_display_name}
                   </p>
 
@@ -181,7 +157,7 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
                   {ownership && <p className="sr-only">{ownership.accessibleText}</p>}
 
                   {isOwnListing ? (
-                    <p className="grid min-h-11 place-items-center rounded-xl border border-dashed border-line text-[0.65rem] font-black uppercase tracking-[0.12em] text-ink-faint">
+                    <p className="grid min-h-12 place-items-center rounded-xl border border-dashed border-line text-small text-ink-dim">
                       Your listing
                     </p>
                   ) : (
@@ -194,7 +170,7 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
                 </article>
               );
             })}
-          </div>
+          </CardGrid>
         )}
       </section>
     </main>

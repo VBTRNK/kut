@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/form";
 import { ECONOMY } from "@/game/economy";
 import { proposeOffer, type OfferState } from "./actions";
 
@@ -55,38 +57,27 @@ export function ProposeOfferForm({
   const nothingOffered = coins <= 0 && picked.size === 0;
 
   return (
-    <form
-      action={action}
-      className="space-y-3 rounded-xl border border-line bg-board/60 p-3 text-left"
-    >
+    <form action={action} className="grid gap-3 text-left">
       <input name="listingId" type="hidden" value={listingId} />
       {[...picked].map((cardId) => (
         <input key={cardId} name="cardId" type="hidden" value={cardId} />
       ))}
 
-      <div>
-        <label
-          className="block text-xs font-bold uppercase tracking-[0.12em] text-ink-faint"
-          htmlFor={`offer-coins-${listingId}`}
-        >
-          FLUT Coins
-        </label>
-        <input
-          className="mt-1 min-h-11 w-full rounded-lg border border-line bg-panel px-3 font-bold tabular-nums"
-          id={`offer-coins-${listingId}`}
-          min={0}
-          name="offeredCoins"
-          onChange={(event) => setCoinsInput(event.target.value)}
-          onFocus={(event) => event.target.select()}
-          step={1}
-          type="number"
-          value={coinsInput}
-        />
-      </div>
+      <Field
+        label="Coins"
+        id={`offer-coins-${listingId}`}
+        min={0}
+        name="offeredCoins"
+        onChange={(event) => setCoinsInput(event.target.value)}
+        onFocus={(event) => event.target.select()}
+        step={1}
+        type="number"
+        value={coinsInput}
+      />
 
       {offerableCards.length > 0 && (
         <fieldset className="space-y-1">
-          <legend className="text-xs font-bold uppercase tracking-[0.12em] text-ink-faint">
+          <legend className="text-small font-semibold">
             Add cards ({picked.size}/{ECONOMY.tradeOfferMaxCards})
           </legend>
           <div className="max-h-64 space-y-1 overflow-y-auto">
@@ -94,7 +85,7 @@ export function ProposeOfferForm({
               const checked = picked.has(card.card_id);
               return (
                 <label
-                  className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-2 py-1.5 text-sm ${
+                  className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-small ${
                     checked ? "border-brass bg-brass/10" : "border-line"
                   }`}
                   key={card.card_id}
@@ -107,7 +98,7 @@ export function ProposeOfferForm({
                     type="checkbox"
                   />
                   <span className="font-semibold">{card.display_name}</span>
-                  <span className="ml-auto text-xs text-ink-faint capitalize">
+                  <span className="ml-auto text-label text-ink-dim capitalize">
                     {card.ovr} · {card.rarity_tier}
                   </span>
                 </label>
@@ -118,19 +109,14 @@ export function ProposeOfferForm({
       )}
 
       {state.error && (
-        <p className="rounded-lg bg-brick-bg p-2 text-xs text-brick">{state.error}</p>
+        <p className="rounded-lg bg-brick-bg p-2 text-small text-brick">{state.error}</p>
       )}
 
-      <button
-        className="min-h-11 w-full rounded-lg bg-brass px-3 text-sm font-black text-ink-on-accent disabled:bg-line disabled:text-ink-faint"
-        disabled={pending || nothingOffered}
-        type="submit"
-      >
+      <Button kind="secondary" wide disabled={pending || nothingOffered} type="submit">
         {pending ? "Sending..." : "Send offer"}
-      </button>
-      <p className="text-[0.7rem] text-ink-faint">
-        Coins and cards are held in escrow until the seller responds or the offer expires after{" "}
-        {ECONOMY.tradeOfferExpiryHours}h.
+      </Button>
+      <p className="text-small text-ink-dim">
+        Coins and cards are held until the seller answers, or for {ECONOMY.tradeOfferExpiryHours} h.
       </p>
     </form>
   );

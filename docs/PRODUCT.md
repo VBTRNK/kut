@@ -99,28 +99,27 @@ Ground rules for every area:
 ## Market and trades
 
 **Behaviour.**
-- **Listings.** Buy-now only, 24 or 72 hours (ADR-072). The price must lie
-  within `get_listing_bounds`:
+- **Listings.** Buy-now, 24/72 hours (ADR-072). `get_listing_bounds` enforces:
   - minimum `max(1, floor(0.8 × discard))`;
   - maximum `max(100, ceil(5 × reference value))`;
-  - a listed card stays owned but cannot be discarded, re-listed or offered.
-- **Buying.** `buy_listing` is one locked transaction: debit the buyer, credit
-  the seller minus 5%, move the card, write `market_sales`, and send both
-  parties a message (ADR-019).
-- **Reference value.** The median of at least 5 sales in 14 days, clamped to
-  1–6× discard. Otherwise 1.5× discard.
+  - listed cards stay owned; no discard, re-list or offer.
+- **Buying.** `buy_listing` atomically debits the buyer, pays the seller minus
+  5%, moves the card, records the sale and notifies both (ADR-019).
+- **Reference value.** Median of ≥5 sales in 14 days, clamped to 1–6× discard;
+  otherwise 1.5× discard.
 - **Trade offers** (ADR-042, `/market/[listingId]`):
   - coins and/or up to 3 cards, escrowed when proposed, at most 10 active;
   - they expire after 12 h;
-  - on accept, the trade swaps atomically and the other offers are refunded;
+  - acceptance swaps atomically and refunds other offers;
   - accepted trades never enter `market_sales`.
-- **Wants.** Up to 100 private wants and 30 copies marked available (ADR-058).
-  A match shows only the owner's display name and a copyable prompt; there is
-  no matcher.
-- **Listing page.**
-  - An ownership chip shows how many copies of the Player and the edition you
-    own, counted across every collection copy (ADR-100, ADR-102).
-  - The discard value is shown as the price floor (ADR-103).
+- **Wants.** 100 private wants, 30 available copies (ADR-058); matches show
+  the owner's display name and a copyable prompt.
+- **UI** (ADR-159): Buy · Selling · Offers. Buy filters tier/price/sort in a
+  sheet. Selling rows show time left and offer counts; list/cancel stays on
+  the Collection card. Offers separates incoming/sent, highlighting one open
+  incoming. Listing details keep phone-pinned Buy,
+  escrow notice, discard value (ADR-103) and ownership across all copies
+  (ADR-100/102).
 
 **Part L:** 1, 2, 3, 4, 5, 20, 22, 23.
 
@@ -131,8 +130,8 @@ Ground rules for every area:
   `market_reference_value`, `set_card_want`, `set_trade_availability`.
 - Views: `active_market_listings` (has `seller_id` and `discard_value`),
   `my_trade_offers`, `my_wanted_cards`, `my_trade_cards`.
-- Races: `tests/integration/market-race.test.ts`, `trade-race.test.ts`.
-- `src/lib/market-ownership.ts`.
+- Races: `tests/integration/{market,trade}-race.test.ts`;
+  ownership: `src/lib/market-ownership.ts`.
 
 ## Ratings, Form and G+A
 

@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { IconSearch } from "@/components/icons";
 import { FilterSheet, ChoiceGroup } from "@/components/ui/filter-sheet";
 import { Toolbar, SearchField, FilterButton } from "@/components/ui/toolbar";
+import { Field } from "@/components/ui/form";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { buildFilterHref, countActiveFilters, type FilterValues } from "@/lib/filters";
 
@@ -52,6 +53,7 @@ export type FilterBarProps = {
   preserve?: FilterValues;
   /** Result line rendered under the bar, e.g. "12 of 48 shown". */
   summary?: string;
+  result?: string;
 };
 
 const fieldClass =
@@ -77,6 +79,7 @@ export function FilterBar({
   range,
   preserve,
   summary,
+  result = "Show cards",
 }: FilterBarProps) {
   const router = useRouter();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -208,7 +211,7 @@ export function FilterBar({
           onClose={() => setSheetOpen(false)}
           returnFocusRef={triggerRef}
           onClear={() => setDraft({})}
-          result="Show cards"
+          result={result}
           onApply={() => {
             setSheetOpen(false);
             router.push(
@@ -230,6 +233,37 @@ export function FilterBar({
               options={[{ value: "", label: chips.allLabel }, ...chips.options]}
               onChange={(value) => setDraft({ ...draft, [chips.name]: value })}
             />
+          )}
+          {(selects ?? []).map((select) => (
+            <ChoiceGroup
+              key={select.name}
+              legend={select.anyLabel}
+              name={select.name}
+              options={[{ value: "", label: select.anyLabel }, ...select.options]}
+              value={draft[select.name] ?? ""}
+              onChange={(value) => setDraft({ ...draft, [select.name]: value })}
+            />
+          ))}
+          {range && (
+            <fieldset className="grid gap-2">
+              <legend className="pb-2 text-small font-semibold">Price</legend>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  [range.minName, range.minLabel],
+                  [range.maxName, range.maxLabel],
+                ].map(([name, label]) => (
+                  <Field
+                    key={name}
+                    label={label}
+                    min={0}
+                    step={1}
+                    type="number"
+                    value={draft[name] ?? ""}
+                    onChange={(event) => setDraft({ ...draft, [name]: event.target.value })}
+                  />
+                ))}
+              </div>
+            </fieldset>
           )}
           <ChoiceGroup
             legend="Sort"
