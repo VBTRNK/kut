@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path to extensions,kut,public;
-select plan(52);
+select plan(54);
 
 select is((select price from kut.pack_definitions where slug='tfh-pack'),250::bigint,'basic pack price is exactly 250');
 select has_function('kut','open_pack',array['text','bigint','uuid'],'pack opening requires an expected price');
@@ -62,6 +62,20 @@ select is((select state from kut.card_wants where user_id='20000000-0000-4000-80
 update kut.seasons set is_active=false where is_active;
 insert into kut.seasons(id,name,starts_on,is_active) values('20000000-0000-4000-8000-000000000040','Reports Test',current_date-14,true);
 update kut.season_rating_rules set v2_starts_week=date_trunc('week',current_date)::date where season_id='20000000-0000-4000-8000-000000000040';
+
+-- Chronicle aggregates across seasons, including unrelated existing weekly goals.
+insert into kut.seasons(id,name,starts_on,is_active) values('20000000-0000-4000-8000-000000000060','Unrelated Reports Season',current_date-14,false);
+insert into kut.match_sessions(id,season_id,session_date,session_type,status,published_at,rating_rules_version)
+values('20000000-0000-4000-8000-000000000061','20000000-0000-4000-8000-000000000060',current_date,'other','published',now(),1);
+insert into kut.attendance(session_id,player_id,goals)
+values('20000000-0000-4000-8000-000000000061','20000000-0000-4000-8000-000000000013',7);
+set local role service_role;
+create temp table t_chronicle_baseline as
+select coalesce((select goal_count from kut.chronicle_weeks where week_start=date_trunc('week',current_date)::date),0) as goal_count;
+grant select on t_chronicle_baseline to authenticated;
+select cmp_ok((select goal_count from t_chronicle_baseline),'>=',7,'the weekly baseline includes unrelated goals from another season');
+reset role;
+
 insert into kut.match_sessions(id,season_id,session_date,session_type,status,created_by) values('20000000-0000-4000-8000-000000000041','20000000-0000-4000-8000-000000000040',current_date,'other','draft','20000000-0000-4000-8000-000000000003');
 insert into kut.attendance(session_id,player_id,goals) values
 ('20000000-0000-4000-8000-000000000041','20000000-0000-4000-8000-000000000011',0),
@@ -70,6 +84,7 @@ insert into kut.attendance(session_id,player_id,goals) values
 ('20000000-0000-4000-8000-000000000041','20000000-0000-4000-8000-000000000014',0);
 set local role authenticated; set local request.jwt.claim.sub='20000000-0000-4000-8000-000000000003'; select kut.publish_session('20000000-0000-4000-8000-000000000041');
 select is((select rating_rules_version from kut.match_sessions where id='20000000-0000-4000-8000-000000000041'),2,'cutover session is version two');
+select is((select goal_count from kut.chronicle_weeks where week_start=date_trunc('week',current_date)::date),(select goal_count from t_chronicle_baseline),'publishing an unsubmitted survey preserves unrelated weekly goals');
 set local request.jwt.claim.sub='20000000-0000-4000-8000-000000000001';
 select is((select count(*) from kut.my_session_reports where session_id='20000000-0000-4000-8000-000000000041' and survey_status='open'),1::bigint,'an eligible member can discover the open report immediately after publication');
 select kut.submit_session_report('20000000-0000-4000-8000-000000000041',0,(select jsonb_object_agg(category::text,'null'::jsonb) from unnest((select category_ids from kut.session_surveys where session_id='20000000-0000-4000-8000-000000000041')) category),0,'20000000-0000-4000-8000-000000000051','submit');
@@ -79,7 +94,7 @@ select is((select balance from kut.wallets where user_id='20000000-0000-4000-800
 select is((select submitted_reports from kut.chronicle_session_report_status where session_id='20000000-0000-4000-8000-000000000041'),1,'Chronicle reports one submitted form while the survey is open');
 select is((select goal_total from kut.chronicle_session_report_status where session_id='20000000-0000-4000-8000-000000000041'),1,'Chronicle reports the provisional aggregate goal total while preserving individual privacy');
 select ok((select accepting_reports from kut.chronicle_session_report_status where session_id='20000000-0000-4000-8000-000000000041'),'Chronicle uses the database deadline to identify an open survey');
-select is((select goal_count from kut.chronicle_weeks where week_start=date_trunc('week',current_date)::date),1,'Chronicle weekly headline includes goals submitted during an open survey');
+select is((select goal_count from kut.chronicle_weeks where week_start=date_trunc('week',current_date)::date)-(select goal_count from t_chronicle_baseline),1,'Chronicle weekly headline includes goals submitted during an open survey');
 set local request.jwt.claim.sub='20000000-0000-4000-8000-000000000002';
 select kut.submit_session_report('20000000-0000-4000-8000-000000000041',0,(select jsonb_object_agg(category::text,case when ordinal=1 then to_jsonb('20000000-0000-4000-8000-000000000011'::text) else 'null'::jsonb end) from unnest((select category_ids from kut.session_surveys where session_id='20000000-0000-4000-8000-000000000041')) with ordinality selected(category,ordinal)),0,'20000000-0000-4000-8000-000000000053','submit');
 set local request.jwt.claim.sub='20000000-0000-4000-8000-000000000004';
