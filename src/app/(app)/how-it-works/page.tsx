@@ -277,6 +277,9 @@ export default async function HowItWorksPage() {
             them all at once. Tier follows the live rating, so a card can climb the ladder without
             you doing anything.
           </p>
+          <p>
+            Top risers shows the five cards that rose most since the last published football week.
+          </p>
         </Section>
 
         <Section title="6. Archetypes reshape the six stats">
