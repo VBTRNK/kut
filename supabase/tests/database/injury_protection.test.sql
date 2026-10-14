@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path to extensions, kut, public;
 
-select plan(48);
+select plan(49);
 
 -- Schema surface (ADR-082) -------------------------------------------------
 select has_table('kut', 'injury_periods', 'the injury periods table exists');
@@ -26,6 +26,12 @@ select '00000082-0000-4000-8000-000000000010', 'Injury Test Season', w0 - 70, tr
 insert into kut.season_rating_rules (season_id, v2_starts_week)
 select '00000082-0000-4000-8000-000000000010', w0 - 70 from t_weeks
 on conflict (season_id) do update set v2_starts_week = excluded.v2_starts_week;
+
+-- An inactive season can still have a publication in this week on a reused DB.
+insert into kut.seasons (id, name, starts_on, is_active)
+select '00000082-0000-4000-8000-000000000020', 'Unrelated Injury Season', w0 - 70, false from t_weeks;
+insert into kut.match_sessions (id, season_id, session_date, session_type, status, published_at)
+select '00000082-0000-4000-8000-000000000306', '00000082-0000-4000-8000-000000000020', w0, 'other', 'published', now() from t_weeks;
 
 insert into auth.users (id, email, aud, role, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 values
@@ -138,6 +144,23 @@ select set_config('request.jwt.claim.sub', '00000082-0000-4000-8000-0000000000c1
 select throws_ok(
   $$ select kut.injury_check_in((select w0 - 7 from t_weeks)) $$,
   'P0001', 'your player is not in injury mode', 'a member who is not injured cannot check in');
+
+-- The first-publication guard spans seasons; exercise that rule before isolating
+-- this scenario. Roll back the trial publication and all its reward/survey writes.
+savepoint existing_publication;
+update kut.match_sessions set status = 'published', published_at = now()
+where id = '00000082-0000-4000-8000-000000000305';
+select is(
+  (select count(*)::integer from kut.user_notifications
+   where user_id = '00000082-0000-4000-8000-0000000000b1' and event_type = 'injury_check_in'
+     and reference_id = '00000082-0000-4000-8000-000000000305'),
+  0, 'an earlier publication in another season suppresses the check-in-open notice');
+rollback to savepoint existing_publication;
+
+-- Hide other current-week publications only inside this rollback-only fixture.
+update kut.match_sessions set status = 'draft', published_at = null
+where status = 'published' and date_trunc('week', session_date)::date = (select w0 from t_weeks)
+  and season_id <> '00000082-0000-4000-8000-000000000010';
 
 -- Publishing this week's first session opens the week and sends the notice.
 update kut.match_sessions set status = 'published', published_at = now()
