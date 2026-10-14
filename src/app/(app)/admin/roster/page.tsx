@@ -59,12 +59,12 @@ export default async function RosterPage() {
   }));
 
   return (
-    <main className="board-ground min-h-screen p-6 text-ink sm:p-10">
+    <main className="board-ground min-h-screen px-4 pt-4 pb-8 text-body text-ink sm:px-8 sm:pt-8">
       {/* The form stays narrow; the roster table gets more room, since the
           injury column (ADR-082) pushed it past max-w-2xl. */}
       <section className="mx-auto max-w-4xl space-y-8">
         <header className="mx-auto max-w-2xl space-y-3">
-          <h1 className="text-4xl font-black tracking-tight">Add a player</h1>
+          <h1 className="font-serif text-title font-normal sm:text-title-lg">Add a player</h1>
           <p className="text-ink-dim">
             Register a new TFH member. They get a Live Card straight away and appear in Live Ratings
             at 30 OVR (common) until their first published attendance.

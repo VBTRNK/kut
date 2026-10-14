@@ -1,4 +1,6 @@
-import Link from "next/link";
+import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
+import { Block } from "@/components/ui/block";
+import { LinkRow } from "@/components/ui/links";
 import { LogoutButton } from "@/components/logout-button";
 import { MidweekOptOutPanel } from "@/components/midweek/opt-out-panel";
 import { requireUser } from "@/lib/auth/user";
@@ -33,30 +35,15 @@ export default async function SettingsPage() {
   const defaultClubName = `${displayName}'s Club`;
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-2xl space-y-8 py-4 sm:py-8">
-        <header className="space-y-3">
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            Account
-          </p>
-          <h1 className="display text-3xl sm:text-6xl">Settings</h1>
-        </header>
-
-        <div className="rounded-2xl border border-line/60 bg-panel/60 p-6">
-          <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.15em] text-ink-faint">
-            Signed in as
-          </p>
-          <p className="mt-2 text-2xl font-black">{user.displayName}</p>
-          {profile?.username && (
-            <p className="mt-1.5 text-sm text-ink-faint">
-              Username: <span className="font-bold text-ink-dim">{profile.username}</span>
-            </p>
-          )}
-        </div>
-
-        <div className="rounded-2xl border border-line/60 bg-panel/60 p-6">
+    <main className={PAGE}>
+      <section className={COLUMN}>
+        <PageHeader
+          title="Settings"
+          sub={`Signed in as ${displayName}${profile?.username ? ` · ${profile.username}` : ""}`}
+        />
+        <Block title="Your club">
           <ClubNameForm currentName={profile?.club_name ?? null} defaultName={defaultClubName} />
-        </div>
+        </Block>
 
         {midweek && (
           <MidweekOptOutPanel
@@ -70,47 +57,17 @@ export default async function SettingsPage() {
           />
         )}
 
-        <Link
-          className="group flex items-center justify-between gap-4 rounded-2xl border border-line/60 bg-panel/60 p-6 hover:border-brass/60"
-          href="/settings/card"
-        >
-          <span>
-            <span className="display block text-3xl group-hover:text-brass">My card</span>
-            <span className="mt-2 block text-sm text-ink-faint">
-              Upload your player photo and choose your archetype.
-            </span>
-          </span>
-          <span aria-hidden="true" className="text-2xl text-brass">
-            &rarr;
-          </span>
-        </Link>
-
-        <Link
-          className="group flex min-h-16 items-center justify-between rounded-2xl border border-line/60 bg-panel/60 px-6 py-4 hover:border-brass/60"
-          href="/how-it-works"
-        >
-          <span className="font-black">How FLUT works</span>
-          <span aria-hidden="true" className="text-brass">
-            &rarr;
-          </span>
-        </Link>
-
-        {isAdminRole(profile?.role) && (
-          <Link
-            className="group flex min-h-16 items-center justify-between rounded-2xl border border-brick-line/50 bg-panel/60 px-6 py-4 hover:border-brick"
-            href="/admin/attendance"
-          >
-            <span>
-              <span className="block font-black text-brick">Admin tools</span>
-              <span className="mt-1 block text-xs text-ink-faint">
-                Attendance, reports, roster and economy
-              </span>
-            </span>
-            <span aria-hidden="true" className="text-brick">
-              &rarr;
-            </span>
-          </Link>
-        )}
+        <ul className="rounded-2xl border border-line/60 bg-panel/60 px-4">
+          <LinkRow href="/settings/card" title="My card" meta="Photo and archetype" />
+          <LinkRow href="/how-it-works" title="How FLUT works" />
+          {isAdminRole(profile?.role) && (
+            <LinkRow
+              href="/admin/attendance"
+              title="Admin tools"
+              meta="Attendance, reports, roster and economy"
+            />
+          )}
+        </ul>
 
         <LogoutButton />
       </section>

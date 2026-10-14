@@ -57,10 +57,10 @@ export default async function AccountLinksPage() {
     .map((player) => ({ id: player.id, display_name: player.display_name, slug: player.slug }));
 
   return (
-    <main className="board-ground min-h-screen p-6 text-ink sm:p-10">
+    <main className="board-ground min-h-screen px-4 pt-4 pb-8 text-body text-ink sm:px-8 sm:pt-8">
       <section className="mx-auto max-w-2xl space-y-8">
         <header className="space-y-3">
-          <h1 className="text-4xl font-black tracking-tight">Accounts</h1>
+          <h1 className="font-serif text-title font-normal sm:text-title-lg">Accounts</h1>
           <p className="text-ink-dim">
             Connect a member&rsquo;s account to their TFH player card, adjust their FLUT Coins,
             reset their club, disable an account, or permanently delete one. Members are normally

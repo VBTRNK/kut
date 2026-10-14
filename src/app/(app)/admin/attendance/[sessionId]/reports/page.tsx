@@ -79,30 +79,33 @@ export default async function AdminReportsPage({ params }: Props) {
   const guests = rows.length - eligible.length;
   const pending = eligible.length - completed;
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
+    <main className="board-ground min-h-screen px-4 pt-4 pb-8 text-body text-ink sm:px-8 sm:pt-8">
       <section className="mx-auto max-w-4xl space-y-8 py-4 sm:py-8">
-        <Link className="text-sm font-black text-brass" href={`/admin/attendance/${sessionId}`}>
+        <Link
+          className="text-small font-extrabold text-brass"
+          href={`/admin/attendance/${sessionId}`}
+        >
           ← Session
         </Link>
         <header>
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            Admin · Reports
-          </p>
-          <h1 className="display mt-3 text-4xl sm:text-6xl">Session reports</h1>
-          <p className="mt-3 text-sm text-ink-dim">
+          <p className="text-label font-semibold text-brass">Admin · Reports</p>
+          <h1 className="mt-3 font-serif text-title font-normal sm:text-title-lg">
+            Session reports
+          </h1>
+          <p className="mt-3 text-small text-ink-dim">
             {completed} of {eligible.length} forms completed · {guests} attendees without accounts.
             {coverage} coverage and rewards are shown separately.
           </p>
         </header>
         {survey.status === "open" ? (
           <section className="rounded-2xl border border-brass/40 bg-brass-bg/30 p-5">
-            <h2 className="font-black text-brass">Close reporting now</h2>
-            <p className="mt-2 text-sm text-ink-dim">
+            <h2 className="font-extrabold text-brass">Close reporting now</h2>
+            <p className="mt-2 text-small text-ink-dim">
               Reporting closes on its own at {formatWhen(survey.closes_at)}. Closing it now scores
               the session immediately, rebuilds the ratings and publishes the results to the
               Chronicle — exactly what the deadline would have done.
             </p>
-            <ul className="mt-3 space-y-1 text-sm text-ink-dim">
+            <ul className="mt-3 space-y-1 text-small text-ink-dim">
               <li>
                 <strong className="text-ink">
                   {completed} of {eligible.length}
@@ -121,10 +124,10 @@ export default async function AdminReportsPage({ params }: Props) {
             </ul>
             <form action={finalizeReports} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
               <input name="sessionId" type="hidden" value={sessionId} />
-              <label className="text-xs font-bold">
+              <label className="text-label font-semibold">
                 Reason
                 <input
-                  className="mt-1 min-h-11 w-full rounded-lg border border-line bg-panel px-3 text-base"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-line bg-panel px-3 text-body"
                   maxLength={500}
                   minLength={3}
                   name="reason"
@@ -132,13 +135,13 @@ export default async function AdminReportsPage({ params }: Props) {
                   required
                 />
               </label>
-              <button className="min-h-11 self-end rounded-lg bg-brass px-4 font-black text-ink-on-accent">
+              <button className="min-h-11 self-end rounded-lg bg-brass px-4 font-extrabold text-ink-on-accent">
                 Close reporting
               </button>
             </form>
           </section>
         ) : survey.status === "finalized" ? (
-          <p className="rounded-2xl border border-line bg-panel/60 p-5 text-sm text-ink-dim">
+          <p className="rounded-2xl border border-line bg-panel/60 p-5 text-small text-ink-dim">
             Reporting closed{survey.finalized_at ? ` on ${formatWhen(survey.finalized_at)}` : ""}.
             {survey.finalized_reason
               ? ` Closed early by an admin: "${survey.finalized_reason}"`
@@ -151,8 +154,8 @@ export default async function AdminReportsPage({ params }: Props) {
             <article className="rounded-2xl border border-line bg-panel/60 p-5" key={row.player_id}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-black">{row.display_name}</h2>
-                  <p className="mt-1 text-xs text-ink-faint">
+                  <h2 className="font-extrabold">{row.display_name}</h2>
+                  <p className="mt-1 text-label text-ink-faint">
                     {!row.user_id
                       ? "No account"
                       : row.report_status === "submitted"
@@ -163,7 +166,7 @@ export default async function AdminReportsPage({ params }: Props) {
                     ·{" "}
                     {row.reward_paid ? "Reward paid" : row.user_id ? "Not earned" : "Not eligible"}
                   </p>
-                  <p className="mt-2 text-sm text-ink-dim">
+                  <p className="mt-2 text-small text-ink-dim">
                     {label}:{" "}
                     {row.has_override
                       ? `${row.override_goals} (admin correction)`
@@ -172,7 +175,7 @@ export default async function AdminReportsPage({ params }: Props) {
                 </div>
               </div>
               <details className="mt-4">
-                <summary className="cursor-pointer text-sm font-black text-brass">
+                <summary className="min-h-11 cursor-pointer text-small font-extrabold text-brass">
                   {row.reported_goals === null && !row.has_override
                     ? `Add ${noun}`
                     : `Edit ${noun}`}
@@ -183,10 +186,10 @@ export default async function AdminReportsPage({ params }: Props) {
                 >
                   <input name="sessionId" type="hidden" value={sessionId} />
                   <input name="playerId" type="hidden" value={row.player_id} />
-                  <label className="text-xs font-bold">
+                  <label className="text-label font-semibold">
                     {label}
                     <input
-                      className="mt-1 min-h-11 w-full rounded-lg border border-line bg-panel px-3 text-base"
+                      className="mt-1 min-h-11 w-full rounded-lg border border-line bg-panel px-3 text-body"
                       defaultValue={
                         row.has_override ? (row.override_goals ?? 0) : (row.reported_goals ?? 0)
                       }
@@ -196,21 +199,21 @@ export default async function AdminReportsPage({ params }: Props) {
                       type="number"
                     />
                   </label>
-                  <label className="text-xs font-bold">
+                  <label className="text-label font-semibold">
                     Reason
                     <input
-                      className="mt-1 min-h-11 w-full rounded-lg border border-line bg-panel px-3 text-base"
+                      className="mt-1 min-h-11 w-full rounded-lg border border-line bg-panel px-3 text-body"
                       maxLength={500}
                       minLength={3}
                       name="reason"
                       required
                     />
                   </label>
-                  <button className="min-h-11 self-end rounded-lg bg-brass px-4 font-black text-ink-on-accent">
+                  <button className="min-h-11 self-end rounded-lg bg-brass px-4 font-extrabold text-ink-on-accent">
                     Save
                   </button>
                   {reportsGoalsAndAssists(sessionDate) && (
-                    <p className="text-xs text-ink-faint sm:col-span-3">
+                    <p className="text-label text-ink-faint sm:col-span-3">
                       One combined total: goals and assists added together.
                     </p>
                   )}
@@ -220,17 +223,17 @@ export default async function AdminReportsPage({ params }: Props) {
                     <input name="sessionId" type="hidden" value={sessionId} />
                     <input name="playerId" type="hidden" value={row.player_id} />
                     <input name="remove" type="hidden" value="true" />
-                    <label className="block text-xs font-bold">
+                    <label className="block text-label font-semibold">
                       Reason to restore member report
                       <input
-                        className="mt-1 min-h-11 w-full rounded-lg border border-line bg-panel px-3 text-base"
+                        className="mt-1 min-h-11 w-full rounded-lg border border-line bg-panel px-3 text-body"
                         maxLength={500}
                         minLength={3}
                         name="reason"
                         required
                       />
                     </label>
-                    <button className="mt-2 min-h-11 rounded-lg border border-brick/50 px-4 text-sm font-black text-brick">
+                    <button className="mt-2 min-h-11 rounded-lg border border-brick/50 px-4 text-small font-extrabold text-brick">
                       Remove correction
                     </button>
                   </form>

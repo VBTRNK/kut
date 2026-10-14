@@ -1,3 +1,6 @@
+import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
+import { Block } from "@/components/ui/block";
+import { Tag } from "@/components/ui/tag";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RARITY_BANDS, type RarityTier } from "@/game/rating-engine";
@@ -67,12 +70,9 @@ export const metadata = { title: "Chronicle issue" };
 
 function TierLabel({ tier }: { tier: RarityTier }) {
   return (
-    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-      <span aria-hidden="true" className="tier-chip" data-rarity={tier}>
-        <span />
-      </span>
-      <span>{tier}</span>
-    </span>
+    <Tag>
+      <span className="capitalize">{tier}</span>
+    </Tag>
   );
 }
 
@@ -190,43 +190,29 @@ export default async function ChronicleIssuePage({
   );
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-3xl space-y-12 py-4 sm:py-8">
-        <Link className="text-sm font-bold text-brass hover:underline" href="/chronicle">
-          &larr; All issues
-        </Link>
-        <header className="border-y-4 border-brass py-5">
-          <div className="flex items-end justify-between gap-4">
-            <h1 className="display text-5xl sm:text-6xl">FLUT Chronicle</h1>
-            <p className="text-right font-black text-brass">
-              Week of {formatChronicleDate(current.week_start)}
-            </p>
-          </div>
-          <p className="mt-4 text-[0.65rem] font-extrabold uppercase tracking-[0.18em] text-ink-faint">
-            {formatChronicleDate(current.week_start)} &ndash;{" "}
-            {formatChronicleDate(current.week_end, {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
-          <p className="display mt-7 text-3xl text-ink-dim">
-            {issueStandfirst(
-              current.session_count,
-              current.appearance_count,
-              current.goal_count,
-              current.week_start,
-            )}
-          </p>
-          {hasUnfinalizedReports && (
-            <p className="mt-3 text-sm font-bold text-brass">
-              The {countAttributive(current.week_start)} total is provisional until reporting is
-              finalized.
-            </p>
+    <main className={PAGE}>
+      <section className={COLUMN}>
+        <PageHeader
+          title={`Week of ${formatChronicleDate(current.week_start)}`}
+          back={{ href: "/chronicle", label: "All issues" }}
+          sub={`${formatChronicleDate(current.week_start)} – ${formatChronicleDate(current.week_end, { day: "numeric", month: "long", year: "numeric" })}`}
+        />
+        <p className="text-body">
+          {issueStandfirst(
+            current.session_count,
+            current.appearance_count,
+            current.goal_count,
+            current.week_start,
           )}
-        </header>
+        </p>
+        {hasUnfinalizedReports && (
+          <p className="text-small text-ink-dim">
+            The {countAttributive(current.week_start)} total is provisional until reporting is
+            finalized.
+          </p>
+        )}
 
-        {sessions.map((session, index) => {
+        {sessions.map((session) => {
           const attendance = (attendanceBySession.get(session.id) ?? []).sort(
             (a, b) =>
               b.goals - a.goals ||
@@ -259,59 +245,51 @@ export default async function ChronicleIssuePage({
                 : noun;
 
           return (
-            <article
-              className="border-b border-line/40 pb-10"
+            <Block
+              title={`${TYPE[session.session_type] ?? "Session"} ${formatChronicleDate(session.session_date)}`}
+              aside={
+                <p className="text-small text-ink-dim">
+                  {attendance.length} in · {goals} {goalLabel}
+                </p>
+              }
               id={`s-${session.id}`}
               key={session.id}
             >
-              <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.18em] text-brass">
-                Matchday {index + 1} &middot; {TYPE[session.session_type] ?? "Session"}
-              </p>
-              <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-                <h2 className="display text-4xl">{formatChronicleDate(session.session_date)}</h2>
-                <p className="font-black tabular-nums text-ink-dim">
-                  {attendance.length} attended &middot; {goals} {goalLabel}
-                </p>
-              </div>
-              {bibs && (
-                <p className="mt-5 rounded-xl border border-brass-line bg-brass-bg/30 px-4 py-3 text-sm text-ink-dim">
-                  Bibs brought by <span className="font-black text-brass">{bibs}</span>
-                </p>
-              )}
+              {bibs && <p className="text-small text-ink-dim">Bibs by {bibs}</p>}
 
               {session.rating_rules_version === 2 ? (
                 reportsFinalized ? (
                   results.length === 0 ? (
-                    <p className="mt-6 rounded-xl border border-dashed border-line p-4 text-sm text-ink-dim">
+                    <p className="rounded-xl border border-dashed border-line p-4 text-small text-ink-dim">
                       Results finalized. No report results were recorded.
                     </p>
                   ) : (
                     <>
-                      <p className="mt-6 text-sm font-bold text-ink-dim">
+                      <p className="text-small text-ink-dim">
                         {progress?.submitted_reports ?? results[0].submitted_reports} of{" "}
                         {progress?.eligible_accounts ?? results[0].eligible_accounts} reports
                         submitted &middot; {progress?.attendee_count ?? results[0].attendee_count}{" "}
                         attendees
                       </p>
-                      <ol className="mt-3 grid gap-x-10 sm:grid-cols-2">
+                      <ol className="grid gap-x-8 sm:grid-cols-2">
                         {results.map((row) => (
                           <li className="border-b border-line/30 py-3" key={row.player_id}>
                             <div className="flex justify-between gap-4">
                               <Link
                                 prefetch={false}
-                                className="font-semibold hover:text-brass hover:underline"
+                                className="inline-flex min-h-11 items-center hover:text-brass hover:underline"
                                 href={`/players/${row.slug}`}
                               >
                                 {row.display_name}
                               </Link>
-                              <span className="font-bold tabular-nums text-brass">
+                              <span className="self-center font-semibold tabular-nums">
                                 {row.effective_goals === null
                                   ? "Not reported"
                                   : formatReportedCount(row.effective_goals, session.session_date)}
                               </span>
                             </div>
                             {row.recognized_categories.length > 0 && (
-                              <p className="mt-1 text-xs font-bold text-steel">
+                              <p className="text-small text-ink-dim">
                                 {row.recognized_categories.join(" · ")}
                               </p>
                             )}
@@ -321,11 +299,11 @@ export default async function ChronicleIssuePage({
                     </>
                   )
                 ) : reportsOpen ? (
-                  <section className="mt-6 rounded-xl border border-brass-line bg-brass-bg/25 p-4">
+                  <section className="rounded-xl bg-panel-2/80 p-3">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="font-black text-brass">Reports open</p>
-                        <p className="mt-1 text-sm text-ink-dim">
+                        <p className="text-body font-semibold">Reports open</p>
+                        <p className="mt-1 text-small text-ink-dim">
                           {progress?.submitted_reports ?? 0} of {progress?.eligible_accounts ?? 0}{" "}
                           reports submitted &middot; closes{" "}
                           {progress ? reportCloseLabel(progress.closes_at) : "soon"}
@@ -333,7 +311,7 @@ export default async function ChronicleIssuePage({
                       </div>
                       {myReport && (
                         <Link
-                          className="inline-flex min-h-11 items-center rounded-lg bg-brass px-4 text-sm font-black text-ink-on-accent"
+                          className="inline-flex min-h-11 items-center rounded-xl border border-line bg-panel px-4 text-body font-semibold hover:border-brass-line"
                           href={`/sessions/${session.id}/report`}
                         >
                           {myReport.report_status === "submitted"
@@ -342,22 +320,22 @@ export default async function ChronicleIssuePage({
                         </Link>
                       )}
                     </div>
-                    <p className="mt-3 text-sm text-ink-faint">
+                    <p className="mt-3 text-small text-ink-faint">
                       {goals} {noun} reported so far. Final player results and recognized kudos
                       appear after reporting closes.
                     </p>
                   </section>
                 ) : (
-                  <p className="mt-6 rounded-xl border border-dashed border-line p-4 text-sm text-ink-dim">
+                  <p className="rounded-xl border border-dashed border-line p-4 text-small text-ink-dim">
                     Reports closed &middot; {progress?.submitted_reports ?? 0} of{" "}
                     {progress?.eligible_accounts ?? 0} submitted &middot; results are being
                     prepared.
                   </p>
                 )
               ) : attendance.length === 0 ? (
-                <p className="mt-6 text-ink-dim">No attendance was recorded.</p>
+                <p className="text-ink-dim">No attendance was recorded.</p>
               ) : (
-                <ol className="mt-6 grid gap-x-10 sm:grid-cols-2">
+                <ol className="grid gap-x-8 sm:grid-cols-2">
                   {attendance.map((row) => (
                     <li
                       className="flex justify-between gap-4 border-b border-line/30 py-2.5"
@@ -366,7 +344,7 @@ export default async function ChronicleIssuePage({
                       {row.players?.slug ? (
                         <Link
                           prefetch={false}
-                          className="font-semibold hover:text-brass hover:underline"
+                          className="inline-flex min-h-11 items-center hover:text-brass hover:underline"
                           href={`/players/${row.players.slug}`}
                         >
                           {row.players.display_name}
@@ -374,53 +352,46 @@ export default async function ChronicleIssuePage({
                       ) : (
                         <span>{row.players?.display_name ?? "A player"}</span>
                       )}
-                      <span className="font-bold tabular-nums text-brass">
+                      <span className="self-center font-semibold tabular-nums">
                         {row.goals ? formatReportedCount(row.goals, session.session_date) : "—"}
                       </span>
                     </li>
                   ))}
                 </ol>
               )}
-            </article>
+            </Block>
           );
         })}
 
         {crossings.length > 0 && (
-          <section>
-            <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.18em] text-brass">
-              This week&rsquo;s promotions
-            </p>
-            <h2 className="display mt-2 text-4xl">Crossings</h2>
-            <p className="mt-2 text-sm text-ink-dim">
-              Ratings move once per football week. Every copy in the club changed with them.
-            </p>
-            <ol className="mt-6 space-y-3">
+          <Block title="Crossings">
+            <ol className="grid">
               {crossings.map((row) => (
                 <li
-                  className="grid gap-3 rounded-2xl border border-line bg-panel/70 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                  className="grid min-h-12 items-center gap-2 border-b border-line/40 py-3 last:border-b-0 min-[360px]:grid-cols-[minmax(0,1fr)_auto]"
                   key={row.player_id}
                 >
                   <Link
                     prefetch={false}
-                    className="min-w-0 truncate font-black hover:text-brass"
+                    className="inline-flex min-h-11 min-w-0 items-center text-body hover:text-brass min-[360px]:truncate"
                     href={`/players/${row.slug}`}
                   >
                     {row.display_name}
                   </Link>
-                  <span className="flex min-w-0 items-center gap-2 text-[0.65rem] font-extrabold uppercase tracking-[0.08em]">
+                  <span className="flex min-w-0 items-center gap-2">
                     <TierLabel tier={row.from_tier} />
                     <span aria-hidden="true" className="text-ink-faint">
                       &rarr;
                     </span>
                     <TierLabel tier={row.to_tier} />
-                    <b className="ml-auto text-xl tabular-nums text-brass sm:ml-2">
+                    <b className="ml-auto text-body font-semibold tabular-nums sm:ml-2">
                       {row.live_ovr}
                     </b>
                   </span>
                 </li>
               ))}
             </ol>
-          </section>
+          </Block>
         )}
       </section>
     </main>

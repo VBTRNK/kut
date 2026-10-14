@@ -457,3 +457,25 @@ Date: 2026-10-14 (flut-ui-pass S9, #294, DR5-20). Amends ADR-053
 - Removed explanations already live in How it works `#market` (tax and
   escrow) and `#packs` (discard); tax also stays by the listing price field.
 - No migration, dependency, economy, action validation or privacy change.
+
+## ADR-160 — The remaining pages on the UI scale
+
+Date: 2026-10-14 (flut-ui-pass S10, #294, DR5-21–24/26). Amends ADR-043
+(type roles), the archived §39/KB-005 (phone standings counts), ADR-049
+(Chronicle presentation), ADR-114 (message rows) and ADR-091 (Settings copy).
+
+- Standings uses a block, ink ranks/value and a You tag. Phones show only the
+  club under the member; Cards and Players join as columns from `sm`. The
+  formula stays on Club Value and How it works `#value`.
+- Players uses the all-width tier/archetype/sort Filter sheet. Profiles,
+  Club Value/copies, My card, reports, invites and Admin use the foundations.
+- Chronicle uses a latest-issue block and earlier link rows; issues use session
+  blocks and tier tags. Provisional aggregates, report actions and result gates
+  remain; the weekly rating explanation already lives at `#cards`.
+- Message titles use Body (600 unread, 400 read), with Small body/time and a
+  New tag. Day groups, mark-all-read and the never-prefetched open route remain.
+- Settings uses Your club/Midweek blocks and navigation rows. Three shortened
+  privacy lines, the scheduled reveal time and two-step opt-out remain. Login
+  uses Fields; Welcome keeps the cosmetic reveal. The shared crest is exempt
+  from the type ratchet (Q5); the card face and fonts do not change.
+- No migration, dependency, economy, server action, privacy or timing change.

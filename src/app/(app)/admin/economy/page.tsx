@@ -42,10 +42,10 @@ export default async function EconomyPage() {
   const totals = packs[0];
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
+    <main className="board-ground min-h-screen px-4 pt-4 pb-8 text-body text-ink sm:px-8 sm:pt-8">
       <section className="mx-auto max-w-5xl space-y-8">
         <header>
-          <h1 className="display mt-3 text-5xl sm:text-6xl">Pack health</h1>
+          <h1 className="mt-3 font-serif text-title font-normal sm:text-title-lg">Pack health</h1>
           <p className="mt-3 max-w-2xl text-ink-dim">
             Expected values use the active Live Card pool and server-defined rarity weights. They
             are a warning system, not a setting screen.
@@ -54,28 +54,28 @@ export default async function EconomyPage() {
         {totals && (
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-2xl border border-line/60 bg-board-deep/40 p-4">
-              <dt className="text-xs font-black uppercase tracking-[0.1em] text-ink-faint">
-                Coin supply
-              </dt>
-              <dd className="mt-2 text-2xl font-black">{Number(totals.total_coin_supply)}</dd>
+              <dt className="text-label font-semibold text-ink-faint">Coin supply</dt>
+              <dd className="mt-2 text-heading font-semibold">
+                {Number(totals.total_coin_supply)}
+              </dd>
             </div>
             <div className="rounded-2xl border border-line/60 bg-board-deep/40 p-4">
-              <dt className="text-xs font-black uppercase tracking-[0.1em] text-ink-faint">
-                Packs opened
-              </dt>
-              <dd className="mt-2 text-2xl font-black">{Number(totals.total_pack_openings)}</dd>
+              <dt className="text-label font-semibold text-ink-faint">Packs opened</dt>
+              <dd className="mt-2 text-heading font-semibold">
+                {Number(totals.total_pack_openings)}
+              </dd>
             </div>
             <div className="rounded-2xl border border-line/60 bg-board-deep/40 p-4">
-              <dt className="text-xs font-black uppercase tracking-[0.1em] text-ink-faint">
-                Card copies
-              </dt>
-              <dd className="mt-2 text-2xl font-black">{Number(totals.total_card_copies)}</dd>
+              <dt className="text-label font-semibold text-ink-faint">Card copies</dt>
+              <dd className="mt-2 text-heading font-semibold">
+                {Number(totals.total_card_copies)}
+              </dd>
             </div>
             <div className="rounded-2xl border border-line/60 bg-board-deep/40 p-4">
-              <dt className="text-xs font-black uppercase tracking-[0.1em] text-ink-faint">
-                Burned
-              </dt>
-              <dd className="mt-2 text-2xl font-black">{Number(totals.total_burned_cards)}</dd>
+              <dt className="text-label font-semibold text-ink-faint">Burned</dt>
+              <dd className="mt-2 text-heading font-semibold">
+                {Number(totals.total_burned_cards)}
+              </dd>
             </div>
           </dl>
         )}
@@ -89,39 +89,41 @@ export default async function EconomyPage() {
               const ratio = Number(pack.expected_discard_return_ratio);
               const status = healthStatus(ratio);
               return (
-                <article className="rounded-3xl border border-line bg-panel p-6" key={pack.slug}>
+                <article className="rounded-2xl border border-line bg-panel p-6" key={pack.slug}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-brass">
+                      <p className="text-label font-semibold text-brass">
                         {pack.cards_per_pack} cards · {pack.price} FLUT Coins
                       </p>
-                      <h2 className="mt-1 text-2xl font-black">{pack.title}</h2>
+                      <h2 className="mt-1 text-heading font-semibold">{pack.title}</h2>
                     </div>
                     <span
-                      className={`rounded-full border px-3 py-1 text-sm font-black ${status.className}`}
+                      className={`rounded-full border px-3 py-1 text-small font-extrabold ${status.className}`}
                     >
                       {status.label}
                     </span>
                   </div>
                   <dl className="mt-6 grid grid-cols-3 gap-3 text-center">
                     <div className="rounded-xl bg-board/60 p-3">
-                      <dt className="text-xs font-bold uppercase text-ink-faint">Per slot</dt>
-                      <dd className="mt-1 text-xl font-black">
+                      <dt className="text-label font-semibold text-ink-faint">Per slot</dt>
+                      <dd className="mt-1 text-heading font-semibold">
                         {Number(pack.expected_discard_per_slot).toFixed(2)}
                       </dd>
                     </div>
                     <div className="rounded-xl bg-board/60 p-3">
-                      <dt className="text-xs font-bold uppercase text-ink-faint">Per pack</dt>
-                      <dd className="mt-1 text-xl font-black">
+                      <dt className="text-label font-semibold text-ink-faint">Per pack</dt>
+                      <dd className="mt-1 text-heading font-semibold">
                         {Number(pack.expected_discard_per_pack).toFixed(2)}
                       </dd>
                     </div>
                     <div className="rounded-xl bg-board/60 p-3">
-                      <dt className="text-xs font-bold uppercase text-ink-faint">Return</dt>
-                      <dd className="mt-1 text-xl font-black">{(ratio * 100).toFixed(1)}%</dd>
+                      <dt className="text-label font-semibold text-ink-faint">Return</dt>
+                      <dd className="mt-1 text-heading font-semibold">
+                        {(ratio * 100).toFixed(1)}%
+                      </dd>
                     </div>
                   </dl>
-                  <p className="mt-4 text-sm text-ink-faint">
+                  <p className="mt-4 text-small text-ink-faint">
                     {pack.eligible_live_count} eligible Live editions. Target expected discard
                     return is 75% or lower; warning begins above 80%.
                   </p>

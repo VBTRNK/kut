@@ -104,7 +104,7 @@ export function AttendanceForm({
       <input name="bibsWashedBy" type="hidden" value={effectiveBibsWashedBy} />
       {correctionSession && <input name="sessionId" type="hidden" value={correctionSession.id} />}
 
-      <div className="flex gap-2 text-sm font-semibold">
+      <div className="flex gap-2 text-small font-semibold">
         {[
           ["attendance", "1. Attendance"],
           ["review", isCorrection ? "2. Correct" : "2. Publish"],
@@ -120,7 +120,7 @@ export function AttendanceForm({
 
       {step === "attendance" && (
         <fieldset className="space-y-3">
-          <legend className="text-xl font-bold">Session details</legend>
+          <legend className="text-heading font-semibold">Session details</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="space-y-2">
               <span className="font-semibold">Date</span>
@@ -135,7 +135,7 @@ export function AttendanceForm({
                 />
                 <button
                   aria-label="Open date picker"
-                  className="absolute inset-y-1 right-1 grid w-11 place-items-center rounded-lg text-xl text-brass hover:bg-brass/10"
+                  className="min-h-11 absolute inset-y-1 right-1 grid w-11 place-items-center rounded-lg text-heading text-brass hover:bg-brass/10"
                   onClick={() => {
                     try {
                       dateInput.current?.showPicker();
@@ -172,14 +172,14 @@ export function AttendanceForm({
           </div>
           {!isCorrection && formattedCutover && (
             <p
-              className={`rounded-xl border p-3 text-sm ${usesMemberReports ? "border-moss-line bg-moss-bg text-moss" : "border-brass-line bg-brass-bg/30 text-brass"}`}
+              className={`rounded-xl border p-3 text-small ${usesMemberReports ? "border-moss-line bg-moss-bg text-moss" : "border-brass-line bg-brass-bg/30 text-brass"}`}
             >
               {usesMemberReports
                 ? `This date uses member reports. Publishing opens ${noun} & kudos for linked attendees for 24 hours.`
                 : `This is a legacy date. Member reports begin with the week of ${formattedCutover}; enter ${noun} during review instead.`}
             </p>
           )}
-          <legend className="pt-4 text-xl font-bold">Who played?</legend>
+          <legend className="pt-4 text-heading font-semibold">Who played?</legend>
           <p className="text-ink-dim">
             Tap each attendee. Large targets are intentional for pitch-side use.
           </p>
@@ -200,7 +200,7 @@ export function AttendanceForm({
             })}
           </div>
           <button
-            className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-bold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
+            className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-semibold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
             disabled={selected.length === 0 || !sessionDate}
             onClick={() => setStep("review")}
             type="button"
@@ -212,7 +212,7 @@ export function AttendanceForm({
 
       {step === "review" && (
         <section className="space-y-4 rounded-2xl border border-brass bg-brass/10 p-5">
-          <h2 className="display text-2xl">
+          <h2 className="font-semibold text-heading">
             {isCorrection ? "Ready to save correction" : "Ready to publish"}
           </h2>
           <p>
@@ -235,17 +235,17 @@ export function AttendanceForm({
                 </option>
               ))}
             </select>
-            <span className="block text-sm text-brass">
+            <span className="block text-small text-brass">
               Whoever brings the bibs gets a one-off bonus in FLUT Coins. Changing this on a
               correction pays the new bringer; the previous one keeps their bonus.
             </span>
           </label>
           {!usesMemberReports && (
             <fieldset className="space-y-3 rounded-xl border border-line bg-board/50 p-4">
-              <legend className="px-1 font-black">
+              <legend className="px-1 font-extrabold">
                 {countLabel(sessionDate)} for this legacy session
               </legend>
-              <p className="text-sm text-ink-dim">
+              <p className="text-small text-ink-dim">
                 Sessions before the reporting cutover keep admin-entered {totalsNoun} totals.
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -254,12 +254,12 @@ export function AttendanceForm({
                     className="flex min-h-12 items-center justify-between gap-4 rounded-xl border border-line/50 bg-panel px-3"
                     key={player.id}
                   >
-                    <span className="min-w-0 truncate text-sm font-bold">
+                    <span className="min-w-0 truncate text-small font-semibold">
                       {player.display_name}
                     </span>
                     <input
                       aria-label={`${player.display_name} ${noun === "G+A" ? "goals and assists" : "goals"}`}
-                      className="h-10 w-20 rounded-lg border border-line bg-board px-3 text-right font-black tabular-nums"
+                      className="min-h-11 w-20 rounded-lg border border-line bg-board px-3 text-right font-extrabold tabular-nums"
                       max="99"
                       min="0"
                       onChange={(event) =>
@@ -287,25 +287,25 @@ export function AttendanceForm({
                 placeholder="For example: Alex was selected by mistake."
                 required
               />
-              <span className="block text-sm text-brass">
+              <span className="block text-small text-brass">
                 The previous attendance and this reason are retained in the admin audit log.
                 {isCancelledSession &&
                   " This session will remain excluded from ratings until reactivated."}
               </span>
             </label>
           ) : (
-            <p className="text-sm text-brass">
+            <p className="text-small text-brass">
               {usesMemberReports
                 ? "Check the date, session type and attendees carefully. Publishing opens member reports for 24 hours."
                 : `Check the legacy ${totalsNoun} totals carefully. This date does not open member reports.`}
             </p>
           )}
           {state.error && (
-            <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+            <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
           )}
           <div className="flex gap-3">
             <button
-              className="min-h-12 flex-1 rounded-xl bg-panel-2 px-4 py-3 font-bold"
+              className="min-h-12 flex-1 rounded-xl bg-panel-2 px-4 py-3 font-semibold"
               disabled={isPending}
               onClick={() => setStep("attendance")}
               type="button"
@@ -313,7 +313,7 @@ export function AttendanceForm({
               Back to attendance
             </button>
             <button
-              className="min-h-12 flex-1 rounded-xl bg-brass px-4 py-3 font-bold text-ink-on-accent disabled:bg-line disabled:text-ink-faint"
+              className="min-h-12 flex-1 rounded-xl bg-brass px-4 py-3 font-semibold text-ink-on-accent disabled:bg-line disabled:text-ink-faint"
               disabled={isPending}
               type="submit"
             >

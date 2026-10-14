@@ -1,5 +1,8 @@
 "use client";
 
+import { Field } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInErrorMessage } from "@/lib/auth/sign-in-error";
@@ -39,44 +42,31 @@ export function LoginForm() {
 
   return (
     <form action={signIn} className="space-y-5">
-      <label className="block space-y-2">
-        <span className="text-sm font-extrabold">Username</span>
-        <input
-          autoCapitalize="none"
-          autoComplete="username"
-          className="min-h-12 w-full rounded-xl border border-line bg-board-deep/60 px-4 font-semibold text-ink focus:border-brass/60 focus:outline-none"
-          name="identifier"
-          required
-          spellCheck={false}
-          type="text"
-        />
-        <span className="block text-xs leading-relaxed text-ink-faint">
-          Members from before usernames existed can still sign in with their email address here.
-        </span>
-      </label>
-      <label className="block space-y-2">
-        <span className="text-sm font-extrabold">Password</span>
-        <input
-          autoComplete="current-password"
-          className="min-h-12 w-full rounded-xl border border-line bg-board-deep/60 px-4 font-semibold text-ink focus:border-brass/60 focus:outline-none"
-          minLength={8}
-          name="password"
-          required
-          type="password"
-        />
-      </label>
+      <Field
+        label="Username"
+        autoCapitalize="none"
+        autoComplete="username"
+        name="identifier"
+        required
+        spellCheck={false}
+        help="Or the email address you joined with."
+      />
+      <Field
+        label="Password"
+        autoComplete="current-password"
+        minLength={8}
+        name="password"
+        required
+        type="password"
+      />
       {errorMessage && (
-        <p className="rounded-xl border border-brick-line/40 bg-brick-bg p-3 text-sm font-bold text-brick">
+        <p className="rounded-xl border border-brick-line/40 bg-brick-bg p-3 text-small font-semibold text-brick">
           {errorMessage}
         </p>
       )}
-      <button
-        className="min-h-12 w-full rounded-xl bg-gradient-to-b from-[#eebd63] to-[#d29a34] px-4 py-3 font-black text-ink-on-accent shadow-lg shadow-brass/20 hover:brightness-105 disabled:bg-none disabled:bg-line disabled:text-ink-faint disabled:shadow-none"
-        disabled={isSubmitting}
-        type="submit"
-      >
+      <Button wide disabled={isSubmitting} type="submit">
         {isSubmitting ? "Signing in…" : "Sign in"}
-      </button>
+      </Button>
     </form>
   );
 }

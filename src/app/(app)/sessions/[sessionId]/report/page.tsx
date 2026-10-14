@@ -1,3 +1,4 @@
+import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { countLabelLong } from "@/game/reported-count";
@@ -80,31 +81,26 @@ export default async function SessionReportPage({ params }: Props) {
     );
   const closed = report.survey_status !== "open" || new Date(report.closes_at) <= new Date();
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-2xl space-y-8 py-4 sm:py-8">
-        <Link className="text-sm font-black text-brass" href="/">
-          ← Home
-        </Link>
-        <header>
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            {report.session_type} · {report.session_date}
-          </p>
-          <h1 className="display mt-3 text-4xl sm:text-6xl">
-            {countLabelLong(report.session_date)} & kudos
-          </h1>
-          <p className="mt-3 text-sm text-ink-dim">
-            Reports close{" "}
-            {new Intl.DateTimeFormat("en-GB", {
-              dateStyle: "medium",
-              timeStyle: "short",
-              timeZone: "Europe/Amsterdam",
-            }).format(new Date(report.closes_at))}
-            .
-          </p>
-        </header>
+    <main className={PAGE}>
+      <section className={COLUMN}>
+        <PageHeader
+          title={`${countLabelLong(report.session_date)} & kudos`}
+          back={{ href: "/", label: "Home" }}
+          sub={
+            <>
+              {report.session_type} · {report.session_date} · Reports close{" "}
+              {new Intl.DateTimeFormat("en-GB", {
+                dateStyle: "medium",
+                timeStyle: "short",
+                timeZone: "Europe/Amsterdam",
+              }).format(new Date(report.closes_at))}
+              .
+            </>
+          }
+        />
         {closed ? (
-          <section className="rounded-3xl border border-line bg-panel/60 p-8 text-center">
-            <h2 className="display text-3xl">Reports closed</h2>
+          <section className="rounded-2xl border border-line bg-panel/60 p-8 text-center">
+            <h2 className="font-semibold text-heading">Reports closed</h2>
             <p className="mt-3 text-ink-dim">
               {report.survey_status === "finalized"
                 ? "Results are ready in the Chronicle."
@@ -112,7 +108,7 @@ export default async function SessionReportPage({ params }: Props) {
             </p>
             {report.survey_status === "finalized" && (
               <Link
-                className="mt-5 inline-flex min-h-12 items-center rounded-xl bg-brass px-5 font-black text-ink-on-accent"
+                className="mt-5 inline-flex min-h-12 items-center rounded-xl bg-brass px-5 font-extrabold text-ink-on-accent"
                 href={`/chronicle`}
               >
                 Open Chronicle

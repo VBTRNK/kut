@@ -15,8 +15,8 @@ export function CancelSessionForm({ sessionId }: { sessionId: string }) {
     >
       <input name="sessionId" type="hidden" value={sessionId} />
       <div className="space-y-1">
-        <h2 className="text-xl font-bold text-brick">Cancel this published session</h2>
-        <p className="text-sm leading-6 text-brick/85">
+        <h2 className="text-heading font-semibold text-brick">Cancel this published session</h2>
+        <p className="text-small leading-6 text-brick/85">
           It will stay in the audit trail, but its attendance will no longer affect Live Ratings.
         </p>
       </div>
@@ -32,10 +32,10 @@ export function CancelSessionForm({ sessionId }: { sessionId: string }) {
         />
       </label>
       {state.error && (
-        <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+        <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
       )}
       <button
-        className="min-h-12 w-full rounded-xl bg-brick px-4 py-3 font-bold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line"
+        className="min-h-12 w-full rounded-xl bg-brick px-4 py-3 font-semibold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line"
         disabled={isPending}
         type="submit"
       >

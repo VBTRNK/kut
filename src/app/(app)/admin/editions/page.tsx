@@ -17,31 +17,30 @@ export default async function EditionsPage() {
   const editions = (data ?? []) as EditionArchiveRow[];
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
+    <main className="board-ground min-h-screen px-4 pt-4 pb-8 text-body text-ink sm:px-8 sm:pt-8">
       <section className="mx-auto max-w-6xl space-y-8 py-4 sm:py-8">
         <header>
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.28em] text-brass">
-            Club administration
-          </p>
-          <h1 className="display mt-3 text-3xl sm:text-6xl">Special editions</h1>
+          <h1 className="mt-3 font-serif text-title font-normal sm:text-title-lg">
+            Special editions
+          </h1>
         </header>
 
         {editions.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-line bg-board-deep/35 px-6 py-12 text-center sm:px-10 sm:py-16">
+          <div className="rounded-2xl border border-dashed border-line bg-board-deep/35 px-6 py-12 text-center sm:px-10 sm:py-16">
             <div
               aria-hidden="true"
-              className="mx-auto flex aspect-[5/7] w-28 items-center justify-center rounded-2xl border border-dashed border-steel/50 bg-panel text-4xl text-brass"
+              className="mx-auto flex aspect-[5/7] w-28 items-center justify-center rounded-2xl border border-dashed border-steel/50 bg-panel text-heading text-brass"
             >
               ▱
             </div>
-            <h2 className="display mx-auto mt-7 max-w-sm text-3xl">
+            <h2 className="font-semibold mx-auto mt-7 max-w-sm text-heading">
               No special editions have been issued.
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-ink-dim">
               A football moment, kept on a card. When editions are introduced, their history will
               live here.
             </p>
-            <p className="mx-auto mt-7 max-w-lg border-t border-line/60 pt-7 text-sm text-ink-dim">
+            <p className="mx-auto mt-7 max-w-lg border-t border-line/60 pt-7 text-small text-ink-dim">
               Packs currently contain Live cards only.
             </p>
           </div>
@@ -52,8 +51,8 @@ export default async function EditionsPage() {
                 className="flex min-h-16 items-center justify-between gap-4 py-4"
                 key={edition.id}
               >
-                <span className="font-black">{edition.title}</span>
-                <span className="text-sm capitalize text-ink-dim">
+                <span className="font-extrabold">{edition.title}</span>
+                <span className="text-small capitalize text-ink-dim">
                   {edition.edition_type.replaceAll("_", " ")}
                 </span>
               </li>
@@ -61,7 +60,7 @@ export default async function EditionsPage() {
           </ul>
         )}
 
-        <p className="text-sm text-ink-dim">
+        <p className="text-small text-ink-dim">
           Foundation only: there is no edition creation, issuance action, or Special card in this
           release.
         </p>

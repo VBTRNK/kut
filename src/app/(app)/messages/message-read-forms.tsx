@@ -10,9 +10,9 @@ export function MarkAllMessagesReadForm() {
   return (
     <form action={formAction}>
       <input name="all" type="hidden" value="1" />
-      {state.error && <p className="mb-2 text-sm text-brick">{state.error}</p>}
+      {state.error && <p className="mb-2 text-small text-brick">{state.error}</p>}
       <button
-        className="min-h-10 rounded-xl border border-brass px-4 text-sm font-black text-brass disabled:border-line disabled:text-ink-faint"
+        className="min-h-11 rounded-xl border border-line bg-panel px-4 text-body font-semibold text-ink hover:border-brass-line disabled:text-ink-faint"
         disabled={pending}
         type="submit"
       >

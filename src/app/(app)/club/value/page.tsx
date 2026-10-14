@@ -1,3 +1,6 @@
+import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
+import { Block } from "@/components/ui/block";
+import { InfoLink } from "@/components/ui/links";
 import Link from "next/link";
 import { ECONOMY } from "@/game/economy";
 import { requireUser } from "@/lib/auth/user";
@@ -60,68 +63,51 @@ export default async function ClubValuePage() {
   };
   const editions = (editionsResponse.data ?? []) as EditionRow[];
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-3xl space-y-8 py-4 sm:py-8">
-        <Link className="text-sm font-bold text-brass hover:underline" href="/club/collection">
-          &larr; Collection
-        </Link>
-        <header>
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            Your collection
-          </p>
-          <h1 className="display mt-3 text-3xl sm:text-6xl">Club Value</h1>
-        </header>
-        <section>
-          <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.16em] text-ink-faint">
-            Your Club Value
-          </p>
-          <p className="mt-2 text-5xl font-black tabular-nums text-brass">
-            {nf.format(value.club_value)}
-          </p>
-          <dl className="mt-7 grid grid-cols-3 gap-4">
+    <main className={PAGE}>
+      <section className={COLUMN}>
+        <PageHeader title="Club Value" back={{ href: "/club/collection", label: "Collection" }} />
+        <Block title="Your Club Value">
+          <p className="text-figure font-extrabold tabular-nums">{nf.format(value.club_value)}</p>
+          <dl className="mt-7 grid gap-4 sm:grid-cols-3">
             <div>
-              <dt className="text-[0.6rem] font-black uppercase tracking-wider text-ink-faint">
-                Wallet
-              </dt>
-              <dd className="mt-2 text-2xl font-black">{nf.format(value.wallet_balance)}</dd>
+              <dt className="text-label font-semibold text-ink-faint">Wallet</dt>
+              <dd className="mt-2 text-heading font-extrabold">
+                {nf.format(value.wallet_balance)}
+              </dd>
             </div>
             <div>
-              <dt className="text-[0.6rem] font-black uppercase tracking-wider text-ink-faint">
-                Collection
-              </dt>
-              <dd className="mt-2 text-2xl font-black">{nf.format(value.owned_cards_value)}</dd>
+              <dt className="text-label font-semibold text-ink-faint">Collection</dt>
+              <dd className="mt-2 text-heading font-extrabold">
+                {nf.format(value.owned_cards_value)}
+              </dd>
             </div>
             <div>
-              <dt className="text-[0.6rem] font-black uppercase tracking-wider text-ink-faint">
-                Personal card
-              </dt>
-              <dd className="mt-2 text-2xl font-black">{nf.format(value.personal_card_bonus)}</dd>
+              <dt className="text-label font-semibold text-ink-faint">Personal card</dt>
+              <dd className="mt-2 text-heading font-extrabold">
+                {nf.format(value.personal_card_bonus)}
+              </dd>
             </div>
           </dl>
-          <p className="mt-7 text-sm text-ink-dim">
+          <p className="mt-7 text-small text-ink-dim">
             {nf.format(value.wallet_balance)} + {nf.format(value.owned_cards_value)} +{" "}
             {nf.format(value.personal_card_bonus)} = {nf.format(value.club_value)} &middot;{" "}
             {value.card_count} cards, {value.unique_player_count} different players
           </p>
-        </section>
-        <section>
-          <p className="text-[0.65rem] font-extrabold uppercase tracking-[0.16em] text-ink-faint">
-            How copies count
-          </p>
-          <div className="mt-4 grid grid-cols-4 gap-2">
+        </Block>
+        <Block title="How copies count">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {ECONOMY.duplicateEditionWeights.map(({ label, percent }) => (
               <div className="rounded-xl border border-line p-3 text-center" key={label}>
-                <p className="text-xs text-ink-dim">{label}</p>
-                <p className="mt-2 text-xl font-black text-brass">{percent}%</p>
+                <p className="text-label text-ink-dim">{label}</p>
+                <p className="mt-2 text-heading font-extrabold text-brass">{percent}%</p>
               </div>
             ))}
           </div>
-          <p className="mt-4 text-sm text-ink-dim">
+          <p className="mt-4 text-small text-ink-dim">
             Per edition. Discard payouts stay at their full value.
           </p>
-        </section>
-        <section>
-          <h2 className="display text-3xl">Your collection&rsquo;s share</h2>
+        </Block>
+        <Block title="Your collection’s share">
           {editions.length === 0 ? (
             <p className="mt-4 text-ink-dim">No cards yet.</p>
           ) : (
@@ -133,12 +119,12 @@ export default async function ClubValuePage() {
                 >
                   <div>
                     <Link
-                      className="font-black text-brass hover:underline"
+                      className="font-extrabold text-brass hover:underline"
                       href={`/club/value/${edition.edition_id}`}
                     >
                       {edition.edition_title} &rarr;
                     </Link>
-                    <p className="mt-1 text-xs text-ink-dim">
+                    <p className="mt-1 text-label text-ink-dim">
                       {edition.copy_count} {edition.copy_count === 1 ? "copy" : "copies"} &middot;{" "}
                       {edition.discard_value} base value
                     </p>
@@ -150,11 +136,10 @@ export default async function ClubValuePage() {
               ))}
             </ul>
           )}
-        </section>
-        <section className="rounded-2xl border border-line bg-panel/50 p-5 text-sm text-ink-dim">
-          <h2 className="font-black text-ink">
-            Personal card &times;{value.personal_card_weight ?? ECONOMY.personalCardClubWeight}
-          </h2>
+        </Block>
+        <Block
+          title={`Personal card ×${value.personal_card_weight ?? ECONOMY.personalCardClubWeight}`}
+        >
           <p className="mt-2">
             {value.personal_card_player_name ? (
               <>
@@ -171,7 +156,8 @@ export default async function ClubValuePage() {
               "No player is linked to this account, so the personal-card bonus is zero."
             )}
           </p>
-        </section>
+        </Block>
+        <InfoLink href="/how-it-works#value">How Club Value works</InfoLink>
       </section>
     </main>
   );

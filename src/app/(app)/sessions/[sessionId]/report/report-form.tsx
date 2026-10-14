@@ -93,14 +93,14 @@ export function ReportForm({
           } before submitting.`
         : null;
   return (
-    <form className="space-y-7" onSubmit={submit}>
+    <form className="grid gap-6" onSubmit={submit}>
       <input name="sessionId" type="hidden" value={sessionId} />
       <input name="sessionDate" type="hidden" value={sessionDate} />
       <input name="revision" type="hidden" value={effectiveRevision} />
       <input name="categoryIds" type="hidden" value={categoryIds.join(",")} />
       {state.saved && (
         <p
-          className="rounded-xl border border-moss-line bg-moss-bg p-4 font-bold text-moss"
+          className="rounded-xl border border-moss-line bg-moss-bg p-4 font-semibold text-moss"
           role="status"
         >
           {state.rewarded
@@ -110,23 +110,23 @@ export function ReportForm({
       )}
       {state.error && (
         <div
-          className="rounded-xl border border-brick-line bg-brick-bg p-4 font-bold text-brick"
+          className="rounded-xl border border-brick-line bg-brick-bg p-4 font-semibold text-brick"
           role="alert"
         >
           {state.error}
         </div>
       )}
-      <fieldset className="space-y-3">
-        <legend className="display text-3xl">{countQuestion(sessionDate)}</legend>
+      <fieldset className="space-y-3 rounded-2xl border border-line/60 bg-panel/60 p-4">
+        <legend className="font-semibold text-heading">{countQuestion(sessionDate)}</legend>
         {combined && (
-          <p className="text-sm text-ink-dim">
+          <p className="text-small text-ink-dim">
             One number: your goals and assists added together. 2 goals and 2 assists is 4.
           </p>
         )}
         <div className="flex flex-wrap gap-2">
           {[0, 1, 2, 3, 4, 5].map((value) => (
             <button
-              className={`min-h-11 min-w-11 rounded-xl border font-black ${goals === String(value) ? "border-brass bg-brass text-ink-on-accent" : "border-line bg-panel"}`}
+              className={`min-h-11 min-w-11 rounded-xl border font-extrabold ${goals === String(value) ? "border-brass bg-brass text-ink-on-accent" : "border-line bg-panel"}`}
               key={value}
               onClick={() => setGoals(String(value))}
               type="button"
@@ -135,10 +135,10 @@ export function ReportForm({
             </button>
           ))}
         </div>
-        <label className="block max-w-48 text-sm font-bold">
+        <label className="block max-w-48 text-small font-semibold">
           6 or more
           <input
-            className="mt-2 min-h-12 w-full rounded-xl border border-line bg-panel px-4 text-base"
+            className="mt-2 min-h-12 w-full rounded-xl border border-line bg-panel px-4 text-body"
             max="99"
             min="0"
             name="goals"
@@ -148,15 +148,15 @@ export function ReportForm({
           />
         </label>
         {highGoals && (
-          <label className="flex min-h-11 items-center gap-3 text-sm font-bold">
+          <label className="flex min-h-11 items-center gap-3 text-small font-semibold">
             <input name="confirmGoals" type="checkbox" value="yes" />
             Confirm {formatReportedCount(Number(goals), sessionDate)}
           </label>
         )}
       </fieldset>
-      <fieldset className="space-y-4">
-        <legend className="display text-3xl">Give kudos</legend>
-        <p className="text-sm text-ink-dim">
+      <fieldset className="space-y-4 rounded-2xl border border-line/60 bg-panel/60 p-4">
+        <legend className="font-semibold text-heading">Give kudos</legend>
+        <p className="text-small text-ink-dim">
           Choose a different teammate in each category, or explicitly Skip. Categories you leave
           unanswered are not a Skip
           {submitted ? "." : " — you can save a draft and come back to them."}
@@ -169,10 +169,10 @@ export function ReportForm({
               className={`block rounded-2xl border bg-panel/60 p-4 ${duplicated ? "border-brick-line" : "border-line"}`}
               key={category.id}
             >
-              <span className="font-black">{category.title}</span>
-              <span className="mt-1 block text-xs text-ink-faint">{category.description}</span>
+              <span className="font-extrabold">{category.title}</span>
+              <span className="mt-1 block text-label text-ink-faint">{category.description}</span>
               <select
-                className="mt-3 min-h-12 w-full rounded-xl border border-line bg-board px-3 text-base"
+                className="mt-3 min-h-12 w-full rounded-xl border border-line bg-board px-3 text-body"
                 name={`category-${category.id}`}
                 onChange={(e) =>
                   setBallot((current) => ({ ...current, [category.id]: e.target.value }))
@@ -190,7 +190,7 @@ export function ReportForm({
                 <option value={SKIP}>Skip this category</option>
               </select>
               {duplicated && (
-                <span className="mt-2 block text-xs font-bold text-brick">
+                <span className="mt-2 block text-label font-semibold text-brick">
                   Already picked in another category.
                 </span>
               )}
@@ -198,20 +198,20 @@ export function ReportForm({
           );
         })}
       </fieldset>
-      <p className="text-sm text-ink-dim">
+      <p className="text-small text-ink-dim">
         {combined ? "Enter your combined goals and assists total" : "Enter your goals"} and choose
         or skip each category. A complete first submission earns 50 FLUT Coins; edits never pay
         twice.
       </p>
       {blocker && (
-        <p className="text-sm font-bold text-ink-dim" role="status">
+        <p className="text-small font-semibold text-ink-dim" role="status">
           {blocker}
         </p>
       )}
       <div className={`grid gap-3 ${submitted ? "" : "sm:grid-cols-2"}`}>
         {!submitted && (
           <button
-            className="min-h-13 rounded-xl border border-line bg-panel font-black"
+            className="min-h-13 rounded-xl border border-line bg-panel font-extrabold"
             disabled={pending || duplicates.size > 0}
             name="intent"
             type="submit"
@@ -221,7 +221,7 @@ export function ReportForm({
           </button>
         )}
         <button
-          className="min-h-13 rounded-xl bg-brass font-black text-ink-on-accent disabled:opacity-50"
+          className="min-h-13 rounded-xl bg-brass font-extrabold text-ink-on-accent disabled:opacity-50"
           disabled={pending || blocker !== null}
           name="intent"
           type="submit"

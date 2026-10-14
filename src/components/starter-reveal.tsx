@@ -36,20 +36,20 @@ export function StarterReveal({ cards }: { cards: RevealCard[] }) {
 
   return (
     <div className="pack-reveal space-y-5 text-center">
-      <div className="pack-reveal__stage rounded-3xl border border-brass/40 bg-[radial-gradient(circle_at_top,_#4a2f08,_#15130f_62%)]">
+      <div className="grid aspect-[4/3] place-items-center rounded-2xl border border-brass-line bg-[radial-gradient(circle_at_top,_#4a2f08,_#15130f_62%)]">
         <div className="pack-reveal__seal">
-          <p className="text-6xl">&#127890;</p>
-          <p className="mt-3 text-sm font-black uppercase tracking-[0.25em] text-brass">
-            Sealed starter pack
+          <p aria-hidden="true" className="text-figure">
+            &#127890;
           </p>
+          <p className="mt-3 text-label font-semibold text-brass">Sealed starter pack</p>
         </div>
       </div>
       <p className="mx-auto max-w-md leading-7 text-ink-dim">
-        250 FLUT Coins and three Live Cards are already yours &mdash; open the pack to meet them.
+        250 FLUT Coins and three Live Cards are already yours.
       </p>
-      {error && <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{error}</p>}
+      {error && <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{error}</p>}
       <button
-        className="min-h-12 rounded-xl bg-brass px-6 py-3 font-black text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
+        className="min-h-12 rounded-xl bg-brass px-6 py-3 font-extrabold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
         disabled={pending}
         onClick={open}
         type="button"

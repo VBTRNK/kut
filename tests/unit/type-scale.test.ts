@@ -28,6 +28,10 @@ describe("type-scale ratchet (ADR-153)", () => {
     expect(rows).toEqual([{ file: "src/a.tsx", count: 2 }]);
   });
 
+  it("keeps the approved brand lockup outside the page scale", () => {
+    expect(tally({ "src/components/brand-lockup.tsx": 'className="text-[40px]"' })).toEqual([]);
+  });
+
   it("only lets the count fall, and asks for the ceiling to follow it down", () => {
     expect(checkCeiling(10, 10)).toBeNull();
     expect(checkCeiling(11, 10)).toMatch(/over the ceiling of 10/);

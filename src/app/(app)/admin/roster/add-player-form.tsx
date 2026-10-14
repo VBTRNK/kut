@@ -39,7 +39,7 @@ export function AddPlayerForm({ existingNames }: { existingNames: string[] }) {
           />
         </label>
         {duplicate && (
-          <p className="rounded-xl bg-warning-bg p-3 text-sm text-warning">
+          <p className="rounded-xl bg-warning-bg p-3 text-small text-warning">
             A player called “{name.trim()}” already exists — add a distinguishing name (e.g. “Nick
             B”) if this is a different person.
           </p>
@@ -65,20 +65,20 @@ export function AddPlayerForm({ existingNames }: { existingNames: string[] }) {
             maxLength={120}
             name="full_name"
           />
-          <span className="block text-sm text-ink-faint">
+          <span className="block text-small text-ink-faint">
             Optional. Kept for admin reference only.
           </span>
         </label>
         {state && !state.ok && (
-          <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+          <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
         )}
         {state?.ok && (
-          <p className="rounded-xl bg-moss-bg p-3 text-sm text-moss">
+          <p className="rounded-xl bg-moss-bg p-3 text-small text-moss">
             Added {state.player.display_name} (slug: {state.player.slug})
           </p>
         )}
         <button
-          className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-bold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
+          className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-semibold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
           disabled={isPending}
           type="submit"
         >

@@ -33,14 +33,14 @@ export function LogoutButton({ variant = "button" }: LogoutButtonProps) {
     return (
       <div className="flex flex-col gap-1">
         <button
-          className="flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-sm font-bold text-ink-dim hover:bg-panel-2 disabled:text-ink-faint"
+          className="flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-small font-semibold text-ink-dim hover:bg-panel-2 disabled:text-ink-faint"
           disabled={isSigningOut}
           onClick={signOut}
           type="button"
         >
           {isSigningOut ? "Signing out..." : "Sign out"}
         </button>
-        {error && <p className="px-3 text-xs text-brick">{error}</p>}
+        {error && <p className="px-3 text-label text-brick">{error}</p>}
       </div>
     );
   }
@@ -48,14 +48,14 @@ export function LogoutButton({ variant = "button" }: LogoutButtonProps) {
   return (
     <div className="flex flex-col items-end gap-1">
       <button
-        className="min-h-10 rounded-xl border border-line px-3 text-sm font-bold text-ink-dim hover:border-brass hover:text-brass disabled:border-line disabled:text-ink-faint"
+        className="min-h-11 rounded-xl border border-line px-3 text-small font-semibold text-ink-dim hover:border-brass hover:text-brass disabled:border-line disabled:text-ink-faint"
         disabled={isSigningOut}
         onClick={signOut}
         type="button"
       >
         {isSigningOut ? "Signing out..." : "Sign out"}
       </button>
-      {error && <p className="max-w-48 text-right text-xs text-brick">{error}</p>}
+      {error && <p className="max-w-48 text-right text-label text-brick">{error}</p>}
     </div>
   );
 }

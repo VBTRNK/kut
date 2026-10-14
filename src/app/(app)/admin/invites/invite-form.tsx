@@ -51,10 +51,10 @@ export function InviteForm({ players }: { players: Player[] }) {
           </select>
         </label>
         {state.error && (
-          <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+          <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
         )}
         <button
-          className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-bold text-ink-on-accent disabled:bg-line disabled:text-ink-faint"
+          className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-semibold text-ink-on-accent disabled:bg-line disabled:text-ink-faint"
           disabled={isPending}
           type="submit"
         >
@@ -64,19 +64,19 @@ export function InviteForm({ players }: { players: Player[] }) {
 
       {state.inviteUrl && state.playerName && (
         <section className="space-y-3 rounded-2xl border border-moss-line bg-moss-line/10 p-5">
-          <h2 className="display text-2xl">Invite ready for {state.playerName}</h2>
-          <p className="text-sm text-moss">
+          <h2 className="font-semibold text-heading">Invite ready for {state.playerName}</h2>
+          <p className="text-small text-moss">
             Copy and share this once. The token is not stored in readable form and cannot be shown
             again here.
           </p>
           <input
             aria-label="One-time invite link"
-            className="min-h-12 w-full rounded-xl border border-moss/50 bg-board-deep/60 px-3 text-sm"
+            className="min-h-12 w-full rounded-xl border border-moss/50 bg-board-deep/60 px-3 text-small"
             readOnly
             value={state.inviteUrl}
           />
           <button
-            className="min-h-12 w-full rounded-xl bg-moss px-4 py-3 font-bold text-ink-on-accent"
+            className="min-h-12 w-full rounded-xl bg-moss px-4 py-3 font-semibold text-ink-on-accent"
             onClick={copyInvite}
             type="button"
           >

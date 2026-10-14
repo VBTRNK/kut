@@ -53,7 +53,7 @@ export function ResetPasswordForm({ accounts }: { accounts: Account[] }) {
           required
           type="password"
         />
-        <span className="block text-sm text-ink-faint">
+        <span className="block text-small text-ink-faint">
           Use at least 12 characters. It is never stored in FLUT’s database or audit log.
         </span>
       </label>
@@ -69,13 +69,13 @@ export function ResetPasswordForm({ accounts }: { accounts: Account[] }) {
         />
       </label>
       {state.error && (
-        <p className="rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
+        <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
       )}
       {state.success && (
-        <p className="rounded-xl bg-moss-bg p-3 text-sm text-moss">{state.success}</p>
+        <p className="rounded-xl bg-moss-bg p-3 text-small text-moss">{state.success}</p>
       )}
       <button
-        className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-bold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
+        className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-semibold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
         disabled={isPending}
         type="submit"
       >
