@@ -430,6 +430,8 @@ and ADR-074 (card detail; the full rating story stays on the Player page).
 - Trading uses wanted rows, an add sheet and copy controls; listed/escrowed
   copies stay disabled. Card details use rating insets, listing and discard
   blocks; the irreversible confirmation and server actions stay.
+- Trading summary read failures are logged and omit counts/completion, while
+  title, tabs and controls remain; core Trading read errors stay fatal (#309).
 - Packs keep their art, shortened copy and price confirmation; errors and
   stale-price/idempotency handling stay. Summary tags sit below cards.
 - Removed explanations live at How it works `#cards`, `#packs`, `#trading`.

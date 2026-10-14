@@ -26,9 +26,10 @@ export function Completion({ count, total }: { count: number; total: number }) {
 
 type CollectionHeaderProps = {
   mode: "album" | "manage" | "trading";
-  cardCount: number;
-  uniquePlayers: number;
-  totalPlayers: number;
+  /** Null when the collection summary could not be read. */
+  cardCount: number | null;
+  uniquePlayers: number | null;
+  totalPlayers: number | null;
   /** Null when the figure could not be read — the header simply omits it. */
   clubValue: number | null;
   showArchetypeNudge: boolean;
@@ -42,18 +43,22 @@ export function CollectionHeader({
   clubValue,
   showArchetypeNudge,
 }: CollectionHeaderProps) {
+  const summaryAvailable = cardCount !== null && uniquePlayers !== null && totalPlayers !== null;
   return (
     <header className="grid gap-4">
       <PageHeader
         title="Collection"
         sub={
-          <>
-            {uniquePlayers} of {totalPlayers} Players · {cardCount}{" "}
-            {cardCount === 1 ? "card" : "cards"}
-            {clubValue !== null && (
-              <>
-                {" "}
-                ·{" "}
+          summaryAvailable || clubValue !== null ? (
+            <>
+              {summaryAvailable && (
+                <>
+                  {uniquePlayers} of {totalPlayers} Players · {cardCount}{" "}
+                  {cardCount === 1 ? "card" : "cards"}
+                  {clubValue !== null && " · "}
+                </>
+              )}
+              {clubValue !== null && (
                 <Link
                   prefetch={false}
                   className="font-semibold text-brass hover:underline"
@@ -61,12 +66,12 @@ export function CollectionHeader({
                 >
                   Club Value {clubValue.toLocaleString()} ›
                 </Link>
-              </>
-            )}
-          </>
+              )}
+            </>
+          ) : undefined
         }
       />
-      <Completion count={uniquePlayers} total={totalPlayers} />
+      {summaryAvailable && <Completion count={uniquePlayers} total={totalPlayers} />}
       <div className="grid gap-3">
         <SectionNav active={mode} label="Collection view" tabs={VIEW_TABS} />
         {showArchetypeNudge && (
