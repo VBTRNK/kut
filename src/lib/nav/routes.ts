@@ -128,6 +128,7 @@ export const ACCOUNT_ROUTES: readonly RouteEntry[] = [
  *  server pages, so a component prop would fail the RSC boundary. */
 export const MARKET_TABS: readonly RouteEntry[] = [
   { key: "buy", href: "/market", label: "Buy" },
+  { key: "selling", href: "/market/selling", label: "Selling" },
   { key: "offers", href: "/market/offers", label: "Offers" },
 ];
 

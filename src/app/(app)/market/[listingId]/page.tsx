@@ -1,7 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AttributeBars } from "@/components/card-stats";
-import { IconCoin } from "@/components/icons";
+import { Block } from "@/components/ui/block";
+import { Button } from "@/components/ui/button";
+import { COLUMN, PAGE, PageHeader } from "@/components/ui/page";
+import { Figure } from "@/components/ui/tag";
 import { LiveCard } from "@/components/live-card";
 import { MarketOwnership } from "@/components/market-ownership";
 import { archetypeLabel } from "@/game/archetypes";
@@ -26,6 +28,7 @@ type ListingPageProps = { params: Promise<{ listingId: string }> };
 type Listing = ListedCardRow & {
   listing_id: string;
   edition_id: string;
+  card_id: string;
   price: number;
   seller_id: string;
   seller_display_name: string;
@@ -106,99 +109,69 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const cardPlayer = toListedCardPlayer(listing, injuredPlayerIds, photoUrls);
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-5xl space-y-8 py-4 sm:py-8">
-        <Link
-          prefetch={false}
-          className="text-sm font-bold text-brass hover:underline"
-          href="/market"
-        >
-          &larr; Market
-        </Link>
-
-        <div className="grid gap-10 pb-24 md:grid-cols-[minmax(240px,330px)_minmax(0,1fr)] md:items-start sm:pb-0 lg:gap-16">
-          <div>
+    <main className={`${PAGE} pb-28 sm:pb-8`}>
+      <section className={`${COLUMN} lg:max-w-5xl`}>
+        <PageHeader
+          back={{ href: "/market", label: "Market" }}
+          title={listing.display_name}
+          sub={
+            <>
+              {archetypeLabel(listing.archetype)} ·{" "}
+              <span className="capitalize">{listing.rarity_tier}</span> · {listing.ovr} OVR
+            </>
+          }
+        />
+        <div className="grid gap-6 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] md:items-start">
+          <div className="mx-auto w-full max-w-[15rem] md:max-w-none">
             <LiveCard
               badge={ownership && <MarketOwnership ownership={ownership} />}
               player={cardPlayer}
               size="detail"
             />
           </div>
-
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-                {archetypeLabel(listing.archetype)} &middot;{" "}
-                <span className="capitalize">{listing.rarity_tier}</span> &middot; {listing.ovr} OVR
-              </p>
-              <h1 className="display text-3xl sm:text-6xl">{listing.display_name}</h1>
-              <p className="flex items-center gap-2 text-3xl font-black tabular-nums text-brass">
-                <IconCoin aria-hidden="true" className="h-6 w-6" />
-                {listing.price.toLocaleString()}
-                <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-ink-dim">
-                  FLUT Coins
-                </span>
-              </p>
-              {/* The price's floor (KB-027): what the card pays out if discarded,
-                  from kut.card_discard_value via the view. Only a real number
-                  shows; never a stand-in (KB-014). */}
-              {typeof listing.discard_value === "number" && (
-                <div className="-mt-1 space-y-0.5">
-                  <p className="flex items-center gap-2 text-sm font-extrabold">
-                    <span className="text-ink-dim">Discard value</span>
-                    <span className="flex items-center gap-1 font-black tabular-nums text-ink">
-                      <IconCoin aria-hidden="true" className="h-3.5 w-3.5 text-brass" />
-                      {listing.discard_value.toLocaleString()}
-                      <span className="sr-only">FLUT Coins</span>
-                    </span>
+          <div className="grid min-w-0 gap-6">
+            <Block title="Buy now">
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <p>
+                  <Figure>{listing.price.toLocaleString()}</Figure>
+                  <span className="sr-only"> FLUT Coins</span>
+                </p>
+                <p className="text-small text-ink-dim">
+                  {typeof listing.discard_value === "number" && (
+                    <>Discard value {listing.discard_value.toLocaleString()} · </>
+                  )}
+                  Sold by {listing.seller_display_name}
+                </p>
+              </div>
+              {isOwnListing ? (
+                <>
+                  <p className="text-small text-ink-dim">
+                    This is your listing. Cancel it from this card in your Collection.
                   </p>
-                  <p className="text-xs text-ink-faint">
-                    What this card pays out if you discard it.
-                  </p>
-                </div>
-              )}
-              <p className="text-sm font-bold text-ink-faint">
-                Sold by {listing.seller_display_name}
-              </p>
-            </div>
-
-            <AttributeBars player={listing} />
-
-            <hr className="border-line/40" />
-
-            {isOwnListing ? (
-              <p className="rounded-2xl border border-dashed border-line p-4 text-sm font-bold text-ink-faint">
-                This is your listing. Cancel it from this card in your Collection.
-              </p>
-            ) : (
-              <div className="space-y-6">
-                {/* On a phone the detail card is ~460px tall, so Buy sat below the
-                    fold under the name, the attribute bars and a rule. It is
-                    pinned above the tab bar instead — rendered once, never
-                    duplicated, so there is no second submit path. At `sm` it
-                    returns to the flow beside the card, where there is room.
-                    The card page next door keeps its actions in the flow: List
-                    and Discard are panels with an input and a confirm, not one
-                    button, and will not fit a bar. */}
+                  <Button href={`/club/collection/${listing.card_id}`} kind="secondary">
+                    View your card
+                  </Button>
+                </>
+              ) : (
                 <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] z-20 border-t border-line/60 bg-board-deep/95 p-4 backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
                   <BuyListingForm
+                    detail
                     canAfford={balance >= listing.price}
                     listingId={listing.listing_id}
                     price={listing.price}
                   />
                 </div>
-
-                <div className="space-y-3">
-                  <h2 className="text-[0.7rem] font-extrabold uppercase tracking-[0.16em] text-ink-faint">
-                    Or make an offer
-                  </h2>
-                  <ProposeOfferForm
-                    askingPrice={listing.price}
-                    listingId={listing.listing_id}
-                    offerableCards={offerableCards}
-                  />
-                </div>
-              </div>
+              )}
+            </Block>
+            <AttributeBars player={listing} />
+            {!isOwnListing && (
+              <Block title="Or make an offer">
+                <ProposeOfferForm
+                  askingPrice={listing.price}
+                  listingId={listing.listing_id}
+                  offerableCards={offerableCards}
+                />
+              </Block>
             )}
           </div>
         </div>

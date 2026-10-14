@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Block } from "@/components/ui/block";
+import { COLUMN, PAGE, PageHeader, FOCUS } from "@/components/ui/page";
+import { Tag } from "@/components/ui/tag";
 import { formatDate } from "@/lib/format";
 import { requireUser } from "@/lib/auth/user";
 import { getNavContext } from "@/lib/nav/context";
@@ -30,99 +33,68 @@ type TradeOffer = {
 };
 
 const STATUS_LABEL: Record<TradeOffer["status"], string> = {
-  active: "Awaiting response",
+  active: "Open",
   accepted: "Accepted",
   rejected: "Declined",
   withdrawn: "Withdrawn",
   expired: "Expired",
 };
 
-function OfferCard({ offer }: { offer: TradeOffer }) {
+function OfferCard({
+  offer,
+  now,
+  primary = false,
+}: {
+  offer: TradeOffer;
+  now: number;
+  primary?: boolean;
+}) {
   const cards = Array.isArray(offer.offered_cards) ? offer.offered_cards : [];
   return (
-    <li className="rounded-2xl border border-line/60 bg-panel/60 p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-brass">
-            {offer.is_outgoing ? `To ${offer.seller_name}` : `From ${offer.proposer_name}`}
-          </p>
-          <h2 className="mt-1 text-xl font-black">
+    <li>
+      <Block
+        title={
+          <>
             <Link
               prefetch={false}
-              className="hover:text-brass"
+              className={`rounded-md hover:text-brass ${FOCUS}`}
               href={`/players/${offer.listing_card_slug}`}
             >
               {offer.listing_card_name}
-            </Link>
-          </h2>
-          <p className="mt-0.5 text-sm text-ink-faint">
-            Listed at {offer.listing_price} FLUT Coins
-          </p>
-        </div>
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.1em] ${
-            offer.status === "active"
-              ? "bg-brass/15 text-brass"
-              : offer.status === "accepted"
-                ? "bg-moss-bg text-moss"
-                : "bg-board text-ink-faint"
-          }`}
-        >
-          {STATUS_LABEL[offer.status]}
-        </span>
-      </div>
-
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-xl bg-board/60 p-3">
-          <dt className="text-xs font-bold uppercase tracking-[0.12em] text-ink-faint">
-            Offered coins
-          </dt>
-          <dd className="mt-1 text-lg font-black tabular-nums">{offer.offered_coins}</dd>
-        </div>
-        <div className="rounded-xl bg-board/60 p-3">
-          <dt className="text-xs font-bold uppercase tracking-[0.12em] text-ink-faint">
-            {offer.status === "active" ? "Expires" : "Resolved"}
-          </dt>
-          <dd className="mt-1 text-sm font-bold">
-            {formatDate(
-              offer.status === "active"
-                ? offer.expires_at
-                : (offer.resolved_at ?? offer.expires_at),
-            )}
-          </dd>
-        </div>
-      </dl>
-
-      {cards.length > 0 && (
-        <div className="mt-3">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-ink-faint">
-            Plus {cards.length} card(s)
-          </p>
-          <ul className="mt-1 flex flex-wrap gap-2">
-            {cards.map((card) => (
-              <li
-                key={card.card_id}
-                className="rounded-lg border border-line px-2 py-1 text-xs font-semibold"
-              >
-                {card.display_name} <span className="text-ink-faint">· {card.ovr}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {offer.status === "accepted" && !offer.is_outgoing && offer.coins_to_seller !== null && (
-        <p className="mt-3 text-sm font-bold text-moss">
-          You received {offer.coins_to_seller} FLUT Coins after the 5% burn.
+            </Link>{" "}
+            · {offer.listing_price} asked
+          </>
+        }
+        tone={primary ? "now" : "plain"}
+        aside={
+          <Tag tone={offer.status === "accepted" ? "won" : "neutral"}>
+            {STATUS_LABEL[offer.status]}
+          </Tag>
+        }
+      >
+        <p className="text-small text-ink-dim">
+          {offer.is_outgoing ? `To ${offer.seller_name}` : `From ${offer.proposer_name}`} ·{" "}
+          {offer.status === "active"
+            ? `${Math.max(0, Math.ceil((Date.parse(offer.expires_at) - now) / 3_600_000))} h left`
+            : `Resolved ${formatDate(offer.resolved_at ?? offer.expires_at)}`}
         </p>
-      )}
-
-      {offer.status === "active" && !offer.is_outgoing && (
-        <RespondToOfferForms offerId={offer.offer_id} />
-      )}
-      {offer.status === "active" && offer.is_outgoing && (
-        <WithdrawOfferForm offerId={offer.offer_id} />
-      )}
+        <p className="text-body">
+          <b className="font-semibold tabular-nums">{offer.offered_coins} coins</b>
+          {cards.length > 0 &&
+            ` + ${cards.map((card) => `${card.display_name} (${card.ovr})`).join(", ")}`}
+        </p>
+        {offer.status === "accepted" && !offer.is_outgoing && offer.coins_to_seller !== null && (
+          <p className="text-small text-moss">
+            You received {offer.coins_to_seller} FLUT Coins after the 5% burn.
+          </p>
+        )}
+        {offer.status === "active" && !offer.is_outgoing && (
+          <RespondToOfferForms offerId={offer.offer_id} primary={primary} />
+        )}
+        {offer.status === "active" && offer.is_outgoing && (
+          <WithdrawOfferForm offerId={offer.offer_id} />
+        )}
+      </Block>
     </li>
   );
 }
@@ -156,6 +128,8 @@ export default async function TradeOffersPage({ searchParams }: OffersPageProps)
   const offers = (data ?? []) as TradeOffer[];
   const incoming = offers.filter((offer) => !offer.is_outgoing);
   const outgoing = offers.filter((offer) => offer.is_outgoing);
+  const now = new Date().getTime();
+  const primaryOfferId = incoming.find((offer) => offer.status === "active")?.offer_id;
   const flash =
     query.sent === "1"
       ? "Offer sent. Your coins and cards are held until the seller responds."
@@ -168,33 +142,19 @@ export default async function TradeOffersPage({ searchParams }: OffersPageProps)
             : null;
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-3xl space-y-8">
-        <header>
-          <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-            Transfer market
-          </p>
-          <h1 className="display mt-3 text-3xl sm:text-6xl">Trade offers</h1>
-          <p className="mt-3 hidden text-ink-dim sm:block">
-            Coin-and-card offers on market listings. Everything you offer is escrowed until the
-            seller accepts or declines, or the offer expires.
-          </p>
-          {/* The Buy tab replaces the old "Back to the market" link. */}
-          <div className="mt-5">
-            <SectionNav label="Market" tabs={marketTabs} />
-          </div>
-        </header>
+    <main className={PAGE}>
+      <section className={`${COLUMN} lg:max-w-3xl`}>
+        <PageHeader title="Market" />
+        <SectionNav label="Market" tabs={marketTabs} />
 
         {flash && (
-          <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 font-bold text-moss">
+          <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 text-body text-moss">
             {flash}
           </p>
         )}
 
         <div className="space-y-4">
-          <h2 className="display text-2xl">
-            Incoming ({incoming.filter((o) => o.status === "active").length})
-          </h2>
+          <h2 className="text-heading font-semibold">On your listings</h2>
           {incoming.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-line p-6 text-center text-ink-dim">
               No offers on your listings yet.
@@ -202,20 +162,23 @@ export default async function TradeOffersPage({ searchParams }: OffersPageProps)
           ) : (
             <ul className="space-y-3">
               {incoming.map((offer) => (
-                <OfferCard key={offer.offer_id} offer={offer} />
+                <OfferCard
+                  key={offer.offer_id}
+                  offer={offer}
+                  now={now}
+                  primary={offer.offer_id === primaryOfferId}
+                />
               ))}
             </ul>
           )}
         </div>
 
         <div className="space-y-4">
-          <h2 className="display text-2xl">
-            Sent ({outgoing.filter((o) => o.status === "active").length})
-          </h2>
+          <h2 className="text-heading font-semibold">You sent</h2>
           {outgoing.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-line p-6 text-center text-ink-dim">
               You haven&rsquo;t made any offers. Find a listing on the{" "}
-              <Link className="text-brass underline" href="/market">
+              <Link prefetch={false} className="text-brass underline" href="/market">
                 market
               </Link>
               .
@@ -223,7 +186,7 @@ export default async function TradeOffersPage({ searchParams }: OffersPageProps)
           ) : (
             <ul className="space-y-3">
               {outgoing.map((offer) => (
-                <OfferCard key={offer.offer_id} offer={offer} />
+                <OfferCard key={offer.offer_id} offer={offer} now={now} />
               ))}
             </ul>
           )}

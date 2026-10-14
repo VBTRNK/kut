@@ -26,10 +26,8 @@ export function AttributeBars({ player }: { player: Attrs }) {
         return (
           <div className="space-y-2" key={key}>
             <div className="flex items-baseline justify-between gap-2">
-              <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-ink-faint">
-                {label}
-              </dt>
-              <dd className="text-xl font-black tabular-nums text-ink">{value}</dd>
+              <dt className="text-label font-semibold text-ink-dim">{label}</dt>
+              <dd className="text-heading font-semibold tabular-nums text-ink">{value}</dd>
             </div>
             <svg
               aria-hidden="true"

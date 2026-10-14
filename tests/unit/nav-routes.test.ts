@@ -97,6 +97,7 @@ describe("activeEntryKey — longest prefix wins", () => {
   it("separates a section index from its nested tab", () => {
     expect(activeEntryKey(MARKET_TABS, "/market")).toBe("buy");
     expect(activeEntryKey(MARKET_TABS, "/market/offers")).toBe("offers");
+    expect(activeEntryKey(MARKET_TABS, "/market/selling")).toBe("selling");
     // A listing id is not the offers tab, and must not fall through to nothing.
     expect(activeEntryKey(MARKET_TABS, "/market/8f14e45f")).toBe("buy");
   });

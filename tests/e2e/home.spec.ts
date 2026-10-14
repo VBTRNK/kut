@@ -61,12 +61,13 @@ test("requires sign-in before showing a private collection", async ({ page }) =>
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 });
 
-test("requires sign-in before browsing the transfer market", async ({ page }) => {
-  await page.goto("/market");
-
-  await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
-});
+for (const route of ["/market", "/market/selling"]) {
+  test(`requires sign-in before browsing ${route}`, async ({ page }) => {
+    await page.goto(route);
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  });
+}
 
 test("requires sign-in before showing trade offers", async ({ page }) => {
   await page.goto("/market/offers");

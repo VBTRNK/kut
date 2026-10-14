@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useRef } from "react";
+import { Button } from "@/components/ui/button";
 import { respondToOffer, withdrawOffer, type OfferState } from "../actions";
 
 const initialState: OfferState = { error: null };
@@ -9,10 +10,12 @@ function RespondButton({
   offerId,
   accept,
   label,
+  primary,
 }: {
   offerId: string;
   accept: boolean;
   label: string;
+  primary: boolean;
 }) {
   const key = useRef<string | null>(null);
   const [state, formAction, pending] = useActionState(respondToOffer, initialState);
@@ -25,31 +28,23 @@ function RespondButton({
   }
 
   return (
-    <form action={action} className={accept ? "flex-1" : undefined}>
+    <form action={action} className="min-w-0 flex-1">
       <input name="offerId" type="hidden" value={offerId} />
       {state.error && (
-        <p className="mb-2 rounded-lg bg-brick-bg p-2 text-xs text-brick">{state.error}</p>
+        <p className="mb-2 rounded-lg bg-brick-bg p-2 text-small text-brick">{state.error}</p>
       )}
-      <button
-        className={
-          accept
-            ? "min-h-11 w-full rounded-lg bg-brass px-3 text-sm font-black text-ink-on-accent disabled:bg-line disabled:text-ink-faint"
-            : "min-h-11 rounded-lg border border-line px-3 text-sm font-bold text-ink-dim disabled:opacity-50"
-        }
-        disabled={pending}
-        type="submit"
-      >
+      <Button kind={primary ? "primary" : "secondary"} wide disabled={pending} type="submit">
         {pending ? "Working..." : label}
-      </button>
+      </Button>
     </form>
   );
 }
 
-export function RespondToOfferForms({ offerId }: { offerId: string }) {
+export function RespondToOfferForms({ offerId, primary }: { offerId: string; primary: boolean }) {
   return (
     <div className="mt-3 flex gap-2">
-      <RespondButton accept label="Accept" offerId={offerId} />
-      <RespondButton accept={false} label="Decline" offerId={offerId} />
+      <RespondButton accept={false} label="Decline" offerId={offerId} primary={false} />
+      <RespondButton accept label="Accept" offerId={offerId} primary={primary} />
     </div>
   );
 }
@@ -60,15 +55,11 @@ export function WithdrawOfferForm({ offerId }: { offerId: string }) {
     <form action={formAction} className="mt-3">
       <input name="offerId" type="hidden" value={offerId} />
       {state.error && (
-        <p className="mb-2 rounded-lg bg-brick-bg p-2 text-xs text-brick">{state.error}</p>
+        <p className="mb-2 rounded-lg bg-brick-bg p-2 text-small text-brick">{state.error}</p>
       )}
-      <button
-        className="min-h-11 rounded-lg border border-line px-3 text-sm font-bold text-ink-dim disabled:opacity-50"
-        disabled={pending}
-        type="submit"
-      >
-        {pending ? "Withdrawing..." : "Withdraw offer"}
-      </button>
+      <Button kind="secondary" disabled={pending} type="submit">
+        {pending ? "Withdrawing..." : "Withdraw"}
+      </Button>
     </form>
   );
 }

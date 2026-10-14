@@ -437,3 +437,23 @@ and ADR-074 (card detail; the full rating story stays on the Player page).
 - Removed explanations live at How it works `#cards`, `#packs`, `#trading`.
   Sheets retain focus through edits, contain Tab and return focus on Escape.
 - No migration, dependency, economy or Midweek privacy/timing change.
+
+## ADR-159 — Market and Selling on the UI scale
+
+Date: 2026-10-14 (flut-ui-pass S9, #294, DR5-20). Amends ADR-053
+(Market tabs) and ADR-051 (listing presentation); closes #237.
+
+- Buy · Selling · Offers share the Market title. Buy uses the toolbar and
+  an all-width Filter sheet for tier, price and sort; the secondary Buy
+  button carries the price, with the ownership chip still on the card.
+- Selling reads `my_collection_cards` and `my_trade_offers`, showing active
+  listings, time left, incoming offer counts and prices. Each row opens its
+  listing; creating or cancelling one remains on its Collection card.
+- Listing details use Buy now and Or make an offer blocks, the existing
+  phone-pinned Buy button, seller/discard context and the escrow notice.
+- Offers separates On your listings and You sent. Only the first active
+  incoming offer has a brass block and primary Accept; other actions are
+  secondary. Answered offers retain their status and received-coin record.
+- Removed explanations already live in How it works `#market` (tax and
+  escrow) and `#packs` (discard); tax also stays by the listing price field.
+- No migration, dependency, economy, action validation or privacy change.

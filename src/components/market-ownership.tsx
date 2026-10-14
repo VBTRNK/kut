@@ -20,8 +20,8 @@ export function MarketOwnership({
   return (
     <p
       aria-hidden={compact || undefined}
-      className={`flex max-w-full items-center rounded-full border border-ink/20 bg-board-deep/85 font-black whitespace-nowrap text-ink tabular-nums shadow-[0_2px_6px_rgb(0_0_0/35%)] backdrop-blur-sm [--icon-cutout:var(--color-board-deep)] ${
-        compact ? "gap-1.5 py-0.5 pr-2.5 pl-2 text-[0.7rem]" : "gap-2 py-1 pr-3 pl-2.5 text-sm"
+      className={`flex max-w-full items-center rounded-full border border-ink/20 bg-board-deep/85 font-semibold whitespace-nowrap text-ink tabular-nums shadow-[0_2px_6px_rgb(0_0_0/35%)] backdrop-blur-sm [--icon-cutout:var(--color-board-deep)] ${
+        compact ? "gap-1.5 py-0.5 pr-2.5 pl-2 text-label" : "gap-2 py-1 pr-3 pl-2.5 text-small"
       }`}
     >
       <IconCollection
