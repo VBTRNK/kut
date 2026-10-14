@@ -33,8 +33,10 @@ test("browsing cards and filters does not prefetch private routes", async ({ pag
       window.scrollTo(0, 0);
     });
     if (route === "/players" || route.endsWith("view=manage") || route === "/market") {
-      await page.getByRole("button", { name: /^Filters/ }).click();
-      await page.getByRole("link", { name: "Gold", exact: true }).hover();
+      await page.getByRole("button", { name: /^Filters?/ }).click();
+      if (route.endsWith("view=manage"))
+        await page.getByRole("radio", { name: "Gold", exact: true }).locator("..").hover();
+      else await page.getByRole("link", { name: "Gold", exact: true }).hover();
       await page.keyboard.press("Escape");
     }
     await page.waitForTimeout(1_000);

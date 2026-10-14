@@ -1,3 +1,4 @@
+import { PAGE, COLUMN } from "@/components/ui/page";
 import { notFound } from "next/navigation";
 import { PackReveal, type RevealCard } from "@/components/pack-reveal";
 import { requireUser } from "@/lib/auth/user";
@@ -73,16 +74,13 @@ export default async function PackResultPage({ params }: PackResultPageProps) {
   }));
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-5xl space-y-4">
-        <p className="text-sm font-bold text-ink-faint">
-          Pack opening saved — the result was fixed before this reveal.
-        </p>
+    <main className={PAGE}>
+      <section className={`${COLUMN} lg:max-w-4xl`}>
         <PackReveal
           cards={revealCards}
           cardHrefBase="/club/collection/"
           doneHref="/club/collection"
-          doneLabel="View Collection"
+          doneLabel="View your Collection"
           secondaryHref="/club/packs"
           secondaryLabel="Open another"
           summaryLine={summary?.line}

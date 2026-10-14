@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AttributeBars } from "@/components/card-stats";
+import { Block, Inset } from "@/components/ui/block";
+import { InfoLink } from "@/components/ui/links";
+import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
 import { LiveCard, type LiveCardPlayer } from "@/components/live-card";
-import { RatingBreakdownStory } from "@/components/rating-breakdown";
 import { requireUser } from "@/lib/auth/user";
-import type { FormContribution, RatingBreakdown } from "@/lib/rating-story";
+import type { RatingBreakdown } from "@/lib/rating-story";
 import { fetchInjuredPlayerIds } from "@/lib/injuries";
 import { toLiveCardPlayer } from "@/lib/live-card-player";
 import { resolvePhotoUrls } from "@/lib/player-photos";
@@ -46,10 +47,6 @@ type CollectionCard = {
   photo_path: string | null;
 };
 
-function readable(value: string) {
-  return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
 export default async function CardDetailPage({ params, searchParams }: CardPageProps) {
   await requireUser();
   const { cardId } = await params;
@@ -80,119 +77,92 @@ export default async function CardDetailPage({ params, searchParams }: CardPageP
     fetchInjuredPlayerIds(supabase),
   ]);
   // ADR-074: the rating story applies only to a Live card. A Special edition is
-  // a frozen snapshot, so explaining a current OVR would misdescribe it. Both
-  // reads are non-critical — a failure renders the page without the story
+  // a frozen snapshot, so explaining a current OVR would misdescribe it. The
+  // read is non-critical — a failure renders the page without the story
   // rather than 500ing, matching how the rating graph treats its own queries.
-  const [query, boundsResponse, valueResponse, breakdownResponse, contributionsResponse] =
-    await Promise.all([
-      searchParams,
-      !card.active_listing_id
-        ? supabase.schema("kut").rpc("get_listing_bounds", { p_card_id: card.card_id })
-        : Promise.resolve({ data: null, error: null }),
-      supabase
-        .schema("kut")
-        .from("my_club_value_copies")
-        .select("weight_percent,club_value_contribution,club_value_change_if_discarded")
-        .eq("card_id", card.card_id)
-        .maybeSingle(),
-      card.is_live
-        ? supabase
-            .schema("kut")
-            .from("player_rating_breakdown")
-            .select(
-              "live_ovr, form_score, activity_score, form_bonus, attendance_base, is_ovr_capped",
-            )
-            .eq("player_id", card.player_id)
-            .maybeSingle()
-        : Promise.resolve({ data: null, error: null }),
-      card.is_live
-        ? supabase
-            .schema("kut")
-            // "*" rather than a column list: ADR-083 appended source and
-            // protected_weeks, and the page ships before the hosted schema does.
-            .from("player_form_contributions")
-            .select("*")
-            .eq("player_id", card.player_id)
-            .order("session_date", { ascending: false })
-        : Promise.resolve({ data: null, error: null }),
-    ]);
+  const [query, boundsResponse, breakdownResponse] = await Promise.all([
+    searchParams,
+    !card.active_listing_id
+      ? supabase.schema("kut").rpc("get_listing_bounds", { p_card_id: card.card_id })
+      : Promise.resolve({ data: null, error: null }),
+    card.is_live
+      ? supabase
+          .schema("kut")
+          .from("player_rating_breakdown")
+          .select(
+            "live_ovr, form_score, activity_score, form_bonus, attendance_base, is_ovr_capped",
+          )
+          .eq("player_id", card.player_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+  ]);
+  if (boundsResponse.error) console.error("card listing bounds read failed", boundsResponse.error);
   const bounds =
     boundsResponse.data && typeof boundsResponse.data === "object" ? boundsResponse.data : null;
   const minimumPrice = bounds && "minimum_price" in bounds ? Number(bounds.minimum_price) : null;
   const maximumPrice = bounds && "maximum_price" in bounds ? Number(bounds.maximum_price) : null;
-  const copyValue = valueResponse.data as {
-    weight_percent: number;
-    club_value_contribution: number;
-    club_value_change_if_discarded: number;
-  } | null;
   const ratingBreakdown = (breakdownResponse.data as RatingBreakdown | null) ?? null;
-  const formContributions = (contributionsResponse.data as FormContribution[] | null) ?? [];
 
   const cardPlayer = toLiveCardPlayer(card, injuredPlayerIds, photoUrls);
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-5xl space-y-8 py-4 sm:py-8">
-        <Link
-          prefetch={false}
-          className="text-sm font-bold text-brass hover:underline"
-          href="/club/collection"
-        >
-          &larr; Collection
-        </Link>
-
-        <div className="grid gap-10 md:grid-cols-[minmax(240px,330px)_minmax(0,1fr)] md:items-start lg:gap-16">
-          <div>
+    <main className={PAGE}>
+      <div className={`${COLUMN} lg:max-w-5xl`}>
+        <PageHeader
+          back={{ href: "/club/collection", label: "Collection" }}
+          title={card.display_name}
+          sub={`${card.is_live ? "Live card" : card.edition_title} · ${card.rarity_tier} · OVR ${card.ovr}`}
+        />
+        <div className="grid gap-6 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] md:items-start">
+          <div className="mx-auto w-full max-w-[15rem] md:max-w-none">
             <LiveCard size="detail" player={cardPlayer} />
           </div>
-
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">
-                {card.is_live ? "Live card" : "Special card"} &middot;{" "}
-                <span className="capitalize">{card.rarity_tier}</span>
-              </p>
-              <h1 className="display text-3xl sm:text-6xl">{card.display_name}</h1>
-              <p className="text-base text-ink-dim">
-                {card.is_live
-                  ? "This card’s rating is live and changes with published football sessions."
-                  : card.edition_title}
-              </p>
-            </div>
-
-            <AttributeBars player={card} />
-
-            {card.is_live && ratingBreakdown && (
-              <RatingBreakdownStory
-                breakdown={ratingBreakdown}
-                contributions={formContributions}
-                playerName={card.display_name}
-              />
+          <div className="grid min-w-0 gap-6">
+            {card.is_live && (
+              <Block title="Why this rating">
+                {ratingBreakdown && (
+                  <dl className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Attendance", value: ratingBreakdown.attendance_base },
+                      { label: "Form", value: `+${ratingBreakdown.form_bonus}` },
+                      { label: "OVR", value: ratingBreakdown.live_ovr },
+                    ].map((row) => (
+                      <Inset className="grid gap-1" key={row.label}>
+                        <dt className="text-label font-semibold text-ink-faint">{row.label}</dt>
+                        <dd className="text-heading font-semibold tabular-nums">{row.value}</dd>
+                      </Inset>
+                    ))}
+                  </dl>
+                )}
+                {ratingBreakdown?.is_ovr_capped && (
+                  <p className="text-small text-ink-dim">
+                    At the 83 ceiling; attendance is shown after the cap.
+                  </p>
+                )}
+                <InfoLink href="/how-it-works#cards">How ratings move</InfoLink>
+                <Link
+                  prefetch={false}
+                  className="inline-flex min-h-11 items-center text-small font-semibold text-brass hover:underline"
+                  href={`/players/${card.player_slug}`}
+                >
+                  See {card.display_name.split(" ")[0]}’s rating history ›
+                </Link>
+              </Block>
             )}
-
-            <Link
-              prefetch={false}
-              className="block text-sm font-bold text-brass hover:underline"
-              href={`/players/${card.player_slug}`}
-            >
-              See {card.display_name.split(" ")[0]}&rsquo;s rating history &rarr;
-            </Link>
-
             {query.listed === "1" && (
-              <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 text-sm font-bold text-moss">
+              <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 text-small text-moss">
                 Listed successfully. This card is locked until the listing expires or you cancel it.
               </p>
             )}
             {query.listingCancelled === "1" && (
-              <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 text-sm font-bold text-moss">
+              <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 text-small text-moss">
                 Listing cancelled. This card is available again.
               </p>
             )}
-
             {card.held_by_offer_id && (
-              <p className="rounded-2xl border border-brass/40 bg-brass/10 p-4 text-sm font-bold text-brass">
-                This card is committed to a pending trade offer. It can&rsquo;t be listed or
-                discarded until that offer is accepted, declined, or expires.
+              <p className="rounded-2xl border border-brass-line bg-brass-bg p-4 text-small text-brass">
+                This card is committed to a pending trade offer. It can’t be listed or discarded
+                until that offer is accepted, declined, or expires.
               </p>
             )}
             {!card.held_by_offer_id && card.active_listing_id && card.active_listing_price && (
@@ -215,49 +185,9 @@ export default async function CardDetailPage({ params, searchParams }: CardPageP
                 <DiscardCardForm cardId={card.card_id} discardValue={card.discard_value} />
               </>
             )}
-
-            <hr className="border-line/40" />
-
-            <dl className="grid grid-cols-2 gap-x-8 gap-y-5">
-              <div>
-                <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-ink-faint">
-                  Edition
-                </dt>
-                <dd className="mt-1.5 text-lg font-black">{readable(card.edition_type)}</dd>
-              </div>
-              <div>
-                <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-ink-faint">
-                  Source
-                </dt>
-                <dd className="mt-1.5 text-lg font-black">{readable(card.source)}</dd>
-              </div>
-              <div>
-                <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-ink-faint">
-                  Discard payout
-                </dt>
-                <dd className="mt-1.5 text-lg font-black tabular-nums">
-                  {card.discard_value} FLUT Coins
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-ink-faint">
-                  Adds to Club Value
-                </dt>
-                <dd className="mt-1.5 text-lg font-black tabular-nums">
-                  {copyValue?.club_value_contribution ?? 0}{" "}
-                  <span className="text-xs text-ink-dim">({copyValue?.weight_percent ?? 0}%)</span>
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-ink-faint">
-                  Card ID
-                </dt>
-                <dd className="mt-1.5 break-all font-mono text-xs text-ink-dim">{card.card_id}</dd>
-              </div>
-            </dl>
           </div>
         </div>
-      </section>
+      </div>
     </main>
   );
 }

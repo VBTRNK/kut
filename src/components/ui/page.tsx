@@ -43,6 +43,7 @@ export function PageHeader({
     <header className="grid gap-2">
       {back && (
         <Link
+          prefetch={false}
           className={`inline-flex min-h-11 items-center justify-self-start rounded-md text-small font-semibold text-brass hover:underline ${FOCUS}`}
           href={back.href}
         >

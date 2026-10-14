@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { IconSearch } from "@/components/icons";
+import { FilterSheet, ChoiceGroup } from "@/components/ui/filter-sheet";
+import { Toolbar, SearchField, FilterButton } from "@/components/ui/toolbar";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { buildFilterHref, countActiveFilters, type FilterValues } from "@/lib/filters";
 
@@ -30,6 +32,8 @@ export type FilterOption = { value: string; label: string };
 export type FilterBarProps = {
   /** Route these filters live on, e.g. "/market". */
   basePath: string;
+  /** DR5 toolbar; remaining callers move in S9/S10. */
+  sheetOnly?: boolean;
   /** Current values, straight from the page's searchParams. */
   values: FilterValues;
   searchPlaceholder: string;
@@ -61,6 +65,7 @@ const chipOff = "border-line bg-board-deep/50 text-ink-dim hover:text-ink";
 
 export function FilterBar({
   basePath,
+  sheetOnly = false,
   values,
   searchPlaceholder,
   searchName = "q",
@@ -77,6 +82,7 @@ export function FilterBar({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [draftMin, setDraftMin] = useState(values[range?.minName ?? ""] ?? "");
   const [draftMax, setDraftMax] = useState(values[range?.maxName ?? ""] ?? "");
+  const [draft, setDraft] = useState(values);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const href = (patch: FilterValues) =>
@@ -170,6 +176,71 @@ export function FilterBar({
       ))}
     </select>
   );
+
+  if (sheetOnly)
+    return (
+      <>
+        <Toolbar
+          summary={summary}
+          filter={
+            <FilterButton
+              aria-expanded={sheetOpen}
+              on={activeCount}
+              ref={triggerRef}
+              onClick={() => {
+                setDraft(values);
+                setSheetOpen(true);
+              }}
+            />
+          }
+        >
+          <form action={basePath} onSubmit={submitSearch}>
+            <SearchField
+              label={searchPlaceholder}
+              defaultValue={values[searchName] ?? ""}
+              key={values[searchName] ?? ""}
+              name={searchName}
+            />
+          </form>
+        </Toolbar>
+        <FilterSheet
+          open={sheetOpen}
+          onClose={() => setSheetOpen(false)}
+          returnFocusRef={triggerRef}
+          onClear={() => setDraft({})}
+          result="Show cards"
+          onApply={() => {
+            setSheetOpen(false);
+            router.push(
+              buildFilterHref({
+                basePath,
+                values: draft,
+                preserve,
+                patch: {},
+                defaults: { [sortName]: defaultSort },
+              }),
+            );
+          }}
+        >
+          {chips && (
+            <ChoiceGroup
+              legend="Tier"
+              name={chips.name}
+              value={draft[chips.name] ?? ""}
+              options={[{ value: "", label: chips.allLabel }, ...chips.options]}
+              onChange={(value) => setDraft({ ...draft, [chips.name]: value })}
+            />
+          )}
+          <ChoiceGroup
+            legend="Sort"
+            name={sortName}
+            options={sorts}
+            value={draft[sortName] ?? defaultSort}
+            onChange={(value) => setDraft({ ...draft, [sortName]: value })}
+          />
+        </FilterSheet>
+      </>
+    );
 
   return (
     <div className="space-y-3">

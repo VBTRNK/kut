@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { CardGrid, COLUMN, PAGE } from "@/components/ui/page";
+import { Tag } from "@/components/ui/tag";
 import { FilterBar } from "@/components/filter-bar";
 import { LiveCard, type LiveCardPlayer } from "@/components/live-card";
 import { requireUser } from "@/lib/auth/user";
@@ -39,6 +41,7 @@ type CollectionCard = {
   rarity_tier: LiveCardPlayer["rarityTier"];
   discard_value: number;
   active_listing_id: string | null;
+  active_listing_price: number | null;
   held_by_offer_id: string | null;
   photo_path: string | null;
 };
@@ -83,7 +86,7 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
         .schema("kut")
         .from("my_collection_cards")
         .select(
-          "card_id, edition_id, edition_title, edition_type, is_live, source, player_id, player_slug, display_name, archetype, ovr, pac, sho, pas, dri, def, phy, rarity_tier, discard_value, active_listing_id, held_by_offer_id, photo_path",
+          "card_id, edition_id, edition_title, edition_type, is_live, source, player_id, player_slug, display_name, archetype, ovr, pac, sho, pas, dri, def, phy, rarity_tier, discard_value, active_listing_id, held_by_offer_id, active_listing_price, photo_path",
         )
         .order("ovr", { ascending: false })
         .order("display_name"),
@@ -147,8 +150,8 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
       fetchInjuredPlayerIds(supabase),
     ]);
     return (
-      <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-        <section className="mx-auto max-w-6xl py-4 sm:py-8">
+      <main className={PAGE}>
+        <section className={`${COLUMN} lg:max-w-6xl`}>
           <CollectionAlbum
             cards={albumCards}
             clubValue={clubValue}
@@ -188,17 +191,15 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
     fetchInjuredPlayerIds(supabase),
   ]);
   const uniquePlayers = new Set(all.map((card) => card.player_id)).size;
-  const discardValue = all.reduce((total, card) => total + (card.discard_value ?? 0), 0);
   const totalPlayers = directory.length;
   const filtered = Boolean(term || rarity);
 
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-6xl space-y-8 py-4 sm:py-8">
+    <main className={PAGE}>
+      <section className={`${COLUMN} lg:max-w-6xl`}>
         <CollectionHeader
           cardCount={all.length}
           clubValue={clubValue}
-          discardValue={discardValue}
           mode="manage"
           showArchetypeNudge={ownPlayer?.archetype === "all_rounder"}
           totalPlayers={totalPlayers}
@@ -208,14 +209,14 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
         {query.discard &&
           Number.isSafeInteger(Number(query.discard)) &&
           Number(query.discard) > 0 && (
-            <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 font-bold text-moss">
+            <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 font-semibold text-moss">
               Card discarded. {query.discard} FLUT Coins were added to your wallet.
             </p>
           )}
         {query.purchase &&
           Number.isSafeInteger(Number(query.purchase)) &&
           Number(query.purchase) > 0 && (
-            <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 font-bold text-moss">
+            <p className="rounded-2xl border border-moss-line/40 bg-moss-bg/50 p-4 font-semibold text-moss">
               Purchase complete. {query.purchase} FLUT Coins were paid and the card is now in your
               collection.
             </p>
@@ -223,10 +224,10 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
 
         {all.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-line bg-panel/60 p-8 text-center">
-            <h2 className="display text-3xl">Your collection is empty</h2>
+            <h2 className="text-heading font-semibold">Your collection is empty</h2>
             <p className="mt-3 text-ink-dim">Open a pack to receive your first Live Cards.</p>
             <Link
-              className="mt-6 inline-flex min-h-12 items-center rounded-xl bg-gradient-to-b from-[#eebd63] to-[#d29a34] px-5 font-black text-ink-on-accent"
+              className="mt-6 inline-flex min-h-12 items-center rounded-xl bg-gradient-to-b from-[#eebd63] to-[#d29a34] px-5 font-extrabold text-ink-on-accent"
               href="/club/packs"
             >
               Open a pack
@@ -238,13 +239,14 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
                 had its own vocabulary for exactly the same three fields: chips
                 for tier, a link row for sort, and a search box with no button. */}
             <FilterBar
+              sheetOnly
               basePath="/club/collection"
               chips={{ name: "rarity", allLabel: "All tiers", options: TIER_OPTIONS }}
               defaultSort="ovr"
               preserve={{ view: "manage" }}
               searchPlaceholder="Search your cards"
               sorts={SORT_OPTIONS}
-              summary={filtered ? `${cards.length} of ${all.length} shown` : undefined}
+              summary={`${filtered ? `${cards.length} of ${all.length} cards · ` : ""}${SORTS[sort]}`}
               values={{ q: term || undefined, rarity, sort }}
             />
 
@@ -252,7 +254,7 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
               <p className="rounded-2xl border border-dashed border-line p-8 text-center text-ink-dim">
                 No cards match these filters.{" "}
                 <Link
-                  className="font-bold text-brass hover:underline"
+                  className="font-semibold text-brass hover:underline"
                   href="/club/collection?view=manage"
                 >
                   Clear them
@@ -261,7 +263,7 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
               </p>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 lg:gap-6">
+                <CardGrid>
                   {cards.map((card) => {
                     const cardPlayer = toLiveCardPlayer(card, injuredPlayerIds, photoUrls);
                     return (
@@ -276,19 +278,19 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
                         {/* Status rides the card rather than floating as loose text
                               beneath it, so a scanned grid reads in one pass. */}
                         {card.active_listing_id && (
-                          <span className="absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-full border border-brass/55 bg-board-deep/90 px-3 py-1 text-[0.65rem] font-black uppercase tracking-[0.1em] text-brass backdrop-blur-sm">
-                            Listed
+                          <span className="absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-full bg-board-deep/90">
+                            <Tag tone="you">Listed · {card.active_listing_price}</Tag>
                           </span>
                         )}
                         {!card.is_live && (
-                          <span className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-line bg-board-deep/90 px-3 py-1 text-[0.6rem] font-black uppercase tracking-[0.1em] text-ink-dim backdrop-blur-sm">
+                          <span className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-line bg-board-deep/90 px-3 py-1 text-label font-semibold text-ink-dim backdrop-blur-sm">
                             {card.edition_title}
                           </span>
                         )}
                       </Link>
                     );
                   })}
-                </div>
+                </CardGrid>
               </>
             )}
           </>

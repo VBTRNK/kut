@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode, type RefObject } from "react";
+import { useEffect, useEffectEvent, useRef, type ReactNode, type RefObject } from "react";
 
 /**
  * A bottom sheet for phone-width surfaces: the account menu and the filter bar.
@@ -34,6 +34,10 @@ export function BottomSheet({
   children,
 }: BottomSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeFromKeyboard = useEffectEvent(() => {
+    onClose();
+    returnFocusRef?.current?.focus();
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -43,9 +47,27 @@ export function BottomSheet({
     panelRef.current?.focus();
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== "Escape") return;
-      onClose();
-      returnFocusRef?.current?.focus();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeFromKeyboard();
+      }
+      if (event.key !== "Tab") return;
+      const controls = Array.from(
+        panelRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not(:disabled), input:not([type="hidden"]):not(:disabled), select:not(:disabled), [tabindex="0"]',
+        ) ?? [],
+      );
+      const first = controls[0];
+      const last = controls.at(-1);
+      if (
+        !first ||
+        (event.shiftKey
+          ? document.activeElement === first || document.activeElement === panelRef.current
+          : document.activeElement === last)
+      ) {
+        event.preventDefault();
+        (event.shiftKey ? last : first)?.focus();
+      }
     }
 
     document.addEventListener("keydown", onKeyDown);
@@ -53,7 +75,7 @@ export function BottomSheet({
       root.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, onClose, returnFocusRef]);
+  }, [open]);
 
   if (!open) return null;
 

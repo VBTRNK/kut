@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useRef } from "react";
+import { Block } from "@/components/ui/block";
+import { Button } from "@/components/ui/button";
 import { discardCard, type DiscardState } from "./actions";
 
 const initialState: DiscardState = { error: null };
@@ -31,26 +33,20 @@ export function DiscardCardForm({ cardId, discardValue }: DiscardCardFormProps) 
   }
 
   return (
-    <form
-      action={action}
-      className="rounded-2xl border border-brick/35 bg-brick-bg/20 p-4"
-      onSubmit={confirmDiscard}
+    <Block
+      title="Discard"
+      aside={<span className="text-small text-ink-dim">{discardValue} coins</span>}
     >
-      <input name="cardId" type="hidden" value={cardId} />
-      <p className="font-black text-brick">Discard this card</p>
-      <p className="mt-1 text-sm leading-6 text-brick/80">
-        This permanently burns this card copy. Your wallet will receive the server-calculated value.
-      </p>
-      {state.error && (
-        <p className="mt-3 rounded-xl bg-brick-bg p-3 text-sm text-brick">{state.error}</p>
-      )}
-      <button
-        className="mt-4 min-h-11 rounded-xl bg-brick px-4 py-2 font-bold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line"
-        disabled={isPending}
-        type="submit"
-      >
-        {isPending ? "Discarding..." : `Discard for ${discardValue} FLUT Coins`}
-      </button>
-    </form>
+      <form action={action} className="grid gap-3" onSubmit={confirmDiscard}>
+        <input name="cardId" type="hidden" value={cardId} />
+        <p className="text-small text-ink-dim">This can’t be undone.</p>
+        {state.error && (
+          <p className="mt-3 rounded-xl bg-brick-bg p-3 text-small text-brick">{state.error}</p>
+        )}
+        <Button kind="secondary" disabled={isPending} type="submit">
+          {isPending ? "Discarding..." : `Discard for ${discardValue}`}
+        </Button>
+      </form>
+    </Block>
   );
 }

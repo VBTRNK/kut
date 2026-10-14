@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AlbumKeyboardNavigation } from "@/components/album/album-keyboard-navigation";
-import { LensMenu } from "@/components/album/lens-menu";
+import { AlbumFilter } from "@/components/album/album-filter";
+import { Tag } from "@/components/ui/tag";
 import { LiveCard } from "@/components/live-card";
 import { toLiveCardPlayer } from "@/lib/live-card-player";
-import { CollectionHeader, Completion } from "@/components/album/collection-header";
+import { CollectionHeader } from "@/components/album/collection-header";
 import { ARCHETYPES, ARCHETYPE_LABELS } from "@/game/archetypes";
 import type { RarityTier } from "@/game/rating-engine";
 import {
@@ -14,7 +15,6 @@ import {
   paginate,
   parseLens,
   spreadFor,
-  spreadPartner,
   type AlbumCollectionCard,
   type AlbumDirectoryPlayer,
   type AlbumSlot,
@@ -51,7 +51,7 @@ function href(lens: string, page: string | number) {
 function SlotFrame({ index, children }: { index: number; children: ReactNode }) {
   return (
     <div className="relative pt-4">
-      <span className="absolute left-0 top-0 text-[0.65rem] font-black tabular-nums text-ink-faint">
+      <span className="absolute left-0 top-0 text-label font-semibold tabular-nums text-ink-faint">
         {index}
       </span>
       {children}
@@ -89,7 +89,7 @@ function AlbumSlotView({
               strokeWidth="4"
             />
           </svg>
-          <span className="absolute bottom-3 left-3 right-3 border-t border-brass/20 pt-2 text-xs font-bold text-ink-faint">
+          <span className="absolute bottom-3 left-3 right-3 border-t border-brass/20 pt-2 text-label font-semibold text-ink-faint">
             {slot.player.display_name}
           </span>
           <span
@@ -120,22 +120,22 @@ function AlbumSlotView({
         <LiveCard player={player} />
       </Link>
       {card.active_listing_id && (
-        <span className="absolute left-1/2 top-8 z-20 -translate-x-1/2 rounded-full border border-brass/55 bg-board-deep/90 px-2 py-1 text-[0.55rem] font-black uppercase tracking-[0.1em] text-brass">
-          Listed
+        <span className="absolute left-1/2 top-8 z-20 -translate-x-1/2 bg-board-deep/90 rounded-full">
+          <Tag tone="you">Listed</Tag>
         </span>
       )}
       {card.held_by_offer_id && (
-        <span className="absolute left-1/2 top-8 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-brass/55 bg-board-deep/90 px-2 py-1 text-[0.55rem] font-black uppercase tracking-[0.1em] text-brass">
+        <span className="absolute inset-x-1 top-8 z-20 rounded-lg bg-board-deep/90 px-2 py-1 text-center text-label font-semibold text-brass">
           In a trade offer
         </span>
       )}
       {slot.copies.length > 1 && (
         <Link
           prefetch={false}
-          className="absolute bottom-1 right-1 z-20 rounded-full bg-brass px-2 py-0.5 text-xs font-black text-ink-on-accent"
+          className="absolute -bottom-2 right-1 z-20 grid min-h-11 min-w-11 place-items-center rounded-full bg-board-deep/90"
           href={`/club/collection?view=manage&q=${encodeURIComponent(slot.player.display_name)}`}
         >
-          ×{slot.copies.length}
+          <Tag tone="you">×{slot.copies.length}</Tag>
         </Link>
       )}
     </SlotFrame>
@@ -155,19 +155,14 @@ function Leaf({
 }) {
   const collected = slots.filter((slot) => slot.copies.length > 0).length;
   return (
-    <article className="relative min-w-0 rounded-3xl border border-line/60 bg-panel/75 p-5 shadow-2xl">
-      <header className="mb-4 flex items-baseline justify-between border-b border-line/50 pb-4">
-        <div>
-          <h2 className="display text-3xl">Page {number}</h2>
-          <p className="mt-1 text-[0.6rem] font-extrabold uppercase tracking-[0.14em] text-ink-faint">
-            {slots[0] ? `slots ${slots[0].index}–${slots[slots.length - 1].index}` : "No slots"}
-          </p>
-        </div>
-        <span className="text-sm font-black tabular-nums text-brass">
-          {collected} / {slots.length}
+    <article className="relative min-w-0 rounded-2xl border border-line/60 bg-panel/60 p-3 sm:p-4">
+      <header className="mb-4 flex items-baseline justify-between">
+        <h2 className="text-heading font-semibold">Page {number}</h2>
+        <span className="text-small tabular-nums text-ink-dim">
+          {collected} of {slots.length}
         </span>
       </header>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {slots.map((slot) => (
           <AlbumSlotView
             injuredPlayerIds={injuredPlayerIds}
@@ -177,7 +172,7 @@ function Leaf({
           />
         ))}
       </div>
-      <span className="mt-4 block text-right text-xs font-bold tabular-nums text-ink-faint">
+      <span className="mt-4 block text-right text-label font-semibold tabular-nums text-ink-faint">
         {number}
       </span>
     </article>
@@ -212,55 +207,32 @@ export function CollectionAlbum({
   const nextPage = currentPage < total ? currentPage + 1 : undefined;
   const previousSpread = left > 1 ? left - 2 : undefined;
   const nextSpread = right !== null && right < total ? right + 1 : undefined;
-  // Desktop opens a spread, so two leaves are on screen and both chips must read
-  // as open (KB-004). The partner is highlighted at `lg:` only, because the second
-  // leaf is revealed purely by CSS (`hidden lg:block`) and BUILD_SPEC §41 requires
-  // identical page numbers at every width — so we mark it, never renumber it.
-  // In the all-pages view every leaf is already on screen, so there is no partner.
-  const partnerPage = requested === "all" ? null : spreadPartner(currentPage, total);
-  const typeItems = ARCHETYPES.map((archetype) => ({
-    href: href(`type:${archetype}`, 1),
-    label: ARCHETYPE_LABELS[archetype],
-  }));
-  const tierItems = TIERS.map((tier) => ({
-    href: href(`tier:${tier}`, 1),
-    label: tier[0].toUpperCase() + tier.slice(1),
-  }));
+  const options = [
+    { value: "all", label: "All Players" },
+    { value: "gaps", label: "Gaps" },
+    { value: "specialists", label: "Specialists" },
+    ...ARCHETYPES.map((type) => ({ value: `type:${type}`, label: ARCHETYPE_LABELS[type] })),
+    ...TIERS.map((tier) => ({
+      value: `tier:${tier}`,
+      label: tier[0].toUpperCase() + tier.slice(1),
+    })),
+  ].map((option) => ({ ...option, count: applyLens(allSlots, parseLens(option.value)).length }));
+  const label = options.find((option) => option.value === selectedLens)!.label;
   return (
-    <div className="space-y-8">
+    <div className="grid gap-6">
       <CollectionHeader
         cardCount={cards.length}
         clubValue={clubValue}
-        discardValue={cards.reduce((sum, card) => sum + Number(card.discard_value), 0)}
         mode="album"
         showArchetypeNudge={own?.archetype === "all_rounder"}
         totalPlayers={allSlots.length}
         uniquePlayers={unique}
       />
-      <nav
-        aria-label="Album lens"
-        className="flex flex-wrap items-center gap-2 border-y border-line/40 py-4"
-      >
-        <span className="mr-2 text-[0.65rem] font-extrabold uppercase tracking-[0.15em] text-ink-faint">
-          Lens
-        </span>
-        {(["all", "gaps", "specialists"] as const).map((value) => (
-          <Link
-            prefetch={false}
-            className={`min-h-10 rounded-full border px-4 py-2 text-xs font-extrabold ${selectedLens === value ? "border-brass/60 bg-brass/12 text-brass" : "border-line text-ink-dim"}`}
-            href={href(value, 1)}
-            key={value}
-          >
-            {value === "all"
-              ? `All players ${allSlots.length}`
-              : value === "gaps"
-                ? `Gaps only ${allSlots.length - unique}`
-                : `Specialists ${allSlots.filter((slot) => slot.player.archetype !== "all_rounder").length}`}
-          </Link>
-        ))}
-        <LensMenu items={typeItems} label="By type" />
-        <LensMenu items={tierItems} label="By tier" />
-      </nav>
+      <AlbumFilter
+        selected={selectedLens}
+        options={options}
+        summary={`${label} · ${requested === "all" ? "all pages" : `page ${currentPage} of ${total}`}`}
+      />
       {requested === "all" ? (
         <div className="space-y-6">
           {pages.map((slots, index) => (
@@ -278,20 +250,8 @@ export function CollectionAlbum({
           nextHref={nextPage ? href(selectedLens, nextPage) : undefined}
           previousHref={previousPage ? href(selectedLens, previousPage) : undefined}
         >
-          <div className="grid gap-3 lg:grid-cols-[3rem_minmax(0,1fr)_3rem] lg:items-center">
-            <div className="hidden lg:block">
-              {previousSpread && (
-                <Link
-                  prefetch={false}
-                  aria-label={`Previous pages, pages ${previousSpread}–${previousSpread + 1}`}
-                  className="grid h-12 w-12 place-items-center rounded-full border border-line text-2xl text-ink-dim hover:border-brass hover:text-brass"
-                  href={href(selectedLens, previousSpread)}
-                >
-                  ‹
-                </Link>
-              )}
-            </div>
-            <div className="grid gap-0 lg:grid-cols-2">
+          <div>
+            <div className="grid gap-6 lg:grid-cols-2">
               {spreadPages.map(([number, slots]) => (
                 <div className={number === currentPage ? "" : "hidden lg:block"} key={number}>
                   <Leaf
@@ -303,24 +263,12 @@ export function CollectionAlbum({
                 </div>
               ))}
             </div>
-            <div className="hidden justify-end lg:flex">
-              {nextSpread && (
-                <Link
-                  prefetch={false}
-                  aria-label={`Next pages, pages ${nextSpread}${nextSpread + 1 <= total ? `–${nextSpread + 1}` : ""}`}
-                  className="grid h-12 w-12 place-items-center rounded-full border border-brass/60 text-2xl text-brass hover:bg-brass/10"
-                  href={href(selectedLens, nextSpread)}
-                >
-                  ›
-                </Link>
-              )}
-            </div>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-3 lg:hidden">
             {previousPage ? (
               <Link
                 prefetch={false}
-                className="min-h-11 rounded-xl border border-line px-4 py-3 text-center font-bold"
+                className="min-h-11 rounded-xl border border-line px-4 py-3 text-center text-body font-semibold"
                 href={href(selectedLens, previousPage)}
               >
                 ‹ Page {previousPage}
@@ -331,7 +279,7 @@ export function CollectionAlbum({
             {nextPage ? (
               <Link
                 prefetch={false}
-                className="min-h-11 rounded-xl border border-brass/60 px-4 py-3 text-center font-bold text-brass"
+                className="min-h-11 rounded-xl border border-brass/60 px-4 py-3 text-center text-body font-semibold text-brass"
                 href={href(selectedLens, nextPage)}
               >
                 Page {nextPage} ›
@@ -342,27 +290,36 @@ export function CollectionAlbum({
           </div>
         </AlbumKeyboardNavigation>
       )}
-      <nav aria-label="Album pages" className="flex flex-wrap justify-center gap-2">
-        {pages.map((page, index) => {
-          const number = index + 1;
-          const count = page.filter((slot) => slot.copies.length > 0).length;
-          return (
+      {requested !== "all" && (
+        <nav aria-label="Album spreads" className="hidden grid-cols-2 gap-3 lg:grid">
+          {previousSpread ? (
             <Link
               prefetch={false}
-              aria-current={number === currentPage ? "page" : undefined}
-              className={`w-14 rounded-lg border p-2 text-center text-xs font-black ${number === currentPage ? "border-brass text-brass" : number === partnerPage ? "border-line text-ink-dim lg:border-brass lg:text-brass" : "border-line text-ink-dim"}`}
-              href={href(selectedLens, number)}
-              key={number}
+              className="min-h-11 rounded-xl border border-line px-4 py-3 text-center text-body font-semibold"
+              href={href(selectedLens, previousSpread)}
             >
-              {number}
-              <Completion count={count} total={page.length} />
+              ‹ Pages {previousSpread}–{previousSpread + 1}
             </Link>
-          );
-        })}
-      </nav>
+          ) : (
+            <span />
+          )}
+          {nextSpread ? (
+            <Link
+              prefetch={false}
+              className="min-h-11 rounded-xl border border-line px-4 py-3 text-center text-body font-semibold"
+              href={href(selectedLens, nextSpread)}
+            >
+              Pages {nextSpread}
+              {nextSpread < total ? `–${nextSpread + 1}` : ""} ›
+            </Link>
+          ) : (
+            <span />
+          )}
+        </nav>
+      )}
       <Link
         prefetch={false}
-        className="block text-center text-sm font-bold text-brass hover:underline"
+        className="inline-flex min-h-11 items-center justify-self-start text-small font-semibold text-brass hover:underline"
         href={href(selectedLens, "all")}
       >
         Show all pages

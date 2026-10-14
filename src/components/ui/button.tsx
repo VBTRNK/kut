@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode, Ref } from "react";
 import { FOCUS } from "./page";
 
 const BUTTON = {
@@ -11,6 +11,7 @@ const BUTTON = {
 type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> & {
   /** A link that looks like a button; the button attributes are then unused. */
   href?: string;
+  ref?: Ref<HTMLButtonElement>;
   kind?: keyof typeof BUTTON;
   wide?: boolean;
   children: ReactNode;
@@ -25,7 +26,7 @@ export function Button({ href, kind = "primary", wide = false, children, ...rest
   const className = `inline-flex min-h-12 items-center justify-center rounded-xl px-5 text-body disabled:cursor-not-allowed disabled:opacity-50 ${BUTTON[kind]} ${wide ? "w-full" : ""} ${FOCUS}`;
   if (href !== undefined) {
     return (
-      <Link className={className} href={href}>
+      <Link prefetch={false} className={className} href={href}>
         {children}
       </Link>
     );
