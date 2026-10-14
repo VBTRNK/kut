@@ -18,14 +18,14 @@ export function MidweekOptOutPanel({
   hasSavedSquadThisWeek,
   locked,
   weekLabel,
-  roundOne,
+  revealAt,
 }: {
   optedOut: boolean;
   hasSavedSquadThisWeek: boolean;
   locked: boolean;
   weekLabel: string | null;
-  /** Round 1's start in the week's schedule, "20:00" (`roundOneClock`). */
-  roundOne: string;
+  /** The lock in the week's schedule: entered cards are visible from then. */
+  revealAt: string;
 }) {
   const confirmId = useId();
   const [confirming, setConfirming] = useState(false);
@@ -71,7 +71,7 @@ export function MidweekOptOutPanel({
         </p>
       ) : (
         <ul className="grid list-disc gap-1 pl-5 text-small text-ink-dim marker:text-ink-faint">
-          <li>Members see the five you enter, or your auto squad, from {roundOne} on Wednesday.</li>
+          <li>Members see the five you enter, or your auto squad, from {revealAt} on Wednesday.</li>
           <li>The rest of your collection is never shown.</li>
           <li>Opting out takes you out completely.</li>
         </ul>

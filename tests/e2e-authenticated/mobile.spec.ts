@@ -539,7 +539,9 @@ test.describe("Midweek Madness results (PR 8)", () => {
 
     await page.getByRole("link", { name: "How ratings work" }).click();
     await expect(page).toHaveURL(/\/how-it-works#midweek-ratings$/);
-    await expect(page.getByRole("heading", { name: "Ratings", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "How ratings work", exact: true }),
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 
@@ -1388,7 +1390,7 @@ test.describe("Midweek Madness calls (D, ADR-118)", () => {
     await expectNoHorizontalOverflow(page);
 
     await page.goto("/how-it-works#midweek-calls");
-    await expect(page.getByRole("heading", { name: "Calls, once you’re out" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "How calls work" })).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 });
@@ -1995,7 +1997,7 @@ test("how-it-works shows the plusses table and the weakest-line rule (ADR-116)",
 }) => {
   await signIn(page, "release_member");
   await page.goto("/how-it-works#midweek");
-  await expect(page.getByRole("heading", { name: "Your squad’s shape" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "How plusses work" })).toBeVisible();
   const plusses = page.getByRole("table").filter({ hasText: "Midfield" });
   await expect(plusses.getByRole("row")).toHaveCount(8);
   await expect(plusses.getByRole("row", { name: /^Tank/ })).toBeVisible();

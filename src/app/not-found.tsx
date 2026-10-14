@@ -1,20 +1,17 @@
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { PageHeader, PAGE } from "@/components/ui/page";
 
 export default function NotFound() {
   return (
-    <main className="board-ground min-h-screen p-5 text-ink sm:p-10">
-      <section className="mx-auto max-w-lg rounded-3xl border border-line bg-panel p-6">
-        <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.26em] text-brass">FLUT</p>
-        <h1 className="mt-3 text-3xl font-black">Page not found</h1>
-        <p className="mt-3 text-ink-dim">
+    <main className={PAGE}>
+      <section className="mx-auto max-w-lg rounded-2xl border border-line bg-panel p-4">
+        <PageHeader title="Page not found" />
+        <p className="mt-3 text-body text-ink-dim">
           This link is unavailable, or the card or saved result no longer belongs to this account.
         </p>
-        <Link
-          className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-brass px-4 font-black text-ink-on-accent"
-          href="/"
-        >
-          Go to Live Ratings
-        </Link>
+        <div className="mt-6">
+          <Button href="/">Go to Home</Button>
+        </div>
       </section>
     </main>
   );

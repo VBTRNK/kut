@@ -101,7 +101,6 @@ export default async function MarketPage({ searchParams }: MarketPageProps) {
         <SectionNav label="Market" tabs={marketTabs} />
         <FilterBar
           basePath="/market"
-          sheetOnly
           result="Show listings"
           summary={`${listings.length} listings · ${query.sort === "price" ? "lowest price first" : query.sort === "ovr" ? "highest OVR first" : "newest first"}`}
           chips={{ name: "rarity", allLabel: "All tiers", options: TIER_OPTIONS }}

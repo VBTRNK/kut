@@ -18,9 +18,8 @@ changes it.
   its own on Home, and the re-split build with five adjustments (see "Owner
   decisions (round 3)" and "Records the build needs").
 
-Built so far: S4 (the foundations, ADR-153), S5 (the hub, its routes, the
-picker and Home's block, ADR-154), S6 (the week, bracket, night, calls and
-pre-match, ADR-155) and S7 (the match report, ADR-156). Since S7 the A2
+Built: S4–S11 (ADR-153–161): foundations, Midweek, report, Home/Collection/
+Packs, Market, remaining pages and FAQ close-out. Since S7 the A2
 board's "before" side no longer rebuilds: its components are retired.
 
 ## The canvas
@@ -976,3 +975,15 @@ stack name and tier tags below 360 px to keep long names readable. Players uses
 keeps Q5's own type; the sealed starter pack uses the approved 4:3 surface.
 Admin keeps its existing workflows and warnings, with the type scale and 44 px
 controls. S11 owns the FAQ rewrite and the final type/copy sweep.
+
+### S11 implementation (ADR-161)
+
+DR5-25 is complete: six tiles and blocks, direct answers, stable anchors and
+Back to the topics. `#midweek-ratings`/`#midweek-calls` remain alongside the
+short design aliases. Config-derived rule tables remain (the archetype stats
+table scrolls within its block on a phone). Privacy has its own block; FAQ and
+Settings correctly name the lock, as the existing views do. The type ceiling
+is zero with the existing card/crest exemptions. Retired FilterBar layouts
+and `sheetOnly` are removed now every caller uses the all-width sheet.
+PRODUCT was checked whole; the missing-plus penalty description is corrected,
+with no engine or gating change. The generic recovery links now say Home.

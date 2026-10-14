@@ -87,7 +87,6 @@ export default async function PlayerDirectoryPage({ searchParams }: PlayerDirect
         />
 
         <FilterBar
-          sheetOnly
           result="Show Players"
           summary={
             SORT_OPTIONS.find((option) => option.value === query.sort)?.label ?? "Highest OVR first"

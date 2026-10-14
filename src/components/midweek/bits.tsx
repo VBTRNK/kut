@@ -51,19 +51,17 @@ export function MidweekTrialistCard({
   if (state === "choosing") {
     return (
       <span className="grid aspect-[5/7] w-full place-items-center content-center gap-1.5 rounded-[0.9rem] border-2 border-dashed border-brass-line bg-brass-bg/30 p-3 text-center text-brass">
-        <b className="text-[44px] leading-none font-normal">+</b>
-        <span className="text-xs font-extrabold tracking-[0.12em] uppercase">Choosing</span>
-        <span className="max-w-48 text-xs leading-snug">Pick a card below for slot {slot}.</span>
+        <b className="text-figure font-extrabold">+</b>
+        <span className="text-label font-semibold">Choosing</span>
+        <span className="max-w-48 text-small">Pick a card for slot {slot}.</span>
       </span>
     );
   }
   return (
     <span className="grid aspect-[5/7] w-full place-items-center content-center gap-1.5 rounded-[0.9rem] border-2 border-dashed border-line bg-[repeating-linear-gradient(135deg,rgb(74_64_48/22%)_0_8px,transparent_8px_16px)] p-3 text-center text-ink-faint">
-      <b className="text-[34px] leading-none font-black text-ink-dim">{trialistOvr}</b>
-      <span className="text-xs font-extrabold tracking-[0.12em] uppercase">Trialist</span>
-      <span className="max-w-48 text-xs leading-snug">
-        Plays here if you leave it empty. Handicapped, so a real card is always better.
-      </span>
+      <b className="text-figure font-extrabold text-ink-dim">{trialistOvr}</b>
+      <span className="text-label font-semibold">Trialist</span>
+      <span className="max-w-48 text-small">Empty slot</span>
     </span>
   );
 }

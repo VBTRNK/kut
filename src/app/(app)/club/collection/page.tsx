@@ -239,7 +239,6 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
                 had its own vocabulary for exactly the same three fields: chips
                 for tier, a link row for sort, and a search box with no button. */}
             <FilterBar
-              sheetOnly
               basePath="/club/collection"
               chips={{ name: "rarity", allLabel: "All tiers", options: TIER_OPTIONS }}
               defaultSort="ovr"
