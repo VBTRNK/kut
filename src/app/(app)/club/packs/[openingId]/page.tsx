@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth/user";
 import { fetchInjuredPlayerIds } from "@/lib/injuries";
 import { toListedCardPlayer, type ListedCardRow } from "@/lib/live-card-player";
 import { packSummary } from "@/lib/pack-summary";
+import { openedNote, packKind } from "@/lib/packs";
 import { resolvePhotoUrls } from "@/lib/player-photos";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,6 +18,11 @@ type PackResultCard = ListedCardRow & {
   pack_title: string;
   slot: number;
   card_id: string;
+  // Appended by #223 S1 (ADR-164): the receipt's stored identity and what each
+  // card was when opened. Absent on an older schema, null before S1.
+  pack_slug?: string | null;
+  opened_tier?: string | null;
+  opened_ovr?: number | null;
 };
 
 export default async function PackResultPage({ params }: PackResultPageProps) {
@@ -67,11 +73,18 @@ export default async function PackResultPage({ params }: PackResultPageProps) {
             .map((player) => player.id),
         });
 
-  const revealCards: RevealCard[] = cards.map((card, index) => ({
-    cardId: card.card_id,
-    player: toListedCardPlayer(card, injuredPlayerIds, photoUrls),
-    chip: summary?.chips[index]?.text ?? null,
-  }));
+  const revealCards: RevealCard[] = cards.map((card, index) => {
+    const player = toListedCardPlayer(card, injuredPlayerIds, photoUrls);
+    return {
+      cardId: card.card_id,
+      player,
+      chip: summary?.chips[index]?.text ?? null,
+      openedNote: openedNote(player.rarityTier, card.opened_tier, card.opened_ovr),
+    };
+  });
+  // The receipt as stored: its own slug, title and price paid, never inferred
+  // from today's prices or the cards drawn.
+  const receipt = cards[0];
 
   return (
     <main className={PAGE}>
@@ -83,8 +96,12 @@ export default async function PackResultPage({ params }: PackResultPageProps) {
           doneLabel="View your Collection"
           secondaryHref="/club/packs"
           secondaryLabel="Open another"
+          pack={{
+            kind: packKind(receipt.pack_slug),
+            title: receipt.pack_title,
+            pricePaid: receipt.price_paid,
+          }}
           summaryLine={summary?.line}
-          title={cards[0].pack_title}
         />
       </section>
     </main>

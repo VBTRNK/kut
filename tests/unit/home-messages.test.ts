@@ -70,11 +70,49 @@ describe("Club activity folds a member's pack openings (ADR-114)", () => {
       [null, 1, "t3"],
       [null, 1, "t2"],
     ]);
-    expect(describeFoldedActivity(folded[0])).toBe("Member B opened 3 packs.");
+    expect(describeFoldedActivity(folded[0])).toBe(
+      `Member B opened 3 packs (100 ${BRAND.currency} each).`,
+    );
     expect(describeFoldedActivity(folded[1])).toBe(
       `Sophie D. opened a pack (100 ${BRAND.currency}).`,
     );
     expect(foldActivity(rows, 2)).toHaveLength(2);
+  });
+
+  it("folds only the same pack at the same price paid, and names it (#223)", () => {
+    const pack = (slug: string | null, title: string | null, amount: number, ts: string) => ({
+      ...row("pack", "Member B", ts),
+      amount,
+      pack_slug: slug,
+      pack_title: title,
+    });
+    const rows = [
+      pack("tfh-silver-pack", "Silver pack", 500, "t9"),
+      pack("tfh-silver-pack", "Silver pack", 500, "t8"),
+      pack("tfh-pack", "Regular pack", 250, "t7"),
+      // Repriced in between: the same pack at another price stays apart.
+      pack("tfh-pack", "Regular pack", 300, "t6"),
+      pack("tfh-pack", "Regular pack", 300, "t5"),
+      // Before pack tiers: the stored title, never today's name.
+      pack("tfh-pack", "TFH Pack", 175, "t4"),
+      // An older schema has no identity at all.
+      row("pack", "Member B", "t3"),
+    ];
+    const folded = foldActivity(rows, 10);
+    expect(folded.map((r) => [r.pack_title ?? null, r.amount, r.packs])).toEqual([
+      ["Silver pack", 500, 2],
+      ["Regular pack", 250, 1],
+      ["Regular pack", 300, 2],
+      ["TFH Pack", 175, 1],
+      [null, 100, 1],
+    ]);
+    expect(folded.map(describeFoldedActivity)).toEqual([
+      `Member B opened 2 Silver packs (500 ${BRAND.currency} each).`,
+      `Member B opened a Regular pack (250 ${BRAND.currency}).`,
+      `Member B opened 2 Regular packs (300 ${BRAND.currency} each).`,
+      `Member B opened a TFH Pack (175 ${BRAND.currency}).`,
+      `Member B opened a pack (100 ${BRAND.currency}).`,
+    ]);
   });
 });
 

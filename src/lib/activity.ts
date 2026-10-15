@@ -21,6 +21,10 @@ export type ActivityRow = {
   // ADR-073: the players whose cards were offered back in a trade. Null on
   // every other row kind, and on a coins-only trade.
   offered_card_names: string[] | null;
+  // #223 (ADR-164): a pack row's recorded receipt ("Silver pack"). Null on
+  // every other kind and on older rows; absent on an older schema.
+  pack_slug?: string | null;
+  pack_title?: string | null;
 };
 
 // Oldest activity the feed will show. The club started using KUT for real on
@@ -68,7 +72,7 @@ export function describeActivity(row: ActivityRow): string {
     case "listing":
       return `${row.actor_name ?? "A member"} listed ${row.card_name ?? "a card"} for ${coins(row.amount)}.`;
     case "pack":
-      return `${row.actor_name ?? "A member"} opened a pack (${coins(row.amount)}).`;
+      return `${row.actor_name ?? "A member"} opened ${row.pack_title ? `a ${row.pack_title}` : "a pack"} (${coins(row.amount)}).`;
     case "session":
       return `A new session was published${row.session_date ? ` — ${formatDate(row.session_date)} · ${row.session_type ?? "session"}` : ""}.`;
     default:
@@ -81,8 +85,10 @@ export type FoldedActivityRow = ActivityRow & { packs: number };
 
 /**
  * Club activity on Home (HANDOFF "Home"): consecutive pack openings by the same
- * member fold into one row ("Member B opened 5 packs."), then the first
- * `limit` rows. Rows arrive newest first, so a folded row keeps the newest time.
+ * member of the same pack at the same price paid fold into one row ("Member B
+ * opened 5 Regular packs."), then the first `limit` rows. Mixed packs or prices
+ * stay apart, so a row never hides what was bought. Rows arrive newest first,
+ * so a folded row keeps the newest time.
  */
 export function foldActivity(rows: readonly ActivityRow[], limit: number): FoldedActivityRow[] {
   const folded: FoldedActivityRow[] = [];
@@ -92,7 +98,9 @@ export function foldActivity(rows: readonly ActivityRow[], limit: number): Folde
       row.kind === "pack" &&
       last?.kind === "pack" &&
       row.actor_name !== null &&
-      last.actor_name === row.actor_name
+      last.actor_name === row.actor_name &&
+      (last.pack_slug ?? null) === (row.pack_slug ?? null) &&
+      last.amount === row.amount
     ) {
       last.packs += 1;
       continue;
@@ -103,10 +111,12 @@ export function foldActivity(rows: readonly ActivityRow[], limit: number): Folde
   return folded;
 }
 
-/** `describeActivity`, plus the folded "Member B opened 5 packs." */
+/** `describeActivity`, plus the folded "Member B opened 5 Regular packs (250 FLUT Coins each)." */
 export function describeFoldedActivity(row: FoldedActivityRow): string {
   if (row.kind === "pack" && row.packs > 1) {
-    return `${row.actor_name ?? "A member"} opened ${row.packs} packs.`;
+    const what = row.pack_title ? `${row.pack_title}s` : "packs";
+    const each = row.amount === null ? "" : ` (${row.amount} ${BRAND.currency} each)`;
+    return `${row.actor_name ?? "A member"} opened ${row.packs} ${what}${each}.`;
   }
   return describeActivity(row);
 }

@@ -2,10 +2,19 @@ import { Block } from "@/components/ui/block";
 import { InfoLink } from "@/components/ui/links";
 import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
 import { requireUser } from "@/lib/auth/user";
+import { packKind, packPromise } from "@/lib/packs";
 import { createClient } from "@/lib/supabase/server";
 import { OpenPackForm } from "./open-pack-form";
 
-type PackOffer = { slug: string; title: string; price: number; cards_per_pack: number };
+// `min_tier` was appended by #223 S1 (ADR-164); an older schema omits it, and
+// then the shop promises nothing beyond the cards.
+type PackOffer = {
+  slug: string;
+  title: string;
+  price: number;
+  cards_per_pack: number;
+  min_tier?: string | null;
+};
 
 /** Mirrors the live-rating tier thresholds the database applies on publish. */
 const TIER_BANDS = [
@@ -24,7 +33,8 @@ export default async function PacksPage() {
     supabase
       .schema("kut")
       .from("active_pack_offers")
-      .select("slug, title, price, cards_per_pack")
+      // "*": views only gain columns, and the page ships before the schema does.
+      .select("*")
       .order("price"),
     supabase.schema("kut").from("wallets").select("balance").eq("user_id", user.id).maybeSingle(),
   ]);
@@ -38,7 +48,7 @@ export default async function PacksPage() {
 
   return (
     <main className={PAGE}>
-      <section className={`${COLUMN} lg:max-w-5xl`}>
+      <section className={`${COLUMN} lg:max-w-6xl`}>
         <PageHeader title="Packs" />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
@@ -47,15 +57,18 @@ export default async function PacksPage() {
               No packs are available right now.
             </p>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
+            // Only the offers the server returned, in price order: an unknown
+            // slug gets neutral art and its own title, never an invented promise.
+            <div className="pack-offers grid gap-4">
               {packs.map((pack) => (
                 <OpenPackForm
                   balance={balance}
-                  canAfford={balance >= pack.price}
                   cardsPerPack={pack.cards_per_pack}
                   key={pack.slug}
+                  kind={packKind(pack.slug)}
                   packSlug={pack.slug}
                   price={pack.price}
+                  promise={packPromise(pack.min_tier)}
                   title={pack.title}
                 />
               ))}

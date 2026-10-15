@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/user";
+import { openPackErrorMessage } from "@/lib/packs";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/uuid";
 
@@ -58,7 +59,9 @@ export async function openPack(
     !("opening_id" in data) ||
     typeof data.opening_id !== "string"
   ) {
-    return { error: "The pack could not be opened. Check your FLUT Coin balance and try again." };
+    // Known server errors (an unmeetable guarantee, a pack taken off sale, too
+    // few coins) get their own words; anything else stays generic.
+    return { error: openPackErrorMessage(error) };
   }
 
   revalidatePath("/club/packs", "layout");

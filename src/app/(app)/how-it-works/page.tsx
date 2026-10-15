@@ -23,6 +23,7 @@ import {
   roundOneClock,
   scheduleVersionOf,
 } from "@/lib/midweek/entry";
+import { packPromise, promiseText } from "@/lib/packs";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "How FLUT works" };
@@ -73,11 +74,19 @@ export default async function HowItWorksPage() {
   // The clock of the latest week (ADR-104), so the rules match the week being
   // played; a failed read falls back to the version the next week opens on.
   const supabase = await createClient();
-  const { data: midweekCurrent } = await supabase
-    .schema("kut")
-    .from("midweek_current")
-    .select("*")
-    .maybeSingle();
+  const [{ data: midweekCurrent }, packsResponse] = await Promise.all([
+    supabase.schema("kut").from("midweek_current").select("*").maybeSingle(),
+    // The packs on offer now, with their live prices and promises (#223). A
+    // failed read leaves the general rules without a price list.
+    supabase.schema("kut").from("active_pack_offers").select("*").order("price"),
+  ]);
+  const offers = (packsResponse.error ? [] : (packsResponse.data ?? [])) as {
+    slug: string;
+    title: string;
+    price: number;
+    cards_per_pack: number;
+    min_tier?: string | null;
+  }[];
   const scheduleVersion = scheduleVersionOf(
     midweekCurrent as { schedule_version?: number | null } | null,
   );
@@ -336,11 +345,29 @@ export default async function HowItWorksPage() {
 
         <Block id="packs" title="Packs and discard">
           <Question title="What is in a pack?">
+            {offers.length > 0 && (
+              <ul className="grid gap-1">
+                {offers.map((offer) => {
+                  const promise = promiseText(packPromise(offer.min_tier));
+                  return (
+                    <li key={offer.slug}>
+                      <strong>{offer.title}</strong>: {offer.price} FLUT Coins,{" "}
+                      {offer.cards_per_pack} Live Cards{promise ? `. ${promise}` : ""}.
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
             <p>
-              A <strong>TFH Pack</strong> costs {ECONOMY.basicPackPrice} FLUT Coins and gives{" "}
-              {ECONOMY.basicPackCardCount} Live Cards. Draws are weighted by rarity, so Common
-              players come up far more often than Gold or better. The result is fixed the moment you
-              open &mdash; refreshing never rerolls it. Duplicates can happen.
+              Packs hold Live Cards only. Every card is drawn by rarity, so Common players come up
+              far more often than Gold or better. A pack with a minimum tier draws its first cards
+              the same way; only if none of them reaches the minimum does the last card come from
+              the Players at or above it. So it promises at least one, and the other cards can be
+              any tier.
+            </p>
+            <p>
+              Duplicates can happen, also within one pack. The result is fixed the moment you pay
+              &mdash; reloading or replaying the opening never rerolls it.
             </p>
             <Link
               className={`inline-flex min-h-11 items-center rounded-md font-semibold text-brass hover:underline ${FOCUS}`}
