@@ -22,7 +22,7 @@ coupling to `VibeTrunk/home` beyond the shared Supabase project.
   or `market_listings`.
 - A deliberate learning project in production-grade practice: clear structure,
   decisions recorded in markdown.
-- Latest hosted migration: `20261021000000_active_member_base_reads.sql` (ADR-152).
+- Latest hosted migration: `20261023000000_pack_tiers.sql` (ADR-164).
   The `VibeTrunk/supabase` catalogue is the hosted history.
 
 ## Reading: grep on demand
