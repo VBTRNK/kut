@@ -46,10 +46,10 @@ Ground rules for every area:
   attendance (250 per session), the bibs bonus (100), a session report (50),
   the injury stipend (100 a week), Midweek wins and calls, audited admin grants.
 - Sinks: packs, and the 5% market tax, which is burned.
-- The basic pack (`tfh-pack` in `kut.pack_definitions`) costs **250** and holds
-  3 Live cards. The draw is weighted by current tier: Common 100, Bronze 60,
-  Silver 30, Gold 12, Holo 4, Elite 1 per eligible Player. `open_pack` needs the
-  quoted price and an idempotency key, so a stale quote never debits.
+- Packs hold 3 Live cards, weighted by current tier: Common 100, Bronze 60,
+  Silver 30, Gold 12, Holo 4, Elite 1 per eligible Player. Regular (`tfh-pack`)
+  costs **250**; Silver 500 / Gold 750 (at least 1 Silver+ / Gold+, ADR-164)
+  are off until S2. `open_pack` needs the quoted price and an idempotency key.
 - Discard burns a copy for `round(10 × 1.08^(OVR − 30))`, computed by the server
   at the moment of discard.
 - Club Value (`/club/value`, Standings) is coins + owned discard value + 4× the
@@ -62,19 +62,19 @@ Ground rules for every area:
 - Standings has ink ranks and a You tag; phones show club names, with Cards
   and Players columns from `sm`. Club Value uses breakdown blocks (ADR-160).
 - Packs: confirmation sheet, tags below cards (ADR-158).
-  Approved design: `design/pack-tiers/` (ADR-163).
+  Design + contract: `design/pack-tiers/` (ADR-163/164).
 - The starter reveal on `/welcome` is cosmetic. The grant already happened in
   `claim_invitation` (ADR-031).
 
 **Part L:** 2, 4, 5, 6, 7, 8, 10, 11.
 
 **Where.**
-- `open_pack(text, bigint, uuid)`, `discard_card`, `card_discard_value`,
-  `claim_invitation`, `grant_starter_pack`, `mark_starter_opened`.
+- `open_pack(text, bigint, uuid)`, `admin_apply_pack_settings`, `discard_card`,
+  `card_discard_value`, `claim_invitation`, `grant_starter_pack`,
+  `mark_starter_opened`; `admin_pack_economy` (admin).
 - Views: `my_collection_cards`, `my_pack_opening_results`, `my_club_value*`,
   `club_value_leaderboard`, `pack_economy_health` (admin).
-- `scripts/measure-pack-ev.mjs` measures a pack's expected value on the real
-  roster.
+- `scripts/measure-pack-ev.mjs` reads each pack's expected value from SQL.
 - `src/lib/pack-summary.ts`, `src/lib/album.ts` (the album is a paged book,
   ADR-048).
 
@@ -84,7 +84,6 @@ Ground rules for every area:
 - Club Value v3 added duplicate discounts to v2’s discard sum (ADR-056).
 - "Untradeable" starter cards were retired (ADR-033). Every card is tradeable
   and discardable.
-- Ideas, not built: silver and gold packs (issue #223).
 
 ## Market and trades
 

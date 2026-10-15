@@ -7,8 +7,8 @@ select plan(212);
 
 select is((select count(*)::int from pg_policies where schemaname='kut'
   and policyname='active membership required for reads' and permissive='RESTRICTIVE'
-  and cmd='SELECT' and roles=array['authenticated']::name[]),31,
-  'all 31 affected tables have restrictive authenticated SELECT gates');
+  and cmd='SELECT' and roles=array['authenticated']::name[]),32,
+  'all 31 affected tables and ADR-164''s pack settings audit have restrictive authenticated SELECT gates');
 select is((select count(*)::int from pg_policies p where p.schemaname='kut'
   and p.tablename <> 'profiles' and p.permissive='PERMISSIVE' and p.cmd in ('SELECT','ALL')
   and 'authenticated'=any(p.roles) and p.qual not in ('kut.is_admin()','is_admin()')

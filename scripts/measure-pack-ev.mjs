@@ -36,7 +36,7 @@ try {
      order by slug
   `);
   if (rows.length === 0)
-    throw new Error("kut.pack_economy_health returned no active pack; nothing to measure.");
+    throw new Error("kut.pack_economy_health returned no pack; nothing to measure.");
 
   console.log(
     JSON.stringify(

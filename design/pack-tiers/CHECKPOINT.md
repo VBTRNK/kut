@@ -18,8 +18,9 @@ do not attach private production aggregates.
 - [x] Prototype keyboard/focus, skip, reduced motion, fixed-result replay/reload
   and 320/390/768/1440 px visual checks.
 - [x] Current PRODUCT/ADR describe the staged boundary without claiming rollout.
-- [ ] S1: independent DB/RPC slice — shared pool/guarantee math, new definitions,
-  immutable opening evidence, analytics, audited settings and concurrency proof.
+- [x] S1: independent DB/RPC slice — shared pool/guarantee math, new definitions,
+  immutable opening evidence, analytics, audited settings and concurrency proof
+  (15 Oct, branch `feat/issue-223-pack-tiers-db`; contract in `COPY_AUDIT.md`).
 - [ ] S2: actual shop/reveal integration, production copy/identity changes,
   real paid-result reload/replay, member access and old-schema browser tests.
 - [ ] S3: advisory admin form/analytics, draft suggestions, manual overrides,
@@ -68,3 +69,14 @@ Next session opening prompt (Opus 5.5, effort High):
 > and the sections 'Context', 'How to run a session' and 'S1' of
 > C:\Users\mfvan\.claude\plans\kut-issue-223.md. Do session S1 of issue-223
 > and publish it as a PR. Stop at its pause point.
+
+S1 (15 Oct): one migration `20261023000000_pack_tiers.sql` + pgTAP
+`pack_tiers.test.sql` (87 assertions: harness parity to 1e-9, needed and
+already-met guarantees, weights, duplicates/low companions, empty pools without
+charge, auth, quotes, replay after repricing/switch-off, receipts, conflicts,
+audit rollback, valid high-return override, member reads, column order) and
+`pack-tiers-race.test.ts` (admin/admin, settings/purchase both ways, same and
+different keys). Mutation checks (no restriction, every-slot restriction,
+wrong miss formula) all fail the suite. Deviation: Silver seeded off, because
+the current shop lists every active offer without its promise. Gate: owner
+review/merge, catalogue PR and hosted apply (owner), then S2 from main.
