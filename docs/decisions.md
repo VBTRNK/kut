@@ -384,20 +384,15 @@ newest outline), DR2's Why foot and DR1-5 (as DR5-4). Closes #279.
 
 Date: 2026-10-13.
 
-- Shared primary/section navigation, card lists, filters and album controls
-  use `Link prefetch={false}`. Clicks retain client navigation and loading UI.
-  Home's directory links and card/listing detail back links also opt out.
-- Next 16.3.8 production probes with synthetic local member data confirmed
-  viewport/scroll prefetch requests: Players 49, album 48, manage 36, Market 26.
-  These fetched route shells and ran session processing, without fetching the
-  detail pages' data. All four fell to zero after the change; clicks still
-  rendered the expected details without reloading the document.
+- Shared navigation, card lists, filters, album controls, Home's directory
+  and detail back links use `Link prefetch={false}`; clicks stay client-side.
+- Local Next 16.3.8 production probes: viewport prefetches (Players 49, album
+  48, manage 36, Market 26 route shells) fell to zero.
 - Cookie-dependent pages and nonce CSP remain dynamic/private/no-store.
   No shared member/photo cache, auth bypass, or change to live polling or lazy
   jobs. This preserves membership revocation, ownership and market freshness.
-- The production fraction of speculative traffic and CPU savings are unproven.
-  Compare equal traffic windows after release, separating prefetch RSC requests
-  (`Next-Router-Prefetch`) from navigations and live refreshes.
+- Production savings are unproven: compare equal traffic windows, counting
+  prefetch RSC requests (`Next-Router-Prefetch`) apart from navigations.
 
 ## ADR-158 — Home, Collection and Packs on the UI scale
 
@@ -492,10 +487,16 @@ Date: 2026-10-14 (#264). Amends ADR-059/063/068 (kudos ballots and recognition).
   phones. Safe Hands follows regular picks with collapsed rules.
 - Tolerant UI first, catalogue migration second; no hosted changes authorised.
 
-## ADR-163 — Pack-tier design
+## ADR-163 — Pack-tier design, shop and opening
 
-Date: 2026-10-15 (#223 S0). [Brief](../design/pack-tiers/BRIEF.md).
-Owner-approved design (brief + prototype). Rules: ADR-164.
+Date: 2026-10-15 (#223 S0, built in S2). [Brief](../design/pack-tiers/BRIEF.md).
+
+- Art by stored slug (unknown: plain paper); promise from `min_tier` only,
+  none on an old schema. Rules: ADR-164.
+- Paid openings start sealed; tier and rating advance alone, the card waits
+  for a tap. Skip, replay, reload, reduced motion show the stored result only.
+- Receipts: stored title and price paid, plus "Gold 64 when opened" if the
+  tier moved. Home folds only pack rows of one slug and price.
 
 ## ADR-164 — Pack tiers: rules and settings
 

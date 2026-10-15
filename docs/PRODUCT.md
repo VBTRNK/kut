@@ -49,7 +49,7 @@ Ground rules for every area:
 - Packs hold 3 Live cards, weighted by current tier: Common 100, Bronze 60,
   Silver 30, Gold 12, Holo 4, Elite 1 per eligible Player. Regular (`tfh-pack`)
   costs **250**; Silver 500 / Gold 750 (at least 1 Silver+ / Gold+, ADR-164)
-  are off until S2. `open_pack` needs the quoted price and an idempotency key.
+  are admin toggles. `open_pack` needs the quoted price and an idempotency key.
 - Discard burns a copy for `round(10 × 1.08^(OVR − 30))`, computed by the server
   at the moment of discard.
 - Club Value (`/club/value`, Standings) is coins + owned discard value + 4× the
@@ -61,8 +61,8 @@ Ground rules for every area:
   rating insets, listing/discard blocks; history is on the Player page.
 - Standings has ink ranks and a You tag; phones show club names, with Cards
   and Players columns from `sm`. Club Value uses breakdown blocks (ADR-160).
-- Packs: confirmation sheet, tags below cards (ADR-158).
-  Design + contract: `design/pack-tiers/` (ADR-163/164).
+- Packs (ADR-163): own art and promise; openings start sealed; receipts keep
+  title, price paid and tier when opened.
 - The starter reveal on `/welcome` is cosmetic. The grant already happened in
   `claim_invitation` (ADR-031).
 
@@ -75,8 +75,7 @@ Ground rules for every area:
 - Views: `my_collection_cards`, `my_pack_opening_results`, `my_club_value*`,
   `club_value_leaderboard`, `pack_economy_health` (admin).
 - `scripts/measure-pack-ev.mjs` reads each pack's expected value from SQL.
-- `src/lib/pack-summary.ts`, `src/lib/album.ts` (the album is a paged book,
-  ADR-048).
+- `src/lib/packs.ts`, `pack-summary.ts`, `album.ts` (a paged book, ADR-048).
 
 **History.**
 - Pack price: 175 (ADR-057, 6 Sep) → 250 (ADR-136, 7 Oct).

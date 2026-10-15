@@ -21,8 +21,9 @@ do not attach private production aggregates.
 - [x] S1: independent DB/RPC slice — shared pool/guarantee math, new definitions,
   immutable opening evidence, analytics, audited settings and concurrency proof
   (15 Oct, branch `feat/issue-223-pack-tiers-db`; contract in `COPY_AUDIT.md`).
-- [ ] S2: actual shop/reveal integration, production copy/identity changes,
-  real paid-result reload/replay, member access and old-schema browser tests.
+- [x] S2: shop/reveal integration, production copy/identity changes, real
+  paid-result reload/replay and browser tests (15 Oct, branch
+  `feat/issue-223-pack-shop-reveal`; see "S2" below).
 - [ ] S3: advisory admin form/analytics, draft suggestions, manual overrides,
   release readiness and owner launch/+2/+4-week review checklist.
 
@@ -80,3 +81,18 @@ different keys). Mutation checks (no restriction, every-slot restriction,
 wrong miss formula) all fail the suite. Deviation: Silver seeded off, because
 the current shop lists every active offer without its promise. Gate: owner
 review/merge, catalogue PR and hosted apply (owner), then S2 from main.
+
+S2 (15 Oct): the prototype's art, stages, gestures and celebrations are now in
+the app (`src/components/pack-art.tsx`, `pack-reveal.tsx`, the "Pack tiers"
+block of `globals.css`); this folder stays the approved reference. Shop reads
+`active_pack_offers` with `select("*")`: art from the slug (unknown: plain
+paper), promise from `min_tier` (absent column: no promise). Opening page:
+sealed → gesture → backs → tier/rating on their own → card waits; Skip all,
+Replay opening, reduced motion; receipt sub line with stored title and price
+paid, "X when opened" only when `opened_tier` differs. Home: live offers tile,
+activity named and folded per slug and price. FAQ: live offers and the
+conditional last draw. Known `open_pack` errors have their own copy.
+`ECONOMY.basicPack*` removed (only the FAQ read them). Starter unchanged apart
+from shared focus/status. Browser: `tests/e2e-authenticated/pack-tiers.spec.ts`.
+Next: owner review/merge; then an admin switches Silver on (settings RPC or
+S3 page); S3 builds the admin page.

@@ -96,9 +96,8 @@ export default async function Home() {
     supabase
       .schema("kut")
       .from("activity_feed")
-      .select(
-        "kind, ts, actor_name, counterparty_name, card_name, amount, session_date, session_type, offered_card_names",
-      )
+      // "*": #223 appended pack_slug and pack_title; views only gain columns.
+      .select("*")
       .gte("ts", ACTIVITY_FLOOR_ISO)
       .order("ts", { ascending: false })
       // Enough to fill six rows once a member's run of pack openings folds into one.
@@ -119,12 +118,7 @@ export default async function Home() {
       .order("week_start", { ascending: false })
       .limit(1)
       .maybeSingle(),
-    supabase
-      .schema("kut")
-      .from("active_pack_offers")
-      .select("price, cards_per_pack")
-      .eq("slug", "tfh-pack")
-      .maybeSingle(),
+    supabase.schema("kut").from("active_pack_offers").select("title, price").order("price"),
   ]);
 
   if (profileError) {
@@ -278,7 +272,15 @@ export default async function Home() {
   const lead = ordered.find((card) => card.value.due) ?? ordered[0];
   const somethingDue = ordered.some((card) => card.value.due);
   const latest = chronicleResponse.error ? null : chronicleResponse.data;
-  const pack = packResponse.error ? null : packResponse.data;
+  // Packs are a category: one offer is named with its price, several say where
+  // they start. A failed read invents nothing.
+  const offers = packResponse.error ? [] : (packResponse.data ?? []);
+  const packState =
+    offers.length === 0
+      ? "See the packs"
+      : offers.length === 1
+        ? `${offers[0].title} · ${offers[0].price} coins`
+        : `${offers.length} packs from ${offers[0].price} coins`;
 
   return (
     <main className={PAGE}>
@@ -308,13 +310,7 @@ export default async function Home() {
             />
             <FigureTile href="/leaderboard" label="Rank" value={rank === null ? "—" : `#${rank}`} />
             {somethingDue ? (
-              <LinkTile
-                href="/club/packs"
-                title="Open a pack"
-                state={
-                  pack ? `${pack.price} coins · ${pack.cards_per_pack} cards` : "See the packs"
-                }
-              />
+              <LinkTile href="/club/packs" title="Open a pack" state={packState} />
             ) : (
               <div className="min-[360px]:col-span-2">
                 <Button href="/club/packs" wide>
