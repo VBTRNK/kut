@@ -2057,7 +2057,9 @@ test(
       await page.getByRole("button", { name: "Skip all" }).click();
       await expect(page.getByRole("heading", { name: "Your new Live Cards" })).toBeVisible();
       await expect(
-        page.getByText(/^Regular pack · (No new Players|\d+ new Players?)\. Album \d+ \/ \d+\.$/),
+        page.getByText(
+          /^Regular pack · Paid \d+ coins · (No new Players|\d+ new Players?)\. Album \d+ \/ \d+\.$/,
+        ),
       ).toBeVisible();
       await expect(
         page.getByText(/^(New · fills slot \d+|×\d+ · discards for \d+)$/).first(),
