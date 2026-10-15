@@ -61,7 +61,8 @@ Ground rules for every area:
   rating insets, listing/discard blocks; history is on the Player page.
 - Standings has ink ranks and a You tag; phones show club names, with Cards
   and Players columns from `sm`. Club Value uses breakdown blocks (ADR-160).
-- Packs use a confirmation sheet; summaries put tags below cards (ADR-158).
+- Packs: confirmation sheet, tags below cards (ADR-158).
+  Approved design: `design/pack-tiers/` (ADR-163).
 - The starter reveal on `/welcome` is cosmetic. The grant already happened in
   `claim_invitation` (ADR-031).
 

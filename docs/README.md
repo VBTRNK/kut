@@ -13,6 +13,7 @@ need for the area you are changing.
 | `E2E_QUARANTINE.md`                           | Evidence required before skipping a failing browser test; preserved #216 diagnosis.         |
 | `SECURITY_REVIEW.md`                          | The MVP-era security review. A reference, not a runbook.                                      |
 | `RATING_BALANCE_REVIEW.md`                    | Point-in-time analysis behind the ADR-063 rating balance.                                     |
+| `PACK_TIERS_VISION.md`                       | Issue #223 proposal: production-roster evidence, guaranteed pack tiers, prices and maturity risks. |
 | `design/`, and `../design/README.md`          | Rendered mockups and the design packages' decisions.                                          |
 
 **Archive.** The build spec, delivery log, release log, roadmap, bug register,
