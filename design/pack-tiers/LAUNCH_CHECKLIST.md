@@ -25,6 +25,12 @@ performed by this checklist or its PR. Keep aggregate evidence private under
 - [ ] Owner decides launch settings: accepted starting prices 250/500/750,
   Regular on, Silver on, Gold off. Verify current settings first: S1 seeded
   both premiums off and a later owner may already have enabled Silver.
+- [ ] Before Apply or a paid smoke test, confirm a fresh production backup
+  using [the backup runbook](../../docs/BACKUP.md). Start it with
+  `gh workflow run backup.yml -R VibeTrunk/kut --ref main`; wait for that
+  non-PR run to succeed, including its independent restore check, and record
+  the run URL privately. The owner also confirms the decryption key remains
+  durably retrievable; never share the key in launch evidence.
 - [ ] Use suggested prices only fills drafts. Review warnings and Apply changes
   only when the owner/admin chooses to launch. Confirm the saved revision,
   shop identity/price/promise and inactive Gold. Manual overrides remain valid;
@@ -47,7 +53,8 @@ performed by this checklist or its PR. Keep aggregate evidence private under
   90%+ floor maturity. Explain unavailable/unsupported pools before decisions.
 - [ ] Choose and record any manual price/availability change and its revision,
   or record why current settings stay. Gold enablement is a separate owner
-  choice. Use Apply for any authorized change; no deployment is needed.
+  choice. Repeat the backup prerequisite before Apply for any authorized
+  change; no deployment is needed.
 
 S3 pause: verified admin PR and this checklist; merge, launch settings, paid
 production smoke tests and review scheduling remain owner actions.
