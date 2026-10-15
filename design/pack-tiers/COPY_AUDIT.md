@@ -62,44 +62,55 @@ Paths without a prefix in the table are under `src/app/(app)/` or `src/` as name
   insert such a notice. Preserve legacy data/event parsing rather than adding
   redundant paid messages or blanket text updates.
 
-## Data contract choices for S1 review
+## S1 contract (as built, ADR-164)
 
-Proposed fixed slugs: existing `tfh-pack`, new `tfh-silver-pack`/`tfh-gold-pack`.
-Do not select a design from price or floor. Keep the current purchase signature
-and response keys. New fields are append-only/optional for reads; every opening
-uses one materialized eligible-pool snapshot so tier changes cannot defeat the
-guarantee halfway through. Empty pools fail atomically with no debit/mint.
+Migration `20261023000000_pack_tiers.sql`; tests `pack_tiers.test.sql` and
+`tests/integration/pack-tiers-race.test.ts`. S2/S3 read this, not the SQL.
 
-Settings save takes all three prices/two toggles and an expected version token.
-Lock definitions in stable order, recheck version, validate auth and bounded
-positive integers, update all or none and write one who/before/after/time audit.
-Use a monotonic revision rather than a timestamp-only token to avoid equal-time
-edit collisions. Regular stays on. Decide the finite technical upper bound in
-S1 alongside bigint/JS safe-integer handling; it is not an economic constraint.
-Manual override above/below recommendations is valid with no extra approval.
-
-Analytics should return authoritative per-pack metrics plus measured-at/version;
-the TS form may divide those metrics by draft prices, not recalculate the pool
-or guarantee odds. Canonical SQL suggestions can use the same metrics; include
-parity vectors for 75%/10%/roundUp25 and undefined ratios.
-Health must account for conditional third-slot EV; the old per-slot EV column
-can remain the base draw statistic for old clients, never label it as every
-slot's premium EV. Full premium pack EV is separately authoritative.
-
-Use one cohort (enabled non-superadmin profiles, including admins/newcomers,
-matching the accepted research); do not guess test identities from display
-names. S1 must inspect whether a real explicit test-account marker exists;
-exclude it consistently if present, otherwise state the cohort and avoid
-claiming an unsupported exclusion. Seven/28-day usage groups by immutable
-identity and paid price; affordability uses draft prices in S3. Tax is a sink,
-market/escrow transfers are not. Reward/discard totals are not pack ROI.
-
-Catalogue rollout: S1 DB/RPC PR independently reviewed/merged; hosted application
-only through VibeTrunk/supabase by owner authorization. New client must work
-before that catalogue application. Until metadata/RPC exists, no premium promise
-or settings save control is fabricated. Owner should coordinate catalogue
-application and S2 deployment so an old UI's generic premium copy is not exposed
-as a launch. Launch checks are owner actions, not authorized by this session.
+- **Definitions.** `tfh-pack` "Regular pack" 250 (a check keeps it on),
+  `tfh-silver-pack` "Silver pack" 500 `min_tier='silver'`, `tfh-gold-pack`
+  "Gold pack" 750 `min_tier='gold'`. Silver and Gold are seeded **off**: the
+  current shop would list Silver without its promise (deviation, see the PR).
+  Map art from the slug only; unknown slugs stay neutral.
+- **Purchase.** `open_pack(text,bigint,uuid)` and its response keys are
+  unchanged. New error: `P0002 'pack guarantee cannot be met'` (empty floor;
+  no debit). `'insufficient FLUT Coins for this pack'` replaces the KUT text.
+- **Reads (appended columns, use `select("*")`).** `active_pack_offers.min_tier`.
+  `my_pack_opening_results`: `pack_slug`/`pack_title` now the recorded receipt
+  (old openings say "TFH Pack"), then `min_tier`, `opened_tier`, `opened_ovr`
+  (null for openings before S1: never infer them) and `floor_draw`. Show "Gold
+  64 when opened" only when `opened_tier` differs from `rarity_tier`.
+  `activity_feed.pack_slug`/`pack_title` (null outside packs and in fixtures);
+  fold only equal slug and `amount`. `pack_economy_health` lists every pack and
+  appends `is_active`, `min_tier`, `qualifying_count`.
+- **Admin read.** `admin_pack_economy()` (admins; 42501 otherwise) returns
+  `measured_at`; `revision` {`revision`,`changed_at`,`changed_by_name`};
+  `packs[]` per definition (price order): `slug,title,price,cards_per_pack,
+  is_active,min_tier,eligible_count,qualifying_count,expected_discard_per_slot,
+  expected_discard_per_pack,expected_{silver_plus,gold_plus,holo_plus,elite},
+  chance_{silver_plus,gold_plus,holo_plus,elite},suggested_price,
+  suggestion_state ('suggested'|'unavailable'|'unsupported'),value_ratio`;
+  expectations are null when the floor has no qualifying Player. `usage[]` by
+  recorded `slug,title,price_paid` with `openings_7d/28d`, `coins_7d/28d`.
+  `cohort` {`definition`,`members`,`median_balance`,`balances` sorted, no ids}.
+  `flows` always has `rewards_and_grants`, `discards`, `packs`, `market_tax`
+  (ledger tax plus burned trade tax) and `admin_adjustments`, each signed
+  `net_7d`/`net_28d`; market sales/buys and trade escrow are transfers, left out.
+  The page divides these per-pack figures by draft prices; it never redraws.
+- **Cohort.** Enabled, non-superadmin profiles. No test-account marker exists,
+  so none is claimed.
+- **Settings write.** `admin_apply_pack_settings(expected_revision, regular,
+  silver, gold, silver_active, gold_active)`: admins only (42501), whole coins
+  1 to 1,000,000 (22023, a technical bound). Locks the three rows in slug order
+  (a purchase's `FOR SHARE` waits, two admins serialize). Returns `status`
+  `applied` (one audit row, revision + 1), `unchanged` or `conflict` (with the
+  current `revision` and `packs`, nothing written). Direct writes are revoked;
+  the audit is `pack_settings_changes` (admin read). No economic checks.
+- **Suggestions** (SQL, current Regular price): R* = max(price,
+  roundUp25(EV/0.75)); premium = roundUp25(max(EV/0.75, R* x largest value
+  ratio / 0.90)) over cards, discard, Silver+/Gold+/Holo+/Elite copies, 0/0
+  ignored. On the 15 Oct fixture: 250 / 500 / 750 (pgTAP parity with
+  `scripts/analyze-pack-tiers.mjs` to 1e-9).
 
 ## Verification reach
 

@@ -31,13 +31,14 @@ select is(
      order by ordinal_position desc limit 3) last_three),
   array['discard_value','is_live','player_id'],
   'player_id and is_live stay in place, directly before ADR-103''s discard_value');
+-- ADR-164 (20261023000000) appended four opening-evidence columns after them.
 select is(
   (select array_agg(column_name::text order by ordinal_position desc) from (
      select column_name, ordinal_position from information_schema.columns
      where table_schema='kut' and table_name='my_pack_opening_results'
-     order by ordinal_position desc limit 2) last_two),
-  array['is_live','player_id'],
-  'player_id and is_live are the last two pack result columns');
+     order by ordinal_position desc limit 6) last_six),
+  array['floor_draw','opened_ovr','opened_tier','min_tier','is_live','player_id'],
+  'player_id and is_live stay in place, directly before ADR-164''s opening evidence');
 
 -- Grants are unchanged: anon has none, members keep SELECT.
 select table_privs_are('kut','active_market_listings','anon',array[]::text[],'anon cannot select from active_market_listings');

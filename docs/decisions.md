@@ -16,11 +16,8 @@ text, with the transition rules S1–S3 ran under, is at the tag `docs-archive-2
   browser run. Accepted: Vercel does not wait for the main-branch CI run.
 - The merge authorizes that deployment only. No deployment records are kept.
   `docs/RELEASING.md` has the flow and the rollback.
-- Superseded: ADR-071 (the fail-closed release gate), ADR-108 (the gate in the
-  owner's session), ADR-123 (held main deployments), ADR-124 (merge authorizes
-  a gated release), the deployment-record part of ADR-126 (full main CI stays),
-  and ADR-128 to ADR-134 (gate checkout, preflight, E2E progress, release
-  steps, release preparation, share-matrix attribution, Topic A monitoring).
+- Superseded: ADR-071, 108, 123, 124, 128–134 and the deployment-record part
+  of ADR-126 (full main CI stays); their titles are at the tag.
 - ADR-135 (cleanup) and the 14-day package-age rule were replaced by ADR-142.
 
 ## ADR-141 — Nightly encrypted kut backup in GitHub Actions, kut only
@@ -139,17 +136,10 @@ Date: 2026-10-11 (Midweek Madness 3.0 S2, VibeTrunk/kut#267, #262).
 
 Date: 2026-10-11 (after Midweek Madness 3.0 S2). Amends `docs/OPERATIONS.md`.
 
-- Agents have no hosted credential, so the smoke query after a hosted apply
-  is a manual step for the owner. For an additive migration (new views,
-  columns, functions) it adds little: CI tests the migration on a fresh stack,
-  and the `apply-migrations` workflow (ADR-144) shows the approved plan, the
-  push and that nothing is pending.
-- So the owner runs a read-only smoke query only after a **data-changing**
-  migration (`docs/OPERATIONS.md` tiers). An access change still gets a
-  member smoke test of the page (AGENTS.md).
-- Running a reviewed read-only smoke inside the apply job is filed as
-  VibeTrunk/supabase#87, for when migrations get frequent or a second tool
-  joins.
+- The owner runs a read-only hosted smoke query only after a data-changing
+  migration (`docs/OPERATIONS.md` tiers). For an additive one, CI on a fresh
+  stack and the `apply-migrations` checks (ADR-144) suffice. An access change
+  still gets a member smoke test of the page. In-job smoke: VibeTrunk/supabase#87.
 
 ## ADR-147 — Every match live: feed, clock, readable shoot-out
 
@@ -505,4 +495,17 @@ Date: 2026-10-14 (#264). Amends ADR-059/063/068 (kudos ballots and recognition).
 ## ADR-163 — Pack-tier design
 
 Date: 2026-10-15 (#223 S0). [Brief](../design/pack-tiers/BRIEF.md).
-Owner-approved design (brief + prototype); runtime unchanged. DB/RPC first.
+Owner-approved design (brief + prototype). Rules: ADR-164.
+
+## ADR-164 — Pack tiers: rules and settings
+
+Date: 2026-10-15 (#223 S1).
+
+- Regular (`tfh-pack`) 250, always on. Silver 500 / Gold 750: 3 Live cards,
+  at least 1 Silver+ / Gold+; only the last card may come from the floor, if
+  no earlier card met it. Weights, duplicates and low cards stay.
+- `pack_draw_pool()` is the one pool, read once per opening; an unmeetable
+  floor fails before any debit. Openings snapshot slug, title, floor, tier/OVR.
+- Prices and toggles change only via audited `admin_apply_pack_settings`
+  (revision token). Suggestions (75%, 10%, round up 25) only advise.
+- Silver and Gold ship off; Silver goes on with the S2 shop.
