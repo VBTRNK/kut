@@ -1,136 +1,30 @@
 import { requireAdmin } from "@/lib/auth/admin";
+import type { PackEconomy } from "@/lib/pack-economy";
 import { createClient } from "@/lib/supabase/server";
-
-type PackHealth = {
-  slug: string;
-  title: string;
-  price: number;
-  cards_per_pack: number;
-  eligible_live_count: number;
-  expected_discard_per_slot: number;
-  expected_discard_per_pack: number;
-  expected_discard_return_ratio: number;
-  total_coin_supply: number;
-  total_pack_openings: number;
-  total_card_copies: number;
-  total_burned_cards: number;
-};
-
-function healthStatus(ratio: number) {
-  if (ratio >= 0.95)
-    return { label: "Critical", className: "border-brick-line/50 bg-brick-bg/50 text-brick" };
-  if (ratio > 0.8)
-    return { label: "Warning", className: "border-warning-line/50 bg-warning-bg/50 text-warning" };
-  if (ratio > 0.75)
-    return { label: "Watch", className: "border-brass-line/50 bg-brass-bg/50 text-brass" };
-  return { label: "Target", className: "border-moss-line/50 bg-moss-bg/50 text-moss" };
-}
+import { COLUMN, PAGE, PageHeader } from "@/components/ui/page";
+import { Button } from "@/components/ui/button";
+import { EconomyForm } from "./economy-form";
 
 export default async function EconomyPage() {
   await requireAdmin();
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .schema("kut")
-    .from("pack_economy_health")
-    .select(
-      "slug, title, price, cards_per_pack, eligible_live_count, expected_discard_per_slot, expected_discard_per_pack, expected_discard_return_ratio, total_coin_supply, total_pack_openings, total_card_copies, total_burned_cards",
-    )
-    .order("price");
-
-  if (error) throw new Error("Could not load pack economy health.");
-  const packs = (data ?? []) as PackHealth[];
-  const totals = packs[0];
-
+  const { data, error } = await supabase.schema("kut").rpc("admin_pack_economy");
+  if (error && error.code !== "PGRST202") throw new Error("Could not load pack economy.");
   return (
-    <main className="board-ground min-h-screen px-4 pt-4 pb-8 text-body text-ink sm:px-8 sm:pt-8">
-      <section className="mx-auto max-w-5xl space-y-8">
-        <header>
-          <h1 className="mt-3 font-serif text-title font-normal sm:text-title-lg">Pack health</h1>
-          <p className="mt-3 max-w-2xl text-ink-dim">
-            Expected values use the active Live Card pool and server-defined rarity weights. They
-            are a warning system, not a setting screen.
-          </p>
-        </header>
-        {totals && (
-          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-2xl border border-line/60 bg-board-deep/40 p-4">
-              <dt className="text-label font-semibold text-ink-faint">Coin supply</dt>
-              <dd className="mt-2 text-heading font-semibold">
-                {Number(totals.total_coin_supply)}
-              </dd>
-            </div>
-            <div className="rounded-2xl border border-line/60 bg-board-deep/40 p-4">
-              <dt className="text-label font-semibold text-ink-faint">Packs opened</dt>
-              <dd className="mt-2 text-heading font-semibold">
-                {Number(totals.total_pack_openings)}
-              </dd>
-            </div>
-            <div className="rounded-2xl border border-line/60 bg-board-deep/40 p-4">
-              <dt className="text-label font-semibold text-ink-faint">Card copies</dt>
-              <dd className="mt-2 text-heading font-semibold">
-                {Number(totals.total_card_copies)}
-              </dd>
-            </div>
-            <div className="rounded-2xl border border-line/60 bg-board-deep/40 p-4">
-              <dt className="text-label font-semibold text-ink-faint">Burned</dt>
-              <dd className="mt-2 text-heading font-semibold">
-                {Number(totals.total_burned_cards)}
-              </dd>
-            </div>
-          </dl>
-        )}
-        {packs.length === 0 ? (
-          <p className="rounded-2xl border border-line bg-panel p-5 text-ink-dim">
-            No active packs are configured.
-          </p>
+    <main className={PAGE}>
+      <section className={`${COLUMN} lg:max-w-6xl`}>
+        {error || !data ? (
+          <>
+            <PageHeader title="Economy" />
+            <p role="status">
+              Pack controls are unavailable on this schema. Refresh after the database rollout.
+            </p>
+            <Button href="/admin/economy" kind="secondary">
+              Refresh
+            </Button>
+          </>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2">
-            {packs.map((pack) => {
-              const ratio = Number(pack.expected_discard_return_ratio);
-              const status = healthStatus(ratio);
-              return (
-                <article className="rounded-2xl border border-line bg-panel p-6" key={pack.slug}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-label font-semibold text-brass">
-                        {pack.cards_per_pack} cards · {pack.price} FLUT Coins
-                      </p>
-                      <h2 className="mt-1 text-heading font-semibold">{pack.title}</h2>
-                    </div>
-                    <span
-                      className={`rounded-full border px-3 py-1 text-small font-extrabold ${status.className}`}
-                    >
-                      {status.label}
-                    </span>
-                  </div>
-                  <dl className="mt-6 grid grid-cols-3 gap-3 text-center">
-                    <div className="rounded-xl bg-board/60 p-3">
-                      <dt className="text-label font-semibold text-ink-faint">Per slot</dt>
-                      <dd className="mt-1 text-heading font-semibold">
-                        {Number(pack.expected_discard_per_slot).toFixed(2)}
-                      </dd>
-                    </div>
-                    <div className="rounded-xl bg-board/60 p-3">
-                      <dt className="text-label font-semibold text-ink-faint">Per pack</dt>
-                      <dd className="mt-1 text-heading font-semibold">
-                        {Number(pack.expected_discard_per_pack).toFixed(2)}
-                      </dd>
-                    </div>
-                    <div className="rounded-xl bg-board/60 p-3">
-                      <dt className="text-label font-semibold text-ink-faint">Return</dt>
-                      <dd className="mt-1 text-heading font-semibold">
-                        {(ratio * 100).toFixed(1)}%
-                      </dd>
-                    </div>
-                  </dl>
-                  <p className="mt-4 text-small text-ink-faint">
-                    {pack.eligible_live_count} eligible Live editions. Target expected discard
-                    return is 75% or lower; warning begins above 80%.
-                  </p>
-                </article>
-              );
-            })}
-          </div>
+          <EconomyForm key={(data as PackEconomy).measured_at} initial={data as PackEconomy} />
         )}
       </section>
     </main>

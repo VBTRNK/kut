@@ -489,24 +489,26 @@ Date: 2026-10-14 (#264). Amends ADR-059/063/068 (kudos ballots and recognition).
 
 ## ADR-163 — Pack-tier design, shop and opening
 
-Date: 2026-10-15 (#223 S0, built in S2). [Brief](../design/pack-tiers/BRIEF.md).
+Date: 2026-10-15 (#223 S0/S2).
 
-- Art by stored slug (unknown: plain paper); promise from `min_tier` only,
-  none on an old schema. Rules: ADR-164.
-- Paid openings start sealed; tier and rating advance alone, the card waits
-  for a tap. Skip, replay, reload, reduced motion show the stored result only.
-- Receipts: stored title and price paid, plus "Gold 64 when opened" if the
-  tier moved. Home folds only pack rows of one slug and price.
+- Art by slug (unknown: paper); promise from `min_tier`, none on old schema.
+  Rules: ADR-164.
+- Sealed opening: tier/rating advance, card waits for a tap. Skip/replay/
+  reload/reduced motion show only the stored result.
+- Receipts: stored title/paid price; "Gold 64 when opened" if tier moved.
+  Home folds by slug and price.
 
 ## ADR-164 — Pack tiers: rules and settings
 
-Date: 2026-10-15 (#223 S1).
+Date: 2026-10-15 (#223 S1/S3).
 
-- Regular (`tfh-pack`) 250, always on. Silver 500 / Gold 750: 3 Live cards,
-  at least 1 Silver+ / Gold+; only the last card may come from the floor, if
-  no earlier card met it. Weights, duplicates and low cards stay.
-- `pack_draw_pool()` is the one pool, read once per opening; an unmeetable
-  floor fails before any debit. Openings snapshot slug, title, floor, tier/OVR.
-- Prices and toggles change only via audited `admin_apply_pack_settings`
-  (revision token). Suggestions (75%, 10%, round up 25) only advise.
-- Silver and Gold ship off; Silver goes on with the S2 shop.
+- Initial Regular (`tfh-pack`) 250/on, Silver 500/off, Gold 750/off. Three Live
+  draws; restrict the last only if needed for 1 Silver+/Gold+. Weights/duplicates/
+  low companions stay. Owner launches Silver after S2.
+- One `pack_draw_pool()` per opening; empty floor fails before debit. Snapshot
+  slug/title/floor/tier/OVR. Audited settings RPC uses a revision token.
+- `/admin/economy`: SQL metrics include off packs; load/Refresh. Draft Regular
+  drives 75%/10%/round-up-25 suggestions: fill only. Apply saves valid settings
+  despite warnings; conflicts reload.
+- Paid-price usage; enabled non-superadmin cohort. Escrow is not a sink;
+  period discards are not pack ROI. Manual changes only.
