@@ -1,8 +1,8 @@
 // Pack expected-value measurement for release evidence (operator handoff, C).
 //
-// This reads kut.pack_economy_health — the same admin projection the Economy
-// screen renders — rather than re-deriving the rarity weights, the discard
-// curve and the pack price. Those live in SQL and must have exactly one
+// This reads kut.pack_economy_health (including off packs), using the same
+// canonical SQL metrics as admin_pack_economy. It omits suggestions and cohort
+// analytics, and never re-derives weights or the discard curve. SQL is the one
 // definition; an earlier version of this script kept a fifth copy of them and
 // could drift from the odds the game actually ships (ADR-064).
 //

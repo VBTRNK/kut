@@ -1,15 +1,14 @@
-# Issue 223 — local S0 checkpoint
+# Issue 223: implementation checkpoint
 
-15 October 2026. Status: S0 design **approved by the owner** (after two
-review rounds); published as its own PR (S0 publication).
-Checkout `C:\Users\mfvan\dev\kut`, branch `docs/issue-223-pack-balance`.
-Plan `C:\Users\mfvan\.claude\plans\kut-issue-223.md`, revision 1.
+15 October 2026. S0/S1/S2 merged (#320/#321/#323). S3 verified locally;
+owner PR review pending on `feat/issue-223-pack-admin`.
+Checkout `C:\Users\mfvan\dev\kut`.
+Plan `C:\Users\mfvan\.claude\plans\kut-issue-223.md`, revision 3.
 Handoff `C:\Users\mfvan\.agents\handoffs\kut-issue-223.md`.
 
 Tracking issue: [VibeTrunk/kut#223](https://github.com/VibeTrunk/kut/issues/223).
-This checkpoint is local because issue edits/PR publication are not authorized.
-Use it for a sanitized issue comment/checklist when publication is authorized;
-do not attach private production aggregates.
+Local checkpoint; S3 PR publication is authorized, tracking-issue edits are not.
+Do not attach private production aggregates.
 
 - [x] Inspect status/log/diffs, accepted issue/vision, existing visual/reveal and
   caller/server-copy system; preserve all pre-existing research content.
@@ -24,7 +23,7 @@ do not attach private production aggregates.
 - [x] S2: shop/reveal integration, production copy/identity changes, real
   paid-result reload/replay and browser tests (15 Oct, branch
   `feat/issue-223-pack-shop-reveal`; see "S2" below).
-- [ ] S3: advisory admin form/analytics, draft suggestions, manual overrides,
+- [x] S3: advisory admin form/analytics, draft suggestions, manual overrides,
   release readiness and owner launch/+2/+4-week review checklist.
 
 The GitHub issue's combined design-and-runtime checkbox remains incomplete.
@@ -96,3 +95,30 @@ conditional last draw. Known `open_pack` errors have their own copy.
 from shared focus/status. Browser: `tests/e2e-authenticated/pack-tiers.spec.ts`.
 Next: owner review/merge; then an admin switches Silver on (settings RPC or
 S3 page); S3 builds the admin page.
+
+S3 (15 Oct): `/admin/economy` now consumes `admin_pack_economy` and
+saves all prices/toggles through `admin_apply_pack_settings`. Draft Regular
+updates price suggestions/value/affordability; warnings never block valid
+manual overrides. Off packs, paid-price usage, signed cohort flows, revision/
+editor/time and conflict reload are included. No migration. Owner launch and
++2/+4-week reviews: [checklist](LAUNCH_CHECKLIST.md).
+Verification: `verify:fast` PASS (70 files/650 tests); canonical pack pgTAP
+87 assertions PASS; settings/purchase concurrency 6 PASS; browser checks
+7 PASS (3 admin + 4 shop/opening; Pixel 7 + 320, 320/390/1440 visual checks, keyboard toggle/
+submit, invalid prices, draft-only suggestion fill, SQL suggestion parity,
+manual warning override, atomic audit/revision, conflict reload and member
+redirect). Empty/unsupported/zero pools and unavailable old-schema RPC also
+have unit coverage. Research files unchanged. Screenshots are private local
+fixture evidence, not production metrics.
+
+Tried/fixed S3: docs exceeded their budgets (condensed current ADRs); conflict
+selector also matched Next's route announcer (filtered to the actual message);
+screenshot caret hiding raced hydration (leave caret unchanged).
+Pause point: admin PR ready for owner review; owner merges and performs launch
+settings/reviews via the checklist. No migration/deploy/hosted writes or issue
+edits. No implementation session remains after S3.
+
+Next opening prompt (any capable model, normal effort):
+
+> Read the issue-223 handoff and S3 PR, then review the owner launch checklist.
+> Do not change hosted settings without my separate instruction.

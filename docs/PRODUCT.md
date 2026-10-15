@@ -48,8 +48,9 @@ Ground rules for every area:
 - Sinks: packs, and the 5% market tax, which is burned.
 - Packs hold 3 Live cards, weighted by current tier: Common 100, Bronze 60,
   Silver 30, Gold 12, Holo 4, Elite 1 per eligible Player. Regular (`tfh-pack`)
-  costs **250**; Silver 500 / Gold 750 (at least 1 Silver+ / Gold+, ADR-164)
-  are admin toggles. `open_pack` needs the quoted price and an idempotency key.
+  starts at **250**; Silver 500 / Gold 750 guarantee 1 Silver+ / Gold+
+  (ADR-164). Prices/premium availability are manual settings. `open_pack`
+  needs the quoted price and an idempotency key.
 - Discard burns a copy for `round(10 × 1.08^(OVR − 30))`, computed by the server
   at the moment of discard.
 - Club Value (`/club/value`, Standings) is coins + owned discard value + 4× the
@@ -81,8 +82,7 @@ Ground rules for every area:
 - Pack price: 175 (ADR-057, 6 Sep) → 250 (ADR-136, 7 Oct).
 - Attendance reward: 75 → 250 (ADR-029, 29 Aug), not retroactive.
 - Club Value v3 added duplicate discounts to v2’s discard sum (ADR-056).
-- "Untradeable" starter cards were retired (ADR-033). Every card is tradeable
-  and discardable.
+- All cards are tradeable/discardable (ADR-033).
 
 ## Market and trades
 
@@ -436,11 +436,10 @@ never misses one side's message.
   - **Accounts** (`/admin/links`): link to a Player (ADR-028), disable or
     delete (ADR-030), soft reset to 250 coins (ADR-035), adjust a wallet
     (at most 100,000 per call).
-  - **Account recovery** (`/admin/accounts`): audited password resets
-    (ADR-011). **Pack health** (`/admin/economy`). **Midweek**: switch,
-    rehearsal, void.
-- Admin uses the shared type scale and surfaces (ADR-160).
-- Admin work should stay tiny (§3.7). Midweek needs none weekly.
+  - **Recovery** (`/admin/accounts`): audited password resets (ADR-011).
+    **Economy**: atomic prices/toggles, draft suggestions, SQL metrics,
+    paid-price usage and cohort flows (ADR-164). **Midweek**: switch/void/rehearsal.
+- Shared UI (ADR-160); Midweek needs no weekly admin work.
 - A superadmin may grant coins to their own wallet; `admin_adjust_wallet`
   refuses the caller's own (ADR-052).
 
