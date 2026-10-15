@@ -1,12 +1,9 @@
 # Decisions — FLUT
 
-Record an ADR only for a game, economy, schema or security rule, in about 20
-lines at most: context, decision, consequences. Newest at the bottom; numbering
-continues from ADR-142.
-
-ADR-001 to ADR-141 are at the git tag `docs-archive-2026-10`; read them with
-`git show docs-archive-2026-10:docs/archive/decisions-2026.md | rg "ADR-099"`.
-The ADRs below are in force, in their current form.
+ADRs record game, economy, schema or security rules: context, decision and
+consequences, about 20 lines at most. Newest last, continuing from ADR-142.
+ADR-001–141: tag `docs-archive-2026-10`, `docs/archive/decisions-2026.md`.
+The ADRs below are current.
 
 ## ADR-140 — Process reset: merge to main deploys
 
@@ -504,3 +501,8 @@ Date: 2026-10-14 (#264). Amends ADR-059/063/068 (kudos ballots and recognition).
 - Existing design tokens; G+A/actions beside kudos on desktop, stacked on
   phones. Safe Hands follows regular picks with collapsed rules.
 - Tolerant UI first, catalogue migration second; no hosted changes authorised.
+
+## ADR-163 — Pack-tier design
+
+Date: 2026-10-15 (#223 S0). [Brief](../design/pack-tiers/BRIEF.md).
+Owner-approved design (brief + prototype); runtime unchanged. DB/RPC first.

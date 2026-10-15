@@ -1,0 +1,150 @@
+{
+  "asOf": "2026-10-15T09:53:20.378064+00:00",
+  "source": "Owner-run production aggregate export, confirmed against three roster screenshots; only anonymous OVR/tier frequencies retained",
+  "roster": [
+    {
+      "ovr": 79,
+      "tier": "holo"
+    },
+    {
+      "ovr": 76,
+      "tier": "holo"
+    },
+    {
+      "ovr": 75,
+      "tier": "holo"
+    },
+    {
+      "ovr": 75,
+      "tier": "holo"
+    },
+    {
+      "ovr": 74,
+      "tier": "holo"
+    },
+    {
+      "ovr": 74,
+      "tier": "holo"
+    },
+    {
+      "ovr": 72,
+      "tier": "holo"
+    },
+    {
+      "ovr": 72,
+      "tier": "holo"
+    },
+    {
+      "ovr": 71,
+      "tier": "holo"
+    },
+    {
+      "ovr": 70,
+      "tier": "holo"
+    },
+    {
+      "ovr": 70,
+      "tier": "holo"
+    },
+    {
+      "ovr": 69,
+      "tier": "gold"
+    },
+    {
+      "ovr": 67,
+      "tier": "gold"
+    },
+    {
+      "ovr": 65,
+      "tier": "gold"
+    },
+    {
+      "ovr": 63,
+      "tier": "gold"
+    },
+    {
+      "ovr": 63,
+      "tier": "gold"
+    },
+    {
+      "ovr": 63,
+      "tier": "gold"
+    },
+    {
+      "ovr": 61,
+      "tier": "gold"
+    },
+    {
+      "ovr": 60,
+      "tier": "gold"
+    },
+    {
+      "ovr": 60,
+      "tier": "gold"
+    },
+    {
+      "ovr": 59,
+      "tier": "silver"
+    },
+    {
+      "ovr": 58,
+      "tier": "silver"
+    },
+    {
+      "ovr": 54,
+      "tier": "silver"
+    },
+    {
+      "ovr": 48,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 47,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 44,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 43,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 43,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 42,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 42,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 41,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 41,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 40,
+      "tier": "bronze"
+    },
+    {
+      "ovr": 37,
+      "tier": "common"
+    },
+    {
+      "ovr": 37,
+      "tier": "common"
+    },
+    {
+      "ovr": 37,
+      "tier": "common"
+    }
+  ]
+}
