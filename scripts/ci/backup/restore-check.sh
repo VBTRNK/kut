@@ -120,12 +120,12 @@ run_step assert-dependents restore_psql -f "$inner/assert.sql"
 
 # --- 5. Gate -----------------------------------------------------------------------
 run_step schema-after restore_exec pg_dump -s -n kut -f "$inner/schema-after.sql"
-# pg_dump 17.6+ wraps plain output in \restrict lines with a random key.
-normalize='grep -vE "^\\\\(un)?restrict " '
-run_step schema-diff restore_exec sh -c \
-  "$normalize $inner/schema-before.sql > $inner/before.norm &&
-   $normalize $inner/schema-after.sql > $inner/after.norm &&
-   diff $inner/before.norm $inner/after.norm"
+for side in before after; do
+  docker cp "$RESTORE_CONTAINER:$inner/schema-$side.sql" "$work/private/schema-$side.sql" > /dev/null
+  run_step "normalize-$side" node "$here/normalize-schema.mjs" \
+    "$work/private/schema-$side.sql" "$work/private/$side.norm"
+done
+run_step schema-diff diff "$work/private/before.norm" "$work/private/after.norm"
 
 run_step restored-counts restore_psql -At -f "$inner/row-counts.sql" -o "$inner/counts.json"
 docker cp "$RESTORE_CONTAINER:$inner/counts.json" "$work/private/restored-counts.json" > /dev/null
