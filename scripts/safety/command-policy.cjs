@@ -5,7 +5,12 @@ const fs = require("node:fs");
 // Policy reference for review/tests only. Runtime hooks contain their own copy
 // and must never load this agent-editable file to make enforcement decisions.
 const dangers = [
-  [/\brm\s+(-\S+\s+)*-\S*[rf]\S*[rf]?/i, "recursive or forced delete"],
+  // Anchored to a command position (start, after a separator, a quote or
+  // sudo/xargs/...), so `docker run --rm` and `git rm -r --cached` still run.
+  [
+    /(?:^|[;&|({\n`"']|\b(?:sudo|xargs|exec|env|command|nohup|time|then|do|else)\s)\s*(?:\S*[\\/])?rm(?:\.exe)?\s(?:[^\n;&|]*\s)?-{1,2}[a-z]*[rf]/i,
+    "recursive or forced delete",
+  ],
   [/\bgit\s+push\b[^\n]*(?:--force\b|--force-with-lease\b|\s-f\b)/i, "force push"],
   [
     /\bgit\s+push\b[^\n]*(?:--delete\b|\s:[A-Za-z0-9._/-]+)/i,
