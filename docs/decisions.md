@@ -77,16 +77,16 @@ Date: 2026-10-10 (S7 live tests, VibeTrunk/kut#212).
   blocked in both; this is proven live in each agent.
 - Codex setup on the owner's machine: the repo's hook trusted in Settings →
   Hooks (again after any change to `.codex/hooks.json`), `approval_policy =
-  "on-request"` with `approvals_reviewer = "user"`, and Codex started at the
-  repo root (the hook path is relative).
+  "on-request"` with `approvals_reviewer = "user"` by default, and Codex
+  started at the repo root (the hook path is relative).
 - Codex limits, from its docs: a hook can only allow or deny, never ask; a hook
   that crashes or times out lets the command through. Hooks are a guardrail,
   not a complete boundary. The Windows launcher is therefore a plain `node`
   command, and a unit test runs it exactly as written.
-- Codex's `prompt` rules did not stop commands in the extension. In practice,
-  Codex commits and pushes reach the owner because the sandbox can't write
-  `.git` and has no network, so Codex must ask to run them outside it.
-  Approving "always" removes that check.
+- Codex's `prompt` rules did not stop commands in the extension. Its commits
+  and pushes reach the owner because the sandbox can't write `.git` and has
+  no network, so Codex must ask. Approving "always" or automatic approval
+  (the owner's choice per session) removes that check.
 
 ## ADR-144 — Hosted migrations through a workflow in VibeTrunk/supabase
 
