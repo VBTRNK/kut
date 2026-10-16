@@ -38,6 +38,38 @@ describe("shared agent hook payloads", () => {
       }
   });
 
+  it("denies forced rm at a command position but not rm as a flag or git subcommand", () => {
+    const denied = [
+      "rm -rf build",
+      "rm -r build",
+      "rm --recursive build",
+      "rm build -f",
+      "sudo rm -rf /tmp/x",
+      "cd out && rm -rf dist",
+      "npm test; rm -f log.txt",
+      "/bin/rm -rf build",
+      "bash -c 'rm -rf build'",
+      "find . -name '*.tmp' -exec rm -f {} +",
+      "ls | xargs rm -rf",
+    ];
+    const allowed = [
+      "docker run --rm hello-world",
+      "docker run --rm --entrypoint psql postgres:17 -c 'select 1'",
+      "git rm -r --cached .next",
+      "rm old.txt",
+    ];
+    for (const agent of agents) {
+      for (const command of denied)
+        expect(decisionOf(runtime(agent).evaluate(payload(command), agent))).toBe("deny");
+      for (const command of allowed)
+        expect(runtime(agent).evaluate(payload(command), agent)).toBeNull();
+      for (const command of [...denied, ...allowed])
+        expect(runtime(agent).evaluate(payload(command), agent)).toEqual(
+          evaluate(payload(command), agent),
+        );
+    }
+  });
+
   it("uses identical guard bodies for both agents and denies unknown agents", () => {
     const guards = agents.map((agent) =>
       fs.readFileSync(`.${agent}/hooks/block-dangerous-commands.cjs`, "utf8"),
