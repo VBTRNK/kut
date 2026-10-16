@@ -146,23 +146,36 @@ prefix_rule(
     ],
 )
 
+# Only read-only `gh` subcommands are allowed (#329). A whole
+# `gh pr` or `gh run` prefix would also allow merge, close, rerun, cancel and
+# delete. These mirror the gh allows in .claude/settings.json.
 prefix_rule(
-    pattern = ["gh", "run"],
+    pattern = ["gh", "run", ["list", "view"]],
     decision = "allow",
-    justification = "Inspecting GitHub Actions runs is routine for this repository.",
+    justification = "Inspecting GitHub Actions runs is routine and read-only.",
     match = [
         "gh run list",
         "gh run view 123456789",
     ],
+    not_match = [
+        "gh run rerun 123456789",
+        "gh run delete 123456789",
+        "gh run cancel 123456789",
+    ],
 )
 
 prefix_rule(
-    pattern = ["gh", "pr"],
+    pattern = ["gh", "pr", ["view", "list"]],
     decision = "allow",
     justification = "Inspecting pull requests is routine and read-only.",
     match = [
         "gh pr list",
         "gh pr view 1",
+    ],
+    not_match = [
+        "gh pr merge 1",
+        "gh pr close 1",
+        "gh pr comment 1",
     ],
 )
 

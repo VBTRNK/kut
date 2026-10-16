@@ -60,22 +60,20 @@ and recording it in `docs/decisions.md`. Never silently "improve" a formula.
 ## Workspace and branches
 
 - Work only in `C:\Users\mfvan\dev\kut` (and `C:\Users\mfvan\dev\supabase`).
-  One agent per checkout; a second agent gets a `git worktree` under the
-  ignored `.release-evidence/worktrees/` and merges into the PR branch. Shared plan
+  A second agent's `git worktree` goes under the ignored
+  `.release-evidence/worktrees/` and merges into the PR branch. Shared plan
   files (`~\.claude\plans`) and handoff files (`~\.agents\handoffs`, see the
   global instructions) are permitted exceptions.
 - `main` is protected. Branch (`feat/`, `fix/`, `docs/`, ...) and open a PR; the
   owner reviews and squash-merges unless they delegate it. Branches
   auto-delete on merge. Use conventional commit prefixes (`feat:`, `docs+fix:`).
 - Never commit, push, deploy or mutate hosted state without authorization for
-  this change. "Publish this slice" covers committing, pushing and its PR;
-  local implementation permission does not. Don't re-ask for covered steps.
+  this change.
 - Independent slices branch from `main`; never stack a migration on a frontend
   branch. Repair a dependent stack by merging updated `origin/main` into it,
   never by force-pushing.
 - Batch docs, issue filings, small UI fixes and chores freely. A migration, a
   Part L invariant or an RPC contract change gets a PR of its own.
-- The agent that packages a PR reads `git diff main...HEAD` in full first.
 - After publication, bring the checkout onto current main. Preserve unpublished
   work first (a named stash or a `tidy` archive); never reset or discard.
 
