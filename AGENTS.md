@@ -1,8 +1,7 @@
 # AGENTS.md
 
 Canonical instructions for every agent (Codex and Claude) in this repo.
-`CLAUDE.md` imports this file; edit it here. Open work is tracked in
-VibeTrunk/kut#212 (the process reset). Its plan says which rules change when.
+`CLAUDE.md` imports this file; edit it here. Open work is GitHub issues.
 
 ## Project
 
@@ -60,10 +59,9 @@ and recording it in `docs/decisions.md`. Never silently "improve" a formula.
 
 ## Workspace and branches
 
-- Work only in `C:\Users\mfvan\dev\kut` (and `C:\Users\mfvan\dev\supabase`);
-  the old OneDrive checkout is frozen until S8. One agent per checkout; a
-  second agent gets a `git worktree` under the ignored
-  `.release-evidence/worktrees/` and merges into the PR branch. Shared plan
+- Work only in `C:\Users\mfvan\dev\kut` (and `C:\Users\mfvan\dev\supabase`).
+  One agent per checkout; a second agent gets a `git worktree` under the
+  ignored `.release-evidence/worktrees/` and merges into the PR branch. Shared plan
   files (`~\.claude\plans`) and handoff files (`~\.agents\handoffs`, see the
   global instructions) are permitted exceptions.
 - `main` is protected. Branch (`feat/`, `fix/`, `docs/`, ...) and open a PR; the
