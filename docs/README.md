@@ -24,7 +24,7 @@ sources are at the git tag `docs-archive-2026-10`. Read one with
 old `ADR-NNN` mentioned anywhere resolves there.
 
 **Open work** (ideas, defects, operations) is GitHub issues, with the labels
-`bug`, `idea`, `next` and `ops`. Process-reset state is VibeTrunk/kut#212.
+`bug`, `idea`, `next` and `ops`.
 
 Root docs: `AGENTS.md` (canonical agent instructions), `CLAUDE.md` (imports
 it), `README.md` (intro and local development), `SECURITY.md` (disclosure).
