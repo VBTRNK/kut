@@ -1,0 +1,121 @@
+/* The Retired treatment (#246 S1), design-only. S3 moves the chosen direction
+   into globals.css as `.live-card[data-retired]`, beside the plaster cast
+   (ADR-084), and draws it from the shared card adapter on current surfaces only.
+   Here a wrapper carries it, so the real LiveCard renders untouched underneath. */
+
+.retired {
+  position: relative;
+  container-type: inline-size;
+  --stamp: #c4362c;
+}
+
+/* A: the club's rubber stamp. The card keeps its tier and rating; its colours
+   fade, and a red "Retired" stamp sits in the band between the shirt number
+   and the nameplate, where the cast writes: never across a face or a rating. */
+.retired[data-stamp="stamp"] .live-card {
+  filter: saturate(0.4) brightness(0.9);
+}
+.retired__stamp {
+  position: absolute;
+  top: 56.5%;
+  left: 50%;
+  z-index: 6;
+  display: grid;
+  justify-items: center;
+  gap: 0.6cqi;
+  padding: 1.2cqi 3.4cqi 1cqi;
+  border: 1.1cqi solid var(--stamp);
+  border-radius: 2.2cqi;
+  box-shadow: inset 0 0 0 0.7cqi rgb(255 255 255 / 0%), inset 0 0 0 1.2cqi var(--stamp);
+  color: var(--stamp);
+  background: rgb(244 239 227 / 8%);
+  transform: translate(-50%, -50%) rotate(-6deg);
+  pointer-events: none;
+  /* Uneven ink: a fixed speckle knocks out a little of the stamp. */
+  -webkit-mask-image:
+    radial-gradient(circle at 18% 30%, transparent 0.9cqi, #000 1cqi),
+    radial-gradient(circle at 71% 64%, transparent 0.7cqi, #000 0.8cqi);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(circle at 18% 30%, transparent 0.9cqi, #000 1cqi),
+    radial-gradient(circle at 71% 64%, transparent 0.7cqi, #000 0.8cqi);
+  mask-composite: intersect;
+}
+.retired__stamp b {
+  font-family: var(--font-sans);
+  font-size: 8.6cqi;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+/* B: a black sash across the top corner, like a testimonial shirt's band. */
+.retired[data-stamp="sash"] .live-card {
+  filter: saturate(0.55);
+}
+.retired__sash {
+  position: absolute;
+  top: 9cqi;
+  right: -12cqi;
+  z-index: 6;
+  width: 58cqi;
+  padding: 1.4cqi 0;
+  background: #1f1d1a;
+  color: #f4efe3;
+  font-family: var(--font-sans);
+  font-size: 5cqi;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(38deg);
+  box-shadow: 0 0.5cqi 1.4cqi rgb(0 0 0 / 40%);
+  pointer-events: none;
+}
+.retired[data-stamp="sash"] {
+  overflow: hidden;
+  border-radius: 0.9rem;
+}
+
+/* C: hung on the clubhouse wall. Sepia, and a brass plaque over the nameplate. */
+.retired[data-stamp="plaque"] .live-card {
+  filter: grayscale(1) sepia(0.45) brightness(0.92);
+}
+.retired__plaque {
+  position: absolute;
+  top: 55.5%;
+  left: 50%;
+  z-index: 6;
+  padding: 1cqi 4cqi;
+  border-radius: 1cqi;
+  background: linear-gradient(140deg, #f2d48b, #b98a2e 60%, #e6c06a);
+  box-shadow: 0 0.4cqi 1cqi rgb(0 0 0 / 45%), inset 0 0 0 0.4cqi rgb(90 60 10 / 45%);
+  color: #3d2a06;
+  font-family: var(--font-sans);
+  font-size: 4.2cqi;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* The mini card (picker rows, Selling, Home): faded with a red stamp bar, the
+   row beside it says "Retired" in words. */
+.retired-mini {
+  position: relative;
+  display: inline-grid;
+}
+.retired-mini > * {
+  filter: saturate(0.35);
+}
+.retired-mini::after {
+  content: "";
+  position: absolute;
+  inset-inline: -2px;
+  top: 44%;
+  height: 5px;
+  border-block: 1.5px solid var(--stamp, #c4362c);
+  transform: rotate(-24deg);
+}
