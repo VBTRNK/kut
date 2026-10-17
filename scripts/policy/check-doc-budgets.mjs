@@ -9,9 +9,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const KB = 1024;
 
-// Start-up budget: about 5k tokens at ~4 bytes per token is 20 KB. The global
-// instructions and Claude's memory index took ~9.5 KB of that in S6, which
-// leaves 11 KB for the repository's own start-up files.
+// Start-up budget: about 7.5k tokens at ~4 bytes per token is 30 KB per agent
+// (raised from 5k by the owner, #327). The global instructions and Claude's
+// memory index took ~13.5 KB of that on 2026-10-17; the repository's own
+// start-up files keep 11 KB.
 export const BUDGETS = [
   { name: "docs/PRODUCT.md", files: ["docs/PRODUCT.md"], maxBytes: 25 * KB },
   {

@@ -76,6 +76,7 @@ and recording it in `docs/decisions.md`. Never silently "improve" a formula.
   Part L invariant or an RPC contract change gets a PR of its own.
 - After publication, bring the checkout onto current main. Preserve unpublished
   work first (a named stash or a `tidy` archive); never reset or discard.
+  Once a PR is merged, give the owner the tidy dry run's line for its branch.
 
 ## Release
 
