@@ -127,9 +127,8 @@ protection and other hosted changes need their own written instruction.
   - Untracked or ignored files: inspect them, then move them to the archive
     with the owner's OK. Never delete them.
   - Remote branches: `tidy --remote`, run the same way.
-- Codex needs the repo hook trusted and a start at the repo root. Its approvals
-  reviewer is `user` by default; the owner may choose automatic approval per
-  session (ADR-143). A crashing Codex hook doesn't block.
+- Codex setup, review defaults and probes: global `~/.codex/AGENTS.md`,
+  "Agent safety policy", and ADR-143. A crashing Codex hook doesn't block.
   - Hosted data: the owner only.
 
 ## Documentation map

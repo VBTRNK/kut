@@ -70,23 +70,22 @@ the 14-day package-age hook.
 
 ## ADR-143 — One safety system for Claude and Codex
 
-Date: 2026-10-10 (S7 live tests, VibeTrunk/kut#212).
+Date: 2026-10-10 (#212); extended 2026-10-17 (#334).
 
-- Both agents run the same hook script (`block-dangerous-commands.cjs`, one
-  copy per agent, kept identical by a unit test). A command it denies is
-  blocked in both; this is proven live in each agent.
-- Codex setup on the owner's machine: the repo's hook trusted in Settings →
-  Hooks (again after any change to `.codex/hooks.json`), `approval_policy =
-  "on-request"` with `approvals_reviewer = "user"` by default, and Codex
-  started at the repo root (the hook path is relative).
-- Codex limits, from its docs: a hook can only allow or deny, never ask; a hook
-  that crashes or times out lets the command through. Hooks are a guardrail,
-  not a complete boundary. The Windows launcher is therefore a plain `node`
-  command, and a unit test runs it exactly as written.
-- Codex's `prompt` rules did not stop commands in the extension. Its commits
-  and pushes reach the owner because the sandbox can't write `.git` and has
-  no network, so Codex must ask. Approving "always" or automatic approval
-  (the owner's choice per session) removes that check.
+- Hooks match except the launcher (tested). Supabase repos/template deny real
+  db push/reset and secrets set; dry runs/listing work. Migrations: ADR-144.
+  Hooks cover shell tools; crashes/timeouts allow. Prompt rules alone fail.
+- Setup/defaults/probes: global `~/.codex/AGENTS.md`, "Agent safety policy".
+  Trust the hook, start at the repo root, probe after hook/trust changes.
+- Automatic review uses the custom profile without `extra_policy` (enforcement
+  unproven). Per-change authorization stays: publication covers commit/push/PR,
+  never merge. Hosted work uses reviewer `user` or the owner.
+- Accepted risk: low/medium actions may pass without authorization, including
+  feature-branch commits/pushes, issue/PR edits and hosted work outside hook
+  denies. Other merges/hosted work depend on assessed risk (thresholds in the
+  global policy). Running hook denies and branch protection remain.
+- Inspector labels aren't proof of consent; missing evidence is incomplete.
+  Future extra_policy needs a passing paired canary and separate OK.
 
 ## ADR-144 — Hosted migrations through a workflow in VibeTrunk/supabase
 

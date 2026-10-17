@@ -3,7 +3,8 @@
 # ADR-142: local Git state is removed only by tidy, which bundles and proves
 # every item first. The dangerous-command hook denies `tidy --apply` to agents;
 # the owner runs it in their own terminal. This prompt is a fallback only, for a
-# hook that fails to start (Codex lets the command through then).
+# hook that fails to start. Automatic review is not an owner-consent gate;
+# --apply remains owner-only regardless of a reviewer verdict.
 prefix_rule(
     pattern = ["node", "scripts/tidy.mjs", "--apply"],
     decision = "prompt",
@@ -88,7 +89,8 @@ prefix_rule(
 # permission is not per-change authorization, and treating it as one is how a
 # broad implementation request turned into one 140-file, 14-migration commit.
 # Each commit and each push needs the user to say so for that specific change,
-# which means each one must surface an approval prompt.
+# while automatic review checks execution risk under its default thresholds.
+# A prompt routes to the configured reviewer; it does not prove owner consent.
 prefix_rule(
     pattern = ["git", "commit"],
     decision = "prompt",
