@@ -1,14 +1,12 @@
 # Issue 223: implementation checkpoint
 
-15 October 2026. S0/S1/S2 merged (#320/#321/#323). S3 verified locally;
-owner PR review pending on `feat/issue-223-pack-admin`.
-Checkout `C:\Users\mfvan\dev\kut`.
-Plan `C:\Users\mfvan\.claude\plans\kut-issue-223.md`, revision 3.
-Handoff `C:\Users\mfvan\.agents\handoffs\kut-issue-223.md`.
-
-Tracking issue: [VibeTrunk/kut#223](https://github.com/VibeTrunk/kut/issues/223).
-Local checkpoint; S3 PR publication is authorized, tracking-issue edits are not.
-Do not attach private production aggregates.
+Closed 17 October 2026. All four slices merged (#320, #321, #323, #324) plus
+the launch-backup fix (#325). Tracking issue:
+[VibeTrunk/kut#223](https://github.com/VibeTrunk/kut/issues/223) (closed, with
+the final checkpoint comment). Open work: the +14/+28-day reviews in
+[#340](https://github.com/VibeTrunk/kut/issues/340). ADR-163/164 are folded in
+`docs/decisions.md`. Below is the working log, kept as the record of the
+slices; do not attach private production aggregates to the public issue.
 
 - [x] Inspect status/log/diffs, accepted issue/vision, existing visual/reveal and
   caller/server-copy system; preserve all pre-existing research content.
@@ -63,13 +61,6 @@ every affordable offer brass, no shop footnote, tier and rating advance on
 their own with a tap to move past each card, per-tier celebrations, and the
 S3 admin economy preview (drafts, advisory warnings, conflict). Re-verified.
 
-Next session opening prompt (Opus 5.5, effort High):
-
-> Read C:\Users\mfvan\.agents\handoffs\kut-issue-223.md, tracking issue #223
-> and the sections 'Context', 'How to run a session' and 'S1' of
-> C:\Users\mfvan\.claude\plans\kut-issue-223.md. Do session S1 of issue-223
-> and publish it as a PR. Stop at its pause point.
-
 S1 (15 Oct): one migration `20261023000000_pack_tiers.sql` + pgTAP
 `pack_tiers.test.sql` (87 assertions: harness parity to 1e-9, needed and
 already-met guarantees, weights, duplicates/low companions, empty pools without
@@ -117,8 +108,3 @@ screenshot caret hiding raced hydration (leave caret unchanged).
 Pause point: admin PR ready for owner review; owner merges and performs launch
 settings/reviews via the checklist. No migration/deploy/hosted writes or issue
 edits. No implementation session remains after S3.
-
-Next opening prompt (any capable model, normal effort):
-
-> Read the issue-223 handoff and S3 PR, then review the owner launch checklist.
-> Do not change hosted settings without my separate instruction.
