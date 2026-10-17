@@ -231,28 +231,25 @@ Date: 2026-10-14 (#264). Amends ADR-059/063/068 (kudos ballots and recognition).
   phones. Safe Hands follows regular picks with collapsed rules.
 - Tolerant UI first, catalogue migration second; no hosted changes authorised.
 
-## ADR-163 — Pack-tier design, shop and opening
+## ADR-163–164 — Pack tiers: Regular, Silver and Gold
 
-Date: 2026-10-15 (#223 S0/S2).
+Folded 2026-10-17 once #223 closed (design `design/pack-tiers/`, open reviews
+#340); full text, `git show 3cb5908:docs/decisions.md`.
 
-- Art by slug (unknown: paper); promise from `min_tier`, none on old schema.
-  Rules: ADR-164.
-- Sealed opening: tier/rating advance, card waits for a tap. Skip/replay/
-  reload/reduced motion show only the stored result.
-- Receipts: stored title/paid price; "Gold 64 when opened" if tier moved.
-  Home folds by slug and price.
-
-## ADR-164 — Pack tiers: rules and settings
-
-Date: 2026-10-15 (#223 S1/S3).
-
-- Initial Regular (`tfh-pack`) 250/on, Silver 500/off, Gold 750/off. Three Live
-  draws; restrict the last only if needed for 1 Silver+/Gold+. Weights/duplicates/
-  low companions stay. Owner launches Silver after S2.
-- One `pack_draw_pool()` per opening; empty floor fails before debit. Snapshot
-  slug/title/floor/tier/OVR. Audited settings RPC uses a revision token.
-- `/admin/economy`: SQL metrics include off packs; load/Refresh. Draft Regular
-  drives 75%/10%/round-up-25 suggestions: fill only. Apply saves valid settings
-  despite warnings; conflicts reload.
-- Paid-price usage; enabled non-superadmin cohort. Escrow is not a sink;
-  period discards are not pack ROI. Manual changes only.
+- **ADR-163:** art by slug (unknown: paper); promise from `min_tier`, none on
+  the old schema. Openings start sealed: tier and rating advance on their own,
+  each card waits for a tap. Skip, replay, reload and reduced motion show only
+  the stored result. Receipts keep the stored title and paid price, and add
+  "Gold 64 when opened" only if the tier moved. Home folds by slug and price.
+- **ADR-164:** Regular (`tfh-pack`) 250/on, Silver 500, Gold 750/off. Three
+  Live draws; the last is restricted only if needed for one Silver+/Gold+.
+  Weights, duplicates and low companions stay. Seeded Silver off (the shop
+  lists every active offer); the owner enables it at launch.
+- **ADR-164:** one `pack_draw_pool()` per opening; an empty floor fails before
+  the debit. Opening snapshots slug, title, floor, tier and OVR. The audited
+  settings RPC uses a revision token (migration `20261023000000`).
+- **ADR-164:** `/admin/economy` shows SQL metrics (off packs too) on load or
+  Refresh. The draft Regular price drives the 75%/10%/round-up-25 suggestions,
+  which only fill the form. Apply saves valid settings despite warnings;
+  conflicts reload. Paid-price usage and the enabled non-superadmin cohort;
+  escrow is not a sink and period discards are not pack ROI. Changes are manual.

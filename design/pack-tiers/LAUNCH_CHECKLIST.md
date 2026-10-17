@@ -1,7 +1,8 @@
 # Pack tiers: owner launch and review checklist
 
-S3 of [#223](https://github.com/VibeTrunk/kut/issues/223). No hosted action is
-performed by this checklist or its PR. Keep aggregate evidence private under
+S3 of [#223](https://github.com/VibeTrunk/kut/issues/223) (closed). Open
+reviews: [#340](https://github.com/VibeTrunk/kut/issues/340). No hosted action
+is performed by this checklist or its PR. Keep aggregate evidence private under
 `.release-evidence/issue-223/`; never attach member metrics to the public issue.
 
 ## Before launch (owner/admin)
