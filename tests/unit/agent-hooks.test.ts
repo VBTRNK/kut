@@ -22,6 +22,43 @@ afterEach(() => {
 });
 
 describe("shared agent hook payloads", () => {
+  it("blocks Supabase mutations while preserving dry runs and migration listing", () => {
+    const denied = [
+      "supabase db push",
+      "npx supabase db push --linked",
+      "npx --yes supabase db push --include-all",
+      "SUPABASE DB PUSH",
+      "supabase.exe db reset --local",
+      "npx supabase db reset --linked",
+      "supabase secrets set KEY=example",
+      "npx supabase secrets set --env-file .env.example",
+      "supabase db push --dry-run=false",
+      "supabase db push; supabase db push --dry-run",
+      "supabase db push --dry-run && supabase db push",
+      "supabase db push # --dry-run",
+      "supabase db push; echo '--dry-run'",
+    ];
+    const allowed = [
+      "supabase migration list",
+      "npx supabase migration list",
+      "supabase db push --dry-run",
+      "npx supabase db push --dry-run --include-all",
+      "supabase db push --linked --dry-run",
+      "SUPABASE DB PUSH --DRY-RUN",
+      "supabase db push --dry-run; git status",
+      "git status",
+    ];
+    for (const agent of agents)
+      for (const tool_name of tools)
+        for (const command of [...denied, ...allowed]) {
+          const key = tool_name.includes("exec_command") ? "cmd" : "command";
+          const raw = JSON.stringify({ tool_name, tool_input: { [key]: command } });
+          const result = runtime(agent).evaluate(raw, agent);
+          expect(decisionOf(result)).toBe(denied.includes(command) ? "deny" : null);
+          expect(result).toEqual(evaluate(raw, agent));
+        }
+  });
+
   it("permits ordinary literal file removal while keeping destructive denies", () => {
     for (const agent of agents)
       for (const tool_name of tools) {
