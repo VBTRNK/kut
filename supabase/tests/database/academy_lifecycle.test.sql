@@ -21,7 +21,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path to extensions,kut,public;
 
-select plan(94);
+select plan(95);
 
 -- ---------------------------------------------------------------------------
 -- Shape and access
@@ -31,8 +31,12 @@ select is((select count(*)::int from kut.players where lifecycle_stage <> 'first
   'every existing Player is founding First Team');
 select is((select count(*)::int from kut.player_lifecycle_events), 0,
   'the founding First Team is a stored stage, not a promotion event');
+-- The migration evaluated the Players it found; CI loads the seed after the
+-- migrations, so those rows get theirs from the next evaluation.
+select is(kut._evaluate_lifecycle(), (select count(*)::int from kut.players),
+  'an evaluation visits every Player once');
 select is((select count(*)::int from kut.player_lifecycle), (select count(*)::int from kut.players),
-  'the migration evaluates every Player once');
+  'every Player then has a lifecycle snapshot');
 select table_privs_are('kut','academy_credits','authenticated',array['SELECT'],'members cannot write credits');
 select table_privs_are('kut','player_lifecycle_events','anon',array[]::text[],'anon cannot read lifecycle events');
 select function_privs_are('kut','_evaluate_lifecycle',array['uuid','date'],'authenticated',array[]::text[],
