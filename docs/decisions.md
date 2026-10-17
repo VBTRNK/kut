@@ -72,18 +72,20 @@ the 14-day package-age hook.
 
 Date: 2026-10-10 (#212); extended 2026-10-17 (#334).
 
-- Hooks match except the launcher (tested). Supabase repos/template deny real
-  db push/reset and secrets set; dry runs/listing work. Migrations: ADR-144.
-  Hooks cover shell tools; crashes/timeouts allow. Prompt rules alone fail.
+- Hooks match except launcher (tested); shell tools only, crash/timeout allows.
+  Supabase repos/template deny real db push/reset and secrets set; dry runs
+  and listing work. Migrations: ADR-144. Prompt rules alone fail.
+- Sandbox blocks `.git` writes/network: commit/push escalations reach
+  `auto_review`.
 - Setup/defaults/probes: global `~/.codex/AGENTS.md`, "Agent safety policy".
-  Trust the hook, start at the repo root, probe after hook/trust changes.
-- Automatic review uses the custom profile without `extra_policy` (enforcement
-  unproven). Per-change authorization stays: publication covers commit/push/PR,
-  never merge. Hosted work uses reviewer `user` or the owner.
-- Accepted risk: low/medium actions may pass without authorization, including
-  feature-branch commits/pushes, issue/PR edits and hosted work outside hook
-  denies. Other merges/hosted work depend on assessed risk (thresholds in the
-  global policy). Running hook denies and branch protection remain.
+  Trust hook; start at repo root; probe hook/trust changes.
+- Automatic review: custom profile, no `extra_policy` (enforcement unproven).
+  Per-change consent stays; publication covers commit/push/PR, never merge.
+  Hosted work: reviewer `user` or owner.
+- Accepted: low/medium risk may pass without consent: feature-branch
+  commit/push, issue/PR edits, hosted work outside hook denies. Other merges/
+  hosted work depend on assessed risk (global thresholds). Running hook denies
+  and branch protection remain.
 - Inspector labels aren't proof of consent; missing evidence is incomplete.
   Future extra_policy needs a passing paired canary and separate OK.
 
