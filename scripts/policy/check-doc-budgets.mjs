@@ -27,7 +27,7 @@ export const BUDGETS = [
 const FIX = {
   "docs/PRODUCT.md": "Rewrite the section to the current state; PRODUCT.md is never appended to.",
   "docs/decisions.md":
-    "Shorten the ADR to its current rule, or move superseded ADRs out under a new docs-archive-YYYY-MM tag (as S4 and S6 did).",
+    "Shorten the ADR to its current rule, or fold a closed plan's ADRs into one, a bullet per old number (ADR-142).",
   "AGENTS.md + CLAUDE.md":
     "Move detail into the doc it belongs to (PRODUCT.md, decisions.md, an issue) and keep only start-up rules here.",
 };

@@ -51,7 +51,7 @@ describe("doc size budgets", () => {
     const over = `# Decisions\n\n${adr(26)}\n`;
     const [problem] = checkBudgets(docs({ "docs/decisions.md": over }));
     expect(problem).toContain('"ADR-142 — Example" is 26 lines, over 25');
-    expect(problem).toContain("docs-archive-YYYY-MM");
+    expect(problem).toContain("fold a closed plan's ADRs into one");
   });
 
   it("splits ADR sections at the next level-2 heading and ignores trailing blanks", () => {
