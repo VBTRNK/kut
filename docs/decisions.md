@@ -75,8 +75,8 @@ Date: 2026-10-10 (#212); extended 2026-10-17 (#334).
 - Hooks match except launcher (tested); shell tools only, crash/timeout allows.
   Supabase repos/template deny real db push/reset and secrets set; dry runs
   and listing work. Migrations: ADR-144. Prompt rules alone fail.
-- Sandbox blocks `.git` writes/network: commit/push escalations reach
-  `auto_review`.
+- Sandbox blocks `.git` writes/network: commit/push escalations reach the
+  configured reviewer.
 - Setup/defaults/probes: global `~/.codex/AGENTS.md`, "Agent safety policy".
   Trust hook; start at repo root; probe hook/trust changes.
 - Automatic review: custom profile, no `extra_policy` (enforcement unproven).
