@@ -1,4 +1,5 @@
-import { Block } from "@/components/ui/block";
+import { Block, Inset } from "@/components/ui/block";
+import { fetchLifecycleEvents, footballWeek } from "@/lib/academy";
 import { InfoLink } from "@/components/ui/links";
 import { PAGE, COLUMN, PageHeader } from "@/components/ui/page";
 import { requireUser } from "@/lib/auth/user";
@@ -29,7 +30,7 @@ const TIER_BANDS = [
 export default async function PacksPage() {
   const user = await requireUser();
   const supabase = await createClient();
-  const [packsResponse, walletResponse] = await Promise.all([
+  const [packsResponse, walletResponse, promoted] = await Promise.all([
     supabase
       .schema("kut")
       .from("active_pack_offers")
@@ -37,6 +38,8 @@ export default async function PacksPage() {
       .select("*")
       .order("price"),
     supabase.schema("kut").from("wallets").select("balance").eq("user_id", user.id).maybeSingle(),
+    // "New in packs" for the promotion week (ADR-165); empty before go-live.
+    fetchLifecycleEvents(supabase, { week: footballWeek(new Date()), kind: "promotion" }),
   ]);
 
   if (packsResponse.error || walletResponse.error) {
@@ -50,6 +53,16 @@ export default async function PacksPage() {
     <main className={PAGE}>
       <section className={`${COLUMN} lg:max-w-6xl`}>
         <PageHeader title="Packs" />
+        {promoted.length > 0 && (
+          <Inset className="grid gap-0.5">
+            <span className="text-body font-semibold">
+              New in packs: {promoted.map((event) => event.display_name).join(", ")}
+            </span>
+            <span className="text-small text-ink-dim">
+              Promoted to the First Team this week. Their first copies are scarce.
+            </span>
+          </Inset>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
           {packs.length === 0 ? (

@@ -21,6 +21,8 @@ type ListedCard = {
   active_listing_id: string;
   active_listing_price: number;
   active_listing_expires_at: string;
+  // Appended by 20261024000000 (ADR-165).
+  player_stage?: string | null;
 };
 
 export default async function SellingPage() {
@@ -81,6 +83,7 @@ export default async function SellingPage() {
                         ovr={card.ovr}
                         rarityTier={card.rarity_tier}
                         injured={injuredPlayerIds.has(card.player_id)}
+                        retired={card.player_stage === "retired"}
                       />
                       <span className="grid min-w-0">
                         <span className="truncate text-body font-semibold">
@@ -88,6 +91,7 @@ export default async function SellingPage() {
                         </span>
                         <span className="text-small text-ink-dim">
                           {hours} h left · {count} {count === 1 ? "offer" : "offers"}
+                          {card.player_stage === "retired" && " · Retired"}
                         </span>
                         <span className="sr-only">
                           {card.rarity_tier} · OVR {card.ovr}

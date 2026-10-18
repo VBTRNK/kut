@@ -17,8 +17,20 @@ const TIER_CLASS: Record<Tier, string> = {
 const PLASTER =
   "after:absolute after:-inset-x-1 after:top-[58%] after:h-2 after:-rotate-[24deg] after:bg-[linear-gradient(90deg,#e0b58a_0_38%,#f3dcc0_38%_62%,#e0b58a_62%)] after:shadow-[0_1px_1px_rgb(0_0_0/25%)] after:content-['']";
 
+/** The Retired stamp in miniature (ADR-165): a red bar over the faded mini. */
+const STAMP_BAR =
+  "relative inline-grid flex-none after:absolute after:-inset-x-0.5 after:top-[44%] after:h-[5px] after:-rotate-[24deg] after:border-y-[1.5px] after:border-[#c4362c] after:content-['']";
+
 type MidweekMiniCardProps =
-  | { variant?: "card"; rarityTier: Tier; ovr: number; injured: boolean; small?: boolean }
+  | {
+      variant?: "card";
+      rarityTier: Tier;
+      ovr: number;
+      injured: boolean;
+      small?: boolean;
+      /** A Retired Player's card: faded, with the stamp's red bar. */
+      retired?: boolean;
+    }
   | { variant: "trialist" | "empty" | "unknown"; small?: boolean; ovr?: number };
 
 /**
@@ -32,16 +44,23 @@ export function MidweekMiniCard(props: MidweekMiniCardProps) {
   const number = props.small ? "text-[13px]" : "text-[17px]";
 
   if ("rarityTier" in props) {
-    return (
+    const mini = (
       <span
         aria-hidden="true"
-        className={`${base} shadow-[0_2px_6px_rgb(0_0_0/45%)] ${TIER_CLASS[props.rarityTier]} ${props.injured ? PLASTER : ""}`}
+        className={`${base} shadow-[0_2px_6px_rgb(0_0_0/45%)] ${TIER_CLASS[props.rarityTier]} ${props.injured ? PLASTER : ""} ${props.retired ? "saturate-[0.35]" : ""}`}
       >
         <b className={`${number} leading-none font-black tracking-[-0.02em]`}>{props.ovr}</b>
         {!props.small && (
           <small className="text-[7px] font-black tracking-[0.12em] opacity-80">OVR</small>
         )}
       </span>
+    );
+    return props.retired ? (
+      <span aria-hidden="true" className={STAMP_BAR}>
+        {mini}
+      </span>
+    ) : (
+      mini
     );
   }
   if (props.variant === "trialist" || props.variant === "unknown") {

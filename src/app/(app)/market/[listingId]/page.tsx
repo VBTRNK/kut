@@ -3,7 +3,7 @@ import { AttributeBars } from "@/components/card-stats";
 import { Block } from "@/components/ui/block";
 import { Button } from "@/components/ui/button";
 import { COLUMN, PAGE, PageHeader } from "@/components/ui/page";
-import { Figure } from "@/components/ui/tag";
+import { Figure, Tag } from "@/components/ui/tag";
 import { LiveCard } from "@/components/live-card";
 import { MarketOwnership } from "@/components/market-ownership";
 import { archetypeLabel } from "@/game/archetypes";
@@ -107,6 +107,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
     }));
 
   const cardPlayer = toListedCardPlayer(listing, injuredPlayerIds, photoUrls);
+  const retired = listing.player_stage === "retired";
 
   return (
     <main className={`${PAGE} pb-28 sm:pb-8`}>
@@ -130,7 +131,13 @@ export default async function ListingPage({ params }: ListingPageProps) {
             />
           </div>
           <div className="grid min-w-0 gap-6">
-            <Block title="Buy now">
+            <Block aside={retired ? <Tag tone="out">Retired</Tag> : undefined} title="Buy now">
+              {retired && (
+                <p className="text-body text-ink-dim">
+                  Can&rsquo;t play Midweek while {listing.display_name} is Retired. Packs
+                  don&rsquo;t make this card any more.
+                </p>
+              )}
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <p>
                   <Figure>{listing.price.toLocaleString()}</Figure>

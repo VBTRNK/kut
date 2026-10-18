@@ -18,7 +18,10 @@ export type NotificationEventType =
   | "report_correction"
   | "kudos_awarded"
   | "injury_check_in"
-  | "midweek_result";
+  | "midweek_result"
+  | "player_promoted"
+  | "player_at_risk"
+  | "player_retired";
 
 export type UserNotification = {
   id: string;
@@ -47,6 +50,9 @@ export const EVENT_LABELS: Record<NotificationEventType, string> = {
   kudos_awarded: "Kudos awarded",
   injury_check_in: "Rehab check-in",
   midweek_result: "Midweek Madness",
+  player_promoted: "New in the First Team",
+  player_at_risk: "At risk",
+  player_retired: "Retired",
 };
 
 export function eventLabel(type: string): string {
@@ -65,6 +71,8 @@ export type TargetLookups = {
   weekByTournament: ReadonlyMap<string, string>;
   /** Market sale id → the bought card's id, only while the member still owns it. */
   ownedCardBySale: ReadonlyMap<string, string>;
+  /** Promotion or retirement event id → the Player's slug (ADR-165). */
+  slugByLifecycleEvent?: ReadonlyMap<string, string>;
 };
 
 /**
@@ -82,6 +90,8 @@ export type TargetLookups = {
  *   issue (`/sessions/{id}` redirects to the week's issue, ADR-049); the
  *   report form's own message → the form;
  * - the rehab check-in → Home, where the check-in is;
+ * - a promotion or a retirement → the Player's profile (ADR-165); an At risk
+ *   warning → the member's cards, since members can't read that event;
  * - a club notice, or a type no code sends any more (`pack_opened`) → nothing.
  */
 export function messageTarget(
@@ -118,6 +128,13 @@ export function messageTarget(
         : null;
     case "injury_check_in":
       return { href: "/", label: "Check in" };
+    case "player_promoted":
+    case "player_retired": {
+      const slug = ref ? lookups.slugByLifecycleEvent?.get(ref) : undefined;
+      return slug ? { href: `/players/${slug}`, label: "Profile" } : null;
+    }
+    case "player_at_risk":
+      return { href: "/club/collection?view=manage", label: "Your cards" };
     default:
       return null;
   }
@@ -132,7 +149,11 @@ export function targetLookupIds(messages: readonly UserNotification[]) {
         .map((message) => message.reference_id as string),
     ),
   ];
-  return { tournamentIds: ids("midweek_result"), saleIds: ids("market_purchase") };
+  return {
+    tournamentIds: ids("midweek_result"),
+    saleIds: ids("market_purchase"),
+    lifecycleEventIds: [...new Set([...ids("player_promoted"), ...ids("player_retired")])],
+  };
 }
 
 const AMS = "Europe/Amsterdam";

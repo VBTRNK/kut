@@ -3,6 +3,8 @@ import Link from "next/link";
 import { AlbumKeyboardNavigation } from "@/components/album/album-keyboard-navigation";
 import { AlbumFilter } from "@/components/album/album-filter";
 import { Tag } from "@/components/ui/tag";
+import { Block } from "@/components/ui/block";
+import { CardGrid } from "@/components/ui/page";
 import { LiveCard } from "@/components/live-card";
 import { toLiveCardPlayer } from "@/lib/live-card-player";
 import { CollectionHeader } from "@/components/album/collection-header";
@@ -31,7 +33,72 @@ type Props = {
   /** Players in injury mode (ADR-082), for the plaster cast (ADR-084). */
   injuredPlayerIds: Set<string>;
   clubValue: number | null;
+  /** Retired Players (ADR-165): their own set after the last page; never counted. */
+  retiredSet?: RetiredSlot[];
 };
+export type RetiredSlot = {
+  player: AlbumDirectoryPlayer;
+  since: string | null;
+  copies: AlbumCollectionCard[];
+};
+
+/** The Retired set: packs don't make these any more, so a slot fills by trade. */
+function RetiredSet({
+  slots,
+  photoUrls,
+  injuredPlayerIds,
+}: {
+  slots: RetiredSlot[];
+  photoUrls: Map<string, string>;
+  injuredPlayerIds: Set<string>;
+}) {
+  const owned = slots.filter((slot) => slot.copies.length > 0).length;
+  return (
+    <Block
+      aside={
+        <p className="text-small tabular-nums text-ink-dim">
+          {owned} of {slots.length}
+        </p>
+      }
+      id="retired-set"
+      title="Retired set"
+    >
+      <p className="text-small text-ink-dim">
+        Packs don&rsquo;t make these any more: the only way to fill a slot is a trade. Retired
+        Players don&rsquo;t count towards the album.
+      </p>
+      <CardGrid wide={4}>
+        {slots.map(({ player, since, copies }) => {
+          const card = copies[0];
+          return card ? (
+            <Link
+              prefetch={false}
+              aria-label={`${player.display_name}, Retired: collected`}
+              className="block rounded-[0.9rem] outline-offset-4 outline-brass focus-visible:outline-2"
+              href={`/club/collection/${card.card_id}`}
+              key={player.id}
+            >
+              <LiveCard player={toLiveCardPlayer(card, injuredPlayerIds, photoUrls)} />
+            </Link>
+          ) : (
+            <Link
+              prefetch={false}
+              aria-label={`${player.display_name}, Retired: not collected`}
+              className="grid aspect-[5/7] place-items-center content-center gap-1 rounded-[0.9rem] border-2 border-dashed border-line/70 p-3 text-center outline-offset-4 outline-brass focus-visible:outline-2"
+              href={`/players/${player.slug}`}
+              key={player.id}
+            >
+              <span className="text-body font-semibold text-ink-dim">{player.display_name}</span>
+              <span className="text-small text-ink-faint">
+                {since ? `Retired ${since}` : "Retired"}
+              </span>
+            </Link>
+          );
+        })}
+      </CardGrid>
+    </Block>
+  );
+}
 function href(lens: string, page: string | number) {
   const p = new URLSearchParams();
   if (lens !== "all") p.set("lens", lens);
@@ -188,6 +255,7 @@ export function CollectionAlbum({
   photoUrls,
   injuredPlayerIds,
   clubValue,
+  retiredSet = [],
 }: Props) {
   const allSlots = buildSlots(roster, cards);
   const lens = parseLens(lensValue);
@@ -324,6 +392,9 @@ export function CollectionAlbum({
       >
         Show all pages
       </Link>
+      {retiredSet.length > 0 && (
+        <RetiredSet injuredPlayerIds={injuredPlayerIds} photoUrls={photoUrls} slots={retiredSet} />
+      )}
     </div>
   );
 }

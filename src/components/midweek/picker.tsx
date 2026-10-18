@@ -52,7 +52,10 @@ export type PickCard = {
 
 export type LastWeekPrefill = {
   slots: (string | null)[];
+  /** Players no longer owned. */
   lostNames: string[];
+  /** Players still owned but Retired, so no longer available for Midweek (ADR-165). */
+  retiredNames?: string[];
   lostSlots: number[];
 };
 
@@ -218,7 +221,7 @@ export function MidweekPicker({
   function loadLastWeek() {
     if (!lastWeek) return;
     setSlots(lastWeek.slots);
-    setPrefillText(prefillNotice(lastWeek.lostNames, lastWeek.lostSlots));
+    setPrefillText(prefillNotice(lastWeek.lostNames, lastWeek.lostSlots, lastWeek.retiredNames));
   }
 
   function submit(event: React.FormEvent<HTMLFormElement>) {

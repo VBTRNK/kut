@@ -9,7 +9,7 @@ Ground rules for every area:
 - **SQL is authoritative.** Economy and ratings run in schema `kut`, never
   client writes. `src/game/` holds display constants/helpers; only Midweek has
   a TS engine twin checked against golden vectors (ADR-064).
-- **Part L** (`docs/INVARIANTS.md`, 1–28): a change needs an ADR, a spec
+- **Part L** (`docs/INVARIANTS.md`, 1–31): a change needs an ADR, a spec
   update and its own PR.
 - **Values:** `src/game/{config,economy,midweek/config}.ts` mirrors SQL;
   change migrations and constants together.
@@ -32,6 +32,7 @@ Ground rules for every area:
 | anything on `/midweek` | [Midweek Madness](#midweek-madness) |
 | Special cards, Groundmasters | [Specials](#specials-and-groundmasters) |
 | injury, rehab check-in, plaster cast | [Injury mode](#injury-mode) |
+| Talents, promotion, At risk, Retired, credits | [Academy](#academy-and-roster-lifecycle) |
 | inbox, Home "now" cards, activity feed | [Notifications](#notifications-and-home) |
 | `/admin/*` | [Admin](#admin) |
 | who sees what, photos, invites | [Privacy](#privacy-consent-and-accounts) |
@@ -56,10 +57,9 @@ Ground rules for every area:
 - Club Value (`/club/value`, Standings) is coins + owned discard value + 4× the
   discard value of the member's own linked Player. Duplicates of one edition
   count 100/20/5/0% (v3, ADR-056). Discard always pays in full.
-- Collection (ADR-158): summary/bar and Album · Manage · Trading; Filter holds
-  album lenses and Manage's tier/sort. Trading has wanted rows, an add sheet
-  and copy controls; summary errors omit counts/bar (#309). Cards have
-  rating insets, listing/discard blocks; history is on the Player page.
+- Collection (ADR-158): summary bar and Album · Manage · Trading (wants, an
+  add sheet, copy controls); Filter holds lenses and sort; summary errors omit
+  counts (#309). Cards have rating insets and listing/discard blocks.
 - Standings has ink ranks and a You tag; phones show club names, with Cards
   and Players columns from `sm`. Club Value uses breakdown blocks (ADR-160).
 - Packs (ADR-163): own art and promise; openings start sealed; receipts keep
@@ -78,11 +78,8 @@ Ground rules for every area:
 - `scripts/measure-pack-ev.mjs` reads each pack's expected value from SQL.
 - `src/lib/packs.ts`, `pack-summary.ts`, `album.ts` (a paged book, ADR-048).
 
-**History.**
-- Pack price: 175 (ADR-057, 6 Sep) → 250 (ADR-136, 7 Oct).
-- Attendance reward: 75 → 250 (ADR-029, 29 Aug), not retroactive.
-- Club Value v3 added duplicate discounts to v2’s discard sum (ADR-056).
-- All cards are tradeable/discardable (ADR-033).
+**History.** Pack 175 → 250 (ADR-057, ADR-136); attendance reward 75 → 250
+(ADR-029); Club Value v3 discounts duplicates (ADR-056); all cards trade (ADR-033).
 
 ## Market and trades
 
@@ -102,12 +99,10 @@ Ground rules for every area:
   - accepted trades never enter `market_sales`.
 - **Wants.** 100 private wants, 30 available copies (ADR-058); matches show
   the owner's display name and a copyable prompt.
-- **UI** (ADR-159/161): Buy · Selling · Offers. Buy filters tier/price/sort in a
-  sheet at every width. Selling rows show time left and offer counts; list/cancel
-  stays on the Collection card. Offers separates incoming/sent, highlighting one open
-  incoming. Listing details keep phone-pinned Buy,
-  escrow notice, discard value (ADR-103) and ownership across all copies
-  (ADR-100/102).
+- **UI** (ADR-159/161): Buy (tier/price/sort in a sheet) · Selling (time left,
+  offers; list/cancel on the Collection card) · Offers (incoming/sent). Listings
+  keep a phone-pinned Buy, escrow notice, discard value (ADR-103) and ownership
+  across copies (ADR-100/102).
 
 **Part L:** 1, 2, 3, 4, 5, 20, 22, 23.
 
@@ -277,54 +272,35 @@ Ground rules for every area:
     and line once the week is complete, a row per card (ADR-155).
   - Share images on `Your night`: a champion poster (for everyone) and "my
     night", drawn in the browser (ADR-120).
-- **Pages** under Compete (ADR-107, ADR-154; a Pick or Live dot, ADR-153):
-  - `/midweek`, the hub: a Now block for the moment and four fixed tiles;
-    after the final the title names the champion until Thursday 23:59;
-  - `/midweek/pick` (from the lock, your locked five); `/midweek/past`;
-  - `/midweek/[weekStart]`, a finished week: who won it, your night, the
-    final and tiles; in play it redirects to the hub (ADR-155). Under it
-    `bracket` (a block per round on a phone, latest first, each from 15
-    minutes before kick-off; the tree from `lg`), `night`, `calls`, `picks`,
-    `next/[round]/[pairing]` (pre-match) and `match/[matchId]`, the report:
-    Match (facts, moments, penalties) and Teams (`?tab=teams`), paired from
-    `lg` (ADR-156).
-- **Live** (ADR-115, ADR-147). Every match in play is watchable on its page:
-  - a clock ticking each second on the corrected device clock, held at 90′;
-  - the feed newest on top: kicks, then the report's moments;
-  - each kick reads `Pen 3`, the outcome and tally, taker v keeper; its
-    commentary and the decider come only at full time (#263).
-  - Nothing shows before its real moment. The match page polls every 10 s
-    (5 s in a shoot-out), the hub and other pages every 20 s.
-  - Every bracket row in play shows the score so far and a ticking minute or
-    `Pens`, and links to watch it (ADR-148). Its score counts the goal events
-    members may see now; no report is rendered for a row.
-- **Pre-match** (ADR-149, ADR-155). Once both feeders of a later pairing have
-  ended, its row, `Your night` and the call link to a pre-match: a
-  countdown, both fives with the week's Power and plusses per line, and the
-  call above them for a member who is out. No win chance or day roll before
-  kick-off; at kick-off it becomes the live match.
+- **Pages** under Compete (ADR-107/153/154): the hub `/midweek` (a Now block,
+  four tiles; names the champion until Thursday 23:59), `/midweek/pick` (your
+  locked five from the lock), `/midweek/past`, and `/midweek/[weekStart]`
+  (in play it redirects to the hub, ADR-155) with `bracket` (a block per round
+  on a phone, the tree from `lg`), `night`, `calls`, `picks`,
+  `next/[round]/[pairing]` and `match/[matchId]` (Match and Teams, ADR-156).
+- **Live** (ADR-115/147/148): every match in play is watchable: a corrected
+  clock held at 90′, the feed newest first, shoot-out kicks whose commentary
+  waits for full time (#263). Nothing shows before its moment; the match polls
+  every 10 s (5 s in a shoot-out), other pages 20 s. Bracket rows in play show
+  the score and minute.
+- **Pre-match** (ADR-149/155): once both feeders end, a countdown, both fives
+  with Power and plusses, and the call for a member who is out; no win chance
+  before kick-off.
 
 **Part L:** 4, 5, 25, 26, 27, 28.
 
 **Where.**
-- **Engine:**
-  - SQL `_mm_*` functions, driven by `run_midweek_due` (open, lock and simulate,
-    pay);
-  - the pure TS twin in `src/game/midweek/`;
-  - parity is pinned by `tests/fixtures/midweek-golden.json`
-    (`tests/unit/midweek-golden.test.ts`, `midweek-parity-sql.test.ts`,
-    `supabase/tests/database/midweek_engine_parity.test.sql`), ADR-090.
-  - Change TS, golden file and SQL together.
+- **Engine:** SQL `_mm_*` driven by `run_midweek_due` (open, lock and
+  simulate, pay); the TS twin in `src/game/midweek/`; parity pinned by
+  `tests/fixtures/midweek-golden.json` and its TS and SQL tests (ADR-090).
+  Change all three together.
 - **Member RPCs:** `save_midweek_squad(uuid[])`, `set_midweek_opt_out`,
   `save_midweek_prediction`.
 - **Reveals:** time-gated `midweek_*_public` views (§44.9). Nothing is revealed
   by a job.
-- **Names (ADR-151):** the views carry the account name (`*_name`) and the
-  club (`side_*_club`, `club_name`, `champion_club`; ADR-145). Clubs show where
-  the team plays, wins or goes through: bracket, scoreboards, feed, report
-  text, results, champion, share images. Accounts show where the member acts
-  (calls, `Your night`, picker) and name trialists. `clubName`/`sideClub`
-  (`rows.ts`) fall back to the account.
+- **Names (ADR-151):** clubs (`*_club`, ADR-145) where the team plays or wins;
+  account names (`*_name`) where the member acts, and for trialists.
+  `clubName`/`sideClub` (`rows.ts`) fall back to the account.
 - **Lazy trigger:** `src/lib/midweek/run-due.ts`, called from Home and every
   Midweek page.
 - **Reports:** a seeded phrasebook in `src/lib/midweek/report/` (ADR-093).
@@ -333,12 +309,9 @@ Ground rules for every area:
   `src/lib/midweek/prematch.ts` and `src/components/midweek/prematch.tsx`.
 - **Simulation:** `tests/sim/`.
 
-**History.**
-- Friday Five was removed (ADR-088) and Midweek was specified (ADR-089).
-- Switched on 26 Sep; the first evening was 30 Sep.
-- The clock was v1 (20:00, whole rounds every 30 min) until ADR-104.
-- Rotation and balance went live on 3 Oct.
-- Operations rule: never push a migration during a running Wednesday evening.
+**History.** Friday Five removed (ADR-088), Midweek specified (ADR-089), first
+evening 30 Sep, clock v1 until ADR-104. Never push a migration during a
+running Wednesday evening.
 
 ## Specials and Groundmasters
 
@@ -360,15 +333,7 @@ Ground rules for every area:
   `protect_frozen_card_edition`.
 - Tests: `special_editions.test.sql`, `special_snapshot_tiers.test.sql`.
 
-**Next (favored, not decided).** Groundmasters, a one-off Special for the
-Players who helped renew the pitch agreement. Issue #222 holds the proposal
-and the delivery order:
-1. an ADR and spec update;
-2. the card design;
-3. the issuance migration;
-4. a pack roll in its own PR.
-
-The `edition_type` check still lacks a `groundmaster` value.
+**Next.** Groundmasters, proposed in #222.
 
 ## Injury mode
 
@@ -384,6 +349,37 @@ The `edition_type` check still lacks a `groundmaster` value.
 - **Plaster cast:** the Live card of a currently injured Player is drawn in a
   signed cast on every card screen (ADR-084 to ADR-087). In Midweek its
   fitness is 0.95.
+- A Player without an account can be injured too (ADR-165): it pauses the
+  absence clock and draws the cast, with no check-in or message.
+
+## Academy and roster lifecycle
+
+**Behaviour** (ADR-165, #246). Live from go-live, recorded once on the roster
+(the current football week); before it members see nothing of this.
+- Stages: **Talent** (no Live card) → **First Team** → **Retired**. At risk is
+  a warning, not a stage. Every Player keeps a profile.
+- **Progress** = counted weeks played in the last 8 + active credits (≤2,
+  admin-given with a reason, expiring after 8 counted weeks). The Academy on
+  Players shows progress ≥2; ≥3 with a real week promotes, permanently.
+- **First Team:** 8 counted weeks absent warns (At risk tag, profile and card
+  block, owners' message); 12 retires. Injury weeks don't count; a game resets
+  it. Retirement is recomputed; a comeback needs a new promotion.
+- **Retired:** copies stay owned and tradeable; no new copies (packs, starter,
+  reset, rotation: `can_mint_copies`); no Midweek (lock, save, picker); a stamp
+  on current cards, never snapshots; out of ratings, risers and album
+  completion, into a Retired set and `/players/retired`.
+- Promotion week: Home "New:" tile, Packs inset, Chronicle roster block.
+- Admin: Add a Player (Talent with 0–2 credits, or First Team; similar names
+  offered first), Stage and Clock columns, Credit, Promote / Bring back;
+  attendance marks Talents and adds one on the spot.
+
+**Part L:** 27, 29, 30, 31.
+
+**Where.** `_evaluate_lifecycle`, `admin_register_player`,
+`admin_promote_player`, `admin_grant_academy_credit`,
+`admin_record_academy_go_live`; views `academy_status`,
+`player_lifecycle_public`, `player_lifecycle_events_public`. `src/lib/academy.ts`,
+`src/components/academy.tsx`; `academy_lifecycle.test.sql`.
 
 **Part L:** 4, 5, 15, 24.
 
@@ -402,7 +398,8 @@ The `edition_type` check still lacks a `groundmaster` value.
 - Event types: `market_sale`, `market_purchase`, `attendance_reward`,
   `pack_opened`, `admin_notice`, `bibs_bonus`, `trade_offer`,
   `trade_response`, `session_report`, `session_results`, `report_correction`,
-  `kudos_awarded`, `injury_check_in`, `midweek_result`.
+  `kudos_awarded`, `injury_check_in`, `midweek_result`, `player_promoted`
+  (everyone), `player_at_risk`, `player_retired` (owners).
 - Message rows use a title, body/time and New tag, grouped by day; no event
   kicker or inline destination label (ADR-160).
 - Every message opens its subject through `/messages/[id]/open`, which also
@@ -431,8 +428,9 @@ never misses one side's message.
 - Roles: `user`, `admin`, `superadmin`. Pages under `/admin`:
   - **Attendance:** record, publish, correct, cancel; reports, G+A
     corrections, early close.
-  - **Roster:** add, deactivate or hard-delete a never-used Player
-    (ADR-025, ADR-026); start or end an injury. **Invites.**
+  - **Roster:** add a Talent or First Team Player, the Academy controls
+    (ADR-165), deactivate or hard-delete a never-used Player (ADR-025/026),
+    injuries. **Invites.**
   - **Accounts** (`/admin/links`): link to a Player (ADR-028), disable or
     delete (ADR-030), soft reset to 250 coins (ADR-035), adjust a wallet
     (at most 100,000 per call).
@@ -497,9 +495,8 @@ never misses one side's message.
   with a **307**.
 - Sign-in cookies are per host. Invite links use `APP_URL`.
 
-**History.** A 308 was declined on 9 Oct: the 307 permits an immediate rollback.
-Reopen only if the legacy host is retired. `/club/midweek/*` → `/midweek/*`
-is a separate permanent redirect (ADR-107).
+**History.** A 308 was declined (9 Oct) so a rollback stays instant.
+`/club/midweek/*` → `/midweek/*` is permanent (ADR-107).
 
 **Where.** `next.config.ts` and `tests/unit/legacy-host-redirect.test.ts`.
 `docs/RELEASING.md` has the live check.

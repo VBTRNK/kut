@@ -192,7 +192,31 @@ describe("the inbox (ADR-114)", () => {
         message("market_purchase", "market_sale", "s1"),
         message("market_sale", "market_sale", "s2"),
       ]),
-    ).toEqual({ tournamentIds: ["t1"], saleIds: ["s1"] });
+    ).toEqual({ tournamentIds: ["t1"], saleIds: ["s1"], lifecycleEventIds: [] });
+  });
+
+  it("sends Academy messages to the Player, or to your cards for an At risk warning", () => {
+    const lookups = {
+      weekByTournament: new Map<string, string>(),
+      ownedCardBySale: new Map<string, string>(),
+      slugByLifecycleEvent: new Map([["e1", "fenna-l"]]),
+    };
+    expect(messageTarget(message("player_promoted", "lifecycle_event", "e1"), lookups)).toEqual({
+      href: "/players/fenna-l",
+      label: "Profile",
+    });
+    expect(messageTarget(message("player_retired", "lifecycle_event", "e2"), lookups)).toBeNull();
+    expect(messageTarget(message("player_at_risk", "lifecycle_event", "e3"), lookups)).toEqual({
+      href: "/club/collection?view=manage",
+      label: "Your cards",
+    });
+    expect(
+      targetLookupIds([
+        message("player_promoted", "lifecycle_event", "e1"),
+        message("player_retired", "lifecycle_event", "e2"),
+        message("player_at_risk", "lifecycle_event", "e3"),
+      ]).lifecycleEventIds,
+    ).toEqual(["e1", "e2"]);
   });
 
   it("groups by day in club time: today, earlier this week, then each older day", () => {

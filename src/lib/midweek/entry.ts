@@ -362,22 +362,42 @@ export function prefillSlots(
   return { slots, lostPlayerIds, lostSlots };
 }
 
+/**
+ * Why saved picks left their slots: sold ("isn't in your collection any
+ * more") or Retired ("is no longer available for Midweek", ADR-165; a
+ * Retired copy is still owned).
+ */
+export function lostClause(gone: readonly string[], retired: readonly string[] = []): string {
+  const parts: string[] = [];
+  if (gone.length > 0)
+    parts.push(
+      `${joinNames(gone)} ${gone.length === 1 ? "isn't" : "aren't"} in your collection any more`,
+    );
+  if (retired.length > 0)
+    parts.push(
+      `${joinNames(retired)} ${retired.length === 1 ? "is" : "are"} no longer available for Midweek`,
+    );
+  return parts.join(" and ");
+}
+
+/** "slot 2 is" / "slots 2 and 4 are". */
+export function slotPhrase(slots: readonly number[]): string {
+  return slots.length === 1 ? `slot ${slots[0]} is` : `slots ${joinNames(slots.map(String))} are`;
+}
+
 /** The HANDOFF copy after "Load last week's five", its first sentence bold. */
 export function prefillNotice(
   lostNames: readonly string[],
   lostSlots: readonly number[],
+  retiredNames: readonly string[] = [],
 ): Segment[] {
   const lead: Segment = { text: "Loaded last week's five.", strong: true };
-  if (lostNames.length === 0) return [lead, { text: " Nothing is saved until you press Save." }];
-  const verb = lostNames.length === 1 ? "isn't" : "aren't";
-  const slotText =
-    lostSlots.length === 1
-      ? `slot ${lostSlots[0]} is`
-      : `slots ${joinNames(lostSlots.map(String))} are`;
+  if (lostNames.length + retiredNames.length === 0)
+    return [lead, { text: " Nothing is saved until you press Save." }];
   return [
     lead,
     {
-      text: ` ${joinNames(lostNames)} ${verb} in your collection any more, so ${slotText} open. Nothing is saved until you press Save.`,
+      text: ` ${lostClause(lostNames, retiredNames)}, so ${slotPhrase(lostSlots)} open. Nothing is saved until you press Save.`,
     },
   ];
 }

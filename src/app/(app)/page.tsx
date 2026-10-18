@@ -34,6 +34,7 @@ import { MidweekMiniCard } from "@/components/midweek/mini-card";
 import { ARCHETYPE_LABELS, type Archetype } from "@/game/archetypes";
 import { formatChronicleDate, issueStandfirst } from "@/lib/chronicle";
 import { InjuryCheckInCard } from "./injury/check-in-card";
+import { fetchLifecycleEvents, footballWeek, tierLabel } from "@/lib/academy";
 
 type TopRiser = {
   id: string;
@@ -268,6 +269,11 @@ export default async function Home() {
       },
     });
   }
+  // The promotion moment (ADR-165, #246 S1 Q5): a plain tile per Player
+  // promoted this football week. Empty before go-live or on a failed read.
+  const promotedThisWeek = (
+    await fetchLifecycleEvents(supabase, { week: footballWeek(now), kind: "promotion" })
+  ).slice(0, 2);
   const ordered = orderNowCards(nowCards);
   const lead = ordered.find((card) => card.value.due) ?? ordered[0];
   const somethingDue = ordered.some((card) => card.value.due);
@@ -325,6 +331,14 @@ export default async function Home() {
                   {card.value.tile}
                 </div>
               ))}
+            {promotedThisWeek.map((event) => (
+              <LinkTile
+                href={`/players/${event.slug}`}
+                key={event.id}
+                state={`First Team · ${tierLabel(event.rarity_tier)} ${event.live_ovr} · in packs`}
+                title={`New: ${event.display_name}`}
+              />
+            ))}
           </div>
         </div>
         {injury?.injured && !injury.checkable_week_start && (

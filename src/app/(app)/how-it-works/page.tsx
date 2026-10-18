@@ -25,6 +25,7 @@ import {
 } from "@/lib/midweek/entry";
 import { packPromise, promiseText } from "@/lib/packs";
 import { createClient } from "@/lib/supabase/server";
+import { ACADEMY, fetchAcademyGoLive } from "@/lib/academy";
 
 export const metadata = { title: "How FLUT works" };
 
@@ -74,12 +75,15 @@ export default async function HowItWorksPage() {
   // The clock of the latest week (ADR-104), so the rules match the week being
   // played; a failed read falls back to the version the next week opens on.
   const supabase = await createClient();
-  const [{ data: midweekCurrent }, packsResponse] = await Promise.all([
+  const [{ data: midweekCurrent }, packsResponse, academyGoLive] = await Promise.all([
     supabase.schema("kut").from("midweek_current").select("*").maybeSingle(),
     // The packs on offer now, with their live prices and promises (#223). A
     // failed read leaves the general rules without a price list.
     supabase.schema("kut").from("active_pack_offers").select("*").order("price"),
+    // The Academy's questions appear from go-live (ADR-165, #246 S1 Q7).
+    fetchAcademyGoLive(supabase),
   ]);
+  const academyLive = academyGoLive !== null;
   const offers = (packsResponse.error ? [] : (packsResponse.data ?? [])) as {
     slug: string;
     title: string;
@@ -335,6 +339,46 @@ export default async function HowItWorksPage() {
               </table>
             </div>
           </Question>
+          {academyLive && (
+            <Question id="academy" title="How does the Academy work?">
+              <p>
+                Someone new starts as a <strong>Talent</strong>: no card yet, but a real rating from
+                their first game. Once they have played in{" "}
+                <strong>2 of the last {ACADEMY.windowWeeks} counted weeks</strong> they show in the
+                Academy on{" "}
+                <Link className="font-semibold text-brass underline" href="/players">
+                  Players
+                </Link>
+                .
+              </p>
+              <p>
+                <strong>{ACADEMY.promoteAt}</strong> counted weeks out of the last eight promote
+                them to the <strong>First Team</strong>: their Live card goes into packs and they
+                get an album slot. Promotion is permanent. A counted week is a Monday-to-Sunday week
+                with a published session; playing twice in one week counts once.
+              </p>
+            </Question>
+          )}
+          {academyLive && (
+            <Question id="retired" title="What happens when a Player retires?">
+              <p>
+                A First Team Player who misses <strong>{ACADEMY.atRiskWeeks} counted weeks</strong>{" "}
+                in a row is <strong>At risk</strong>: owners get a message. After{" "}
+                <strong>{ACADEMY.retireWeeks}</strong> they <strong>retire</strong>. Weeks in injury
+                mode don&rsquo;t count, and one game resets the count.
+              </p>
+              <p>
+                Retiring never takes a card away. Copies stay yours to keep, sell, trade or discard,
+                and wanted lists keep them. Packs and starter packs stop making the card, it
+                can&rsquo;t play Midweek, and it moves to the album&rsquo;s Retired set. Its rating
+                keeps moving as usual.
+              </p>
+              <p>
+                A Retired Player who comes back builds a <strong>comeback</strong> in the Academy,
+                by the same three-week rule. Coming back reuses the same card.
+              </p>
+            </Question>
+          )}
           <a
             className={`inline-flex min-h-11 items-center justify-self-start rounded-md text-small font-semibold text-brass hover:underline ${FOCUS}`}
             href="#top"
@@ -531,6 +575,16 @@ export default async function HowItWorksPage() {
               {MIDWEEK.trialist.ovr}, handicapped so a real card always beats one.
             </p>
           </Question>
+          {academyLive && (
+            <Question id="midweek-retired" title="Can a Retired card play?">
+              <p>
+                No. A <strong className="text-ink">Retired</strong> Player&rsquo;s card is listed in
+                the picker but can&rsquo;t be picked. A saved pick that retires before the lock is
+                replaced like a sold card: your other picks move up and a trialist fills the last
+                slot. Once the lock has stored your five, a later retirement changes nothing.
+              </p>
+            </Question>
+          )}
           <Question title="How plusses work" id="plusses">
             <p>
               Every archetype brings plusses to three lines: attack, midfield and defence. An

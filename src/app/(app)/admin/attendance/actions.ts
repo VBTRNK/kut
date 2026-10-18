@@ -8,6 +8,57 @@ import { isUuid } from "@/lib/uuid";
 
 export type PublishAttendanceState = { error: string | null };
 
+export type SimilarPlayer = {
+  player_id: string;
+  display_name: string;
+  lifecycle_stage: string;
+  is_active: boolean;
+};
+export type SpotTalentResult =
+  | { ok: true; player: { id: string; display_name: string } }
+  | { ok: false; error: string; similar?: SimilarPlayer[] };
+
+/**
+ * "Not on the list?" (ADR-165, #246 S1 E2): register a Talent while recording
+ * attendance. A similar existing name is offered first, never auto-merged;
+ * `allowSimilar` adds them as a new Talent anyway.
+ */
+export async function addTalentOnTheSpot(
+  rawName: string,
+  allowSimilar: boolean,
+): Promise<SpotTalentResult> {
+  await requireAdmin();
+  const displayName = String(rawName ?? "").trim();
+  if (!displayName || displayName.length > 80) {
+    return { ok: false, error: "Display name must be 1–80 characters." };
+  }
+  const supabase = await createClient();
+  if (!allowSimilar) {
+    const { data, error } = await supabase
+      .schema("kut")
+      .rpc("admin_similar_players", { p_display_name: displayName });
+    if (error) return { ok: false, error: "Couldn't check the name. Please try again." };
+    const similar = (data ?? []) as SimilarPlayer[];
+    if (similar.length > 0) return { ok: false, error: "", similar };
+  }
+  const { data, error } = await supabase.schema("kut").rpc("admin_register_player", {
+    p_display_name: displayName,
+    p_stage: "talent",
+    p_allow_similar: true,
+  });
+  if (error) {
+    return {
+      ok: false,
+      error: error.message.includes("admin access")
+        ? "You don't have permission to do this."
+        : "Couldn't add the Talent. Check the name and try again.",
+    };
+  }
+  revalidatePath("/admin/roster");
+  const row = data as { player_id: string; display_name: string };
+  return { ok: true, player: { id: row.player_id, display_name: row.display_name } };
+}
+
 const INVALID_REQUEST: PublishAttendanceState = {
   error: "The attendance details were invalid. Please review them and try again.",
 };
