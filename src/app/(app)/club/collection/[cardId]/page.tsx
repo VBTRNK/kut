@@ -11,6 +11,8 @@ import { toLiveCardPlayer } from "@/lib/live-card-player";
 import { resolvePhotoUrls } from "@/lib/player-photos";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/uuid";
+import { StageBlock } from "@/components/academy";
+import { fetchLifecycle } from "@/lib/academy";
 import { DiscardCardForm } from "../discard-card-form";
 import { CreateListingForm } from "../create-listing-form";
 import { CancelListingForm } from "../cancel-listing-form";
@@ -45,6 +47,8 @@ type CollectionCard = {
   active_listing_expires_at: string | null;
   held_by_offer_id: string | null;
   photo_path: string | null;
+  // Appended by 20261024000000 (ADR-165): the Retired stamp.
+  player_stage?: string | null;
 };
 
 export default async function CardDetailPage({ params, searchParams }: CardPageProps) {
@@ -57,9 +61,8 @@ export default async function CardDetailPage({ params, searchParams }: CardPageP
   const { data, error } = await supabase
     .schema("kut")
     .from("my_collection_cards")
-    .select(
-      "card_id, edition_id, edition_title, edition_type, is_live, source, player_id, player_slug, display_name, archetype, ovr, pac, sho, pas, dri, def, phy, rarity_tier, discard_value, active_listing_id, active_listing_price, active_listing_expires_at, held_by_offer_id, photo_path",
-    )
+    // "*": views only gain columns (the stage, ADR-165).
+    .select("*")
     .eq("card_id", cardId)
     .maybeSingle();
 
@@ -72,9 +75,16 @@ export default async function CardDetailPage({ params, searchParams }: CardPageP
   }
 
   const card = data as CollectionCard;
-  const [photoUrls, injuredPlayerIds] = await Promise.all([
+  const [photoUrls, injuredPlayerIds, [lifecycle], copiesResponse] = await Promise.all([
     resolvePhotoUrls(supabase, [card.photo_path]),
     fetchInjuredPlayerIds(supabase),
+    // At risk or Retired (ADR-165): members from go-live.
+    fetchLifecycle(supabase, { playerId: card.player_id }),
+    supabase
+      .schema("kut")
+      .from("my_collection_cards")
+      .select("card_id", { count: "exact", head: true })
+      .eq("player_id", card.player_id),
   ]);
   // ADR-074: the rating story applies only to a Live card. A Special edition is
   // a frozen snapshot, so explaining a current OVR would misdescribe it. The
@@ -111,13 +121,14 @@ export default async function CardDetailPage({ params, searchParams }: CardPageP
         <PageHeader
           back={{ href: "/club/collection", label: "Collection" }}
           title={card.display_name}
-          sub={`${card.is_live ? "Live card" : card.edition_title} · ${card.rarity_tier} · OVR ${card.ovr}`}
+          sub={`${card.is_live ? "Live card" : card.edition_title} · ${card.rarity_tier} · OVR ${card.ovr}${card.player_stage === "retired" ? " · Retired" : ""}`}
         />
         <div className="grid gap-6 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] md:items-start">
           <div className="mx-auto w-full max-w-[15rem] md:max-w-none">
             <LiveCard size="detail" player={cardPlayer} />
           </div>
           <div className="grid min-w-0 gap-6">
+            <StageBlock copies={copiesResponse.count ?? undefined} row={lifecycle ?? null} />
             {card.is_live && (
               <Block title="Why this rating">
                 {ratingBreakdown && (

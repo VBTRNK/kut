@@ -25,6 +25,12 @@ export type LiveCardPlayer = LiveCardIdentity & {
   phy: number;
   rarityTier: "common" | "bronze" | "silver" | "gold" | "holo" | "elite";
   photoUrl?: string | null;
+  /**
+   * The Retired stamp (ADR-165): the Player is Retired right now. Set by the
+   * shared adapters from a current card's stage, never on a snapshot (a locked
+   * Midweek entry, a pack's "when opened" card, a dated Chronicle fact).
+   */
+  retired?: boolean;
 };
 
 type LiveCardProps = {
@@ -211,6 +217,7 @@ export function LiveCard({ player, size = "grid", trend, badge }: LiveCardProps)
       className="live-card"
       data-injured={injured || undefined}
       data-rarity={tier}
+      data-retired={player.retired || undefined}
       data-size={size}
     >
       <span aria-hidden="true" className="live-card__glow" />
@@ -295,6 +302,16 @@ export function LiveCard({ player, size = "grid", trend, badge }: LiveCardProps)
       <span aria-hidden="true" className="live-card__sheen" />
       <span aria-hidden="true" className="live-card__grain" />
       <span aria-hidden="true" className="live-card__frame" />
+      {player.retired && (
+        <>
+          {/* Last in the card: the fade covers every layer, the stamp sits on it. */}
+          <span aria-hidden="true" className="live-card__retired-fade" />
+          <span aria-hidden="true" className="live-card__stamp">
+            <b>Retired</b>
+          </span>
+          <span className="sr-only">Retired: this card can&rsquo;t play Midweek</span>
+        </>
+      )}
     </article>
   );
 

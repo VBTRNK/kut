@@ -8,6 +8,7 @@ import { packSummary } from "@/lib/pack-summary";
 import { openedNote, packKind } from "@/lib/packs";
 import { resolvePhotoUrls } from "@/lib/player-photos";
 import { createClient } from "@/lib/supabase/server";
+import { firstTeamOnly } from "@/lib/academy";
 
 type PackResultPageProps = { params: Promise<{ openingId: string }> };
 
@@ -49,8 +50,9 @@ export default async function PackResultPage({ params }: PackResultPageProps) {
     ),
     fetchInjuredPlayerIds(supabase),
     supabase.schema("kut").from("my_collection_cards").select("card_id, player_id, discard_value"),
-    // The album's slot order (`buildSlots`): by name, then id.
-    supabase.schema("kut").from("player_directory").select("id, display_name"),
+    // The album's slot order (`buildSlots`): the First Team by name, then id.
+    // "*": the stage was appended by 20261024000000 (ADR-165).
+    supabase.schema("kut").from("player_directory").select("*"),
   ]);
   // The chips are a nicety: a failed read shows the cards without them.
   const summary =
@@ -66,7 +68,13 @@ export default async function PackResultPage({ params }: PackResultPageProps) {
             player_id: string;
             discard_value: number;
           }[],
-          roster: ((rosterResponse.data ?? []) as { id: string; display_name: string }[])
+          roster: firstTeamOnly(
+            (rosterResponse.data ?? []) as {
+              id: string;
+              display_name: string;
+              lifecycle_stage?: string | null;
+            }[],
+          )
             .sort(
               (a, b) => a.display_name.localeCompare(b.display_name) || a.id.localeCompare(b.id),
             )
@@ -74,7 +82,12 @@ export default async function PackResultPage({ params }: PackResultPageProps) {
         });
 
   const revealCards: RevealCard[] = cards.map((card, index) => {
-    const player = toListedCardPlayer(card, injuredPlayerIds, photoUrls);
+    // A pack result is a snapshot ("when opened"): never the Retired stamp.
+    const player = toListedCardPlayer(
+      { ...card, player_stage: null, lifecycle_stage: null },
+      injuredPlayerIds,
+      photoUrls,
+    );
     return {
       cardId: card.card_id,
       player,

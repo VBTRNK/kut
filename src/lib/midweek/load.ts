@@ -1,4 +1,5 @@
 import { roundStartAt } from "@/game/midweek/schedule";
+import { isRetiredRow } from "@/lib/academy";
 import { BRAND } from "@/lib/brand";
 import type { createClient } from "@/lib/supabase/server";
 import {
@@ -344,7 +345,8 @@ export async function savedMinis(
   const { data, error } = await supabase
     .schema("kut")
     .from("my_collection_cards")
-    .select("card_id, player_id, is_live, ovr, rarity_tier")
+    // "*": the stage was appended by 20261024000000 (ADR-165).
+    .select("*")
     .in(
       "card_id",
       squad.map((row) => row.card_id),
@@ -358,11 +360,15 @@ export async function savedMinis(
         is_live: boolean;
         ovr: number;
         rarity_tier: EntryMini["rarityTier"];
+        player_stage?: string | null;
       }[]
-    ).map((row) => [row.card_id, row]),
+    )
+      .filter((row) => !isRetiredRow(row))
+      .map((row) => [row.card_id, row]),
   );
-  // A saved card sold since shows as a trialist on the picker; here it is
-  // simply left out.
+  // A saved card sold since, or a Retired Player's (no longer available for
+  // Midweek, ADR-165), shows as a trialist on the picker; here it is simply
+  // left out.
   return squad.flatMap((row) => {
     const card = byCard.get(row.card_id);
     return card

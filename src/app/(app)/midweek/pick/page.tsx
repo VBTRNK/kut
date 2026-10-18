@@ -17,7 +17,9 @@ import {
   isLockedTonight,
   isPickingOpen,
   joinNames,
+  lostClause,
   prefillSlots,
+  slotPhrase,
   starterNotice,
   weekArchetype,
   type MidweekCurrent,
@@ -29,6 +31,8 @@ import { loadWeekResults } from "@/lib/midweek/results";
 import { runDueMidweek } from "@/lib/midweek/run-due";
 import { resolvePhotoUrls } from "@/lib/player-photos";
 import { createClient } from "@/lib/supabase/server";
+import { isRetiredRow } from "@/lib/academy";
+import { MidweekMiniCard } from "@/components/midweek/mini-card";
 
 export const metadata = { title: "Pick your five" };
 
@@ -49,6 +53,8 @@ type CollectionRow = {
   phy: number;
   rarity_tier: LiveCardPlayer["rarityTier"];
   photo_path: string | null;
+  // Appended by 20261024000000 (ADR-165): a Retired card can't play Midweek.
+  player_stage?: string | null;
 };
 
 const BACK = { href: "/midweek", label: "Midweek" };
@@ -101,9 +107,8 @@ export default async function MidweekPickPage() {
       supabase
         .schema("kut")
         .from("my_collection_cards")
-        .select(
-          "card_id, player_id, is_live, display_name, archetype, ovr, pac, sho, pas, dri, def, phy, rarity_tier, photo_path",
-        )
+        // "*": views only gain columns (the stage, ADR-165).
+        .select("*")
         .order("ovr", { ascending: false })
         .order("display_name"),
       supabase
@@ -134,7 +139,12 @@ export default async function MidweekPickPage() {
         ]),
   );
 
-  const owned = (collectionResponse.data ?? []) as CollectionRow[];
+  // One "playable in Midweek" condition (ADR-165): not Retired. Retired cards
+  // are listed below the picker, faded and not pickable (#246 S1, Q6).
+  const everything = (collectionResponse.data ?? []) as CollectionRow[];
+  const owned = everything.filter((card) => !isRetiredRow(card));
+  const retiredTiles = strongestCopies(everything.filter(isRetiredRow), injuredPlayerIds);
+  const retiredPlayerIds = new Set(retiredTiles.map(({ card }) => card.player_id));
   const tiles = strongestCopies(owned, injuredPlayerIds);
   const ownedPlayerIds = new Set(tiles.map(({ card }) => card.player_id));
   const photoUrls = await resolvePhotoUrls(
@@ -170,18 +180,16 @@ export default async function MidweekPickPage() {
     ...(lastWeek?.lostPlayerIds ?? []),
   ]);
   const nameOf = (id: string) => names.get(id) ?? "A Player";
+  const gone = (ids: string[]) => ids.filter((id) => !retiredPlayerIds.has(id)).map(nameOf);
+  const retired = (ids: string[]) => ids.filter((id) => retiredPlayerIds.has(id)).map(nameOf);
 
   const byPlayer = new Map(cards.map((card) => [card.playerId, card]));
   const sendNow = saved.slots.flatMap((id) => (id ? [byPlayer.get(id)?.cardId ?? ""] : []));
   const savedCardIds = squad.map((row) => row.card_id);
   let lostSavedNotice: string | null = null;
   if (saved.lostPlayerIds.length > 0) {
-    const lost = saved.lostPlayerIds.map(nameOf);
-    const slotText =
-      saved.lostSlots.length === 1
-        ? `slot ${saved.lostSlots[0]} is`
-        : `slots ${joinNames(saved.lostSlots.map(String))} are`;
-    lostSavedNotice = `${joinNames(lost)} ${lost.length === 1 ? "isn't" : "aren't"} in your collection any more, so ${slotText} open. Save your five again, or a trialist plays there.`;
+    const clause = lostClause(gone(saved.lostPlayerIds), retired(saved.lostPlayerIds));
+    lostSavedNotice = `${clause}, so ${slotPhrase(saved.lostSlots)} open. Save your five again, or a trialist plays there.`;
   } else if (savedCardIds.length > 0 && sendNow.some((id) => !savedCardIds.includes(id))) {
     lostSavedNotice =
       "Your collection has changed since you saved, so a different copy of one of your Players would play now. Save your five again to make it count.";
@@ -210,7 +218,8 @@ export default async function MidweekPickPage() {
               lastWeek
                 ? {
                     slots: lastWeek.slots,
-                    lostNames: lastWeek.lostPlayerIds.map(nameOf),
+                    lostNames: gone(lastWeek.lostPlayerIds),
+                    retiredNames: retired(lastWeek.lostPlayerIds),
                     lostSlots: lastWeek.lostSlots,
                   }
                 : null
@@ -222,6 +231,36 @@ export default async function MidweekPickPage() {
             starterLead={starterNotice(cards.length, MIDWEEK.squadSize)}
             trialistOvr={MIDWEEK.trialist.ovr}
           />
+        )}
+        {retiredTiles.length > 0 && (
+          <Block
+            aside={<p className="text-small text-ink-dim">Can&rsquo;t be picked</p>}
+            title="Retired cards"
+          >
+            <ul className="grid">
+              {retiredTiles.map(({ card }) => (
+                <li
+                  className="grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-b border-line/40 py-2 opacity-70 last:border-b-0"
+                  key={card.player_id}
+                >
+                  <MidweekMiniCard
+                    injured={card.is_live && injuredPlayerIds.has(card.player_id)}
+                    ovr={card.ovr}
+                    rarityTier={card.rarity_tier}
+                    retired
+                  />
+                  <span className="grid min-w-0">
+                    <span className="truncate text-body font-semibold">{card.display_name}</span>
+                    <span className="truncate text-small text-ink-dim">
+                      Can&rsquo;t play Midweek
+                    </span>
+                  </span>
+                  <Tag tone="out">Retired</Tag>
+                </li>
+              ))}
+            </ul>
+            <InfoLink href="/how-it-works#retired">When a Player retires</InfoLink>
+          </Block>
         )}
       </div>
     </main>
@@ -256,6 +295,7 @@ async function LockedFive({
   let cards: (LiveCardPlayer | null)[] = [];
   let auto = false;
   let lost: string[] = [];
+  let retiredLost: string[] = [];
 
   if (current.status === "simulated") {
     const results = await loadWeekResults(supabase, current.tournament_id as string, new Date());
@@ -275,9 +315,8 @@ async function LockedFive({
       supabase
         .schema("kut")
         .from("my_collection_cards")
-        .select(
-          "card_id, player_id, is_live, display_name, archetype, ovr, pac, sho, pas, dri, def, phy, rarity_tier, photo_path",
-        )
+        // "*": the stage was appended by 20261024000000 (ADR-165).
+        .select("*")
         .in(
           "card_id",
           squad.map((row) => row.card_id),
@@ -286,12 +325,20 @@ async function LockedFive({
     ]);
     if (collection.error) throw new Error("Could not load your five.");
     const rows = (collection.data ?? []) as (OwnedCardRow & { card_id: string; ovr: number })[];
-    const byCard = new Map(rows.map((row) => [row.card_id, row]));
+    // The lock drops a Retired pick like a sold one (ADR-165): it is still
+    // owned, but no longer available for Midweek.
+    retiredLost = rows.filter(isRetiredRow).map((row) => row.display_name);
+    const byCard = new Map(
+      rows.filter((row) => !isRetiredRow(row)).map((row) => [row.card_id, row]),
+    );
     const photoUrls = await resolvePhotoUrls(
       supabase,
       rows.map((row) => row.photo_path),
     );
-    const missing = squad.filter((row) => !byCard.has(row.card_id)).map((row) => row.player_id);
+    const retiredCards = new Set(rows.filter(isRetiredRow).map((row) => row.card_id));
+    const missing = squad
+      .filter((row) => !byCard.has(row.card_id) && !retiredCards.has(row.card_id))
+      .map((row) => row.player_id);
     const names = await playerNames(supabase, missing);
     const kept = squad.flatMap((row) => {
       const card = byCard.get(row.card_id);
@@ -320,6 +367,14 @@ async function LockedFive({
               <p className="text-small text-ink-dim">
                 {joinNames(lost)} {lost.length === 1 ? "was" : "were"} no longer in your collection
                 at the lock, so a trialist took {lost.length === 1 ? "that slot" : "those slots"}.
+              </p>
+            )}
+            {retiredLost.length > 0 && (
+              <p className="text-small text-ink-dim">
+                {joinNames(retiredLost)} {retiredLost.length === 1 ? "was" : "were"} no longer
+                available for Midweek at the lock (Retired), so{" "}
+                {retiredLost.length === 1 ? "that slot was" : "those slots were"} filled after your
+                other picks.
               </p>
             )}
             <CardGrid>

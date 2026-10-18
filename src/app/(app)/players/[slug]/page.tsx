@@ -18,6 +18,8 @@ import { fetchInjuredPlayerIds } from "@/lib/injuries";
 import { toLiveCardPlayer } from "@/lib/live-card-player";
 import { resolvePhotoUrls } from "@/lib/player-photos";
 import { createClient } from "@/lib/supabase/server";
+import { StageBlock, TalentRoad } from "@/components/academy";
+import { fetchLifecycle } from "@/lib/academy";
 
 export const metadata = { title: "Player profile" };
 
@@ -35,6 +37,17 @@ type DirectoryRow = {
   def: number;
   phy: number;
   rarity_tier: LiveCardPlayer["rarityTier"];
+  // Appended by 20261024000000 (ADR-165); absent on an older schema.
+  lifecycle_stage?: string | null;
+};
+
+const TIER_LABEL: Record<LiveCardPlayer["rarityTier"], string> = {
+  common: "Common",
+  bronze: "Bronze",
+  silver: "Silver",
+  gold: "Gold",
+  holo: "Holo",
+  elite: "Elite",
 };
 
 type PlayerProfilePageProps = { params: Promise<{ slug: string }> };
@@ -44,19 +57,37 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
   const { slug } = await params;
   const supabase = await createClient();
 
+  // "*": views only gain columns (the stage, ADR-165).
   const { data, error } = await supabase
     .schema("kut")
     .from("player_directory")
-    .select(
-      "id, slug, display_name, archetype, photo_path, live_ovr, pac, sho, pas, dri, def, phy, rarity_tier",
-    )
+    .select("*")
     .eq("slug", slug)
     .maybeSingle();
 
   if (error) throw new Error("Could not load this player.");
-  if (!data) notFound();
+  if (!data) {
+    // A Talent has no card yet, so no directory row: their profile is the road
+    // to the First Team, members from go-live (ADR-165, #246 S1 A3).
+    const [talent] = await fetchLifecycle(supabase, { slug });
+    if (!talent || talent.lifecycle_stage !== "talent") notFound();
+    return (
+      <main className={PAGE}>
+        <section className={`${COLUMN} lg:max-w-5xl`}>
+          <PageHeader
+            title={talent.display_name}
+            back={{ href: "/players", label: "Players" }}
+            sub={`Talent · ${archetypeLabel(talent.archetype)} · ${talent.academy_visible ? "in the Academy" : "not in the Academy yet"}`}
+          />
+          <TalentRoad row={talent} tierLabel={TIER_LABEL[talent.rarity_tier]} />
+        </section>
+      </main>
+    );
+  }
 
   const player = data as DirectoryRow;
+  // At risk or Retired: a block above the attributes. Members from go-live.
+  const [lifecycle] = await fetchLifecycle(supabase, { playerId: player.id });
   const [photoUrls, seasonResponse, attendanceResponse, injuredPlayerIds] = await Promise.all([
     resolvePhotoUrls(supabase, [player.photo_path]),
     supabase.schema("kut").from("seasons").select("id").eq("is_active", true).maybeSingle(),
@@ -135,7 +166,7 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
         <PageHeader
           title={player.display_name}
           back={{ href: "/players", label: "Players" }}
-          sub={`${archetypeLabel(player.archetype)} · ${player.live_ovr} OVR · ${player.rarity_tier}`}
+          sub={`${archetypeLabel(player.archetype)} · ${player.live_ovr} OVR · ${player.rarity_tier}${player.lifecycle_stage === "retired" ? " · Retired" : ""}`}
         />
 
         <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[minmax(240px,330px)_minmax(0,1fr)] md:items-start sm:gap-8">
@@ -144,6 +175,7 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
           </div>
 
           <div className="min-w-0 space-y-6 sm:space-y-8">
+            <StageBlock row={lifecycle ?? null} />
             <Block title="Attributes">
               <AttributeBars player={player} />
             </Block>

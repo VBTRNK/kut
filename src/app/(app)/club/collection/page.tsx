@@ -19,6 +19,7 @@ import {
   type AlbumDirectoryPlayer,
 } from "@/lib/album";
 import { notFound } from "next/navigation";
+import { fetchLifecycle, firstTeamOnly, isRetiredRow, weekLabel } from "@/lib/academy";
 
 type CollectionCard = {
   card_id: string;
@@ -44,6 +45,8 @@ type CollectionCard = {
   active_listing_price: number | null;
   held_by_offer_id: string | null;
   photo_path: string | null;
+  // Appended by 20261024000000 (ADR-165): the Retired stamp.
+  player_stage?: string | null;
 };
 
 type CollectionPageProps = {
@@ -85,18 +88,11 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
       supabase
         .schema("kut")
         .from("my_collection_cards")
-        .select(
-          "card_id, edition_id, edition_title, edition_type, is_live, source, player_id, player_slug, display_name, archetype, ovr, pac, sho, pas, dri, def, phy, rarity_tier, discard_value, active_listing_id, held_by_offer_id, active_listing_price, photo_path",
-        )
+        // "*": views only gain columns (the stage, ADR-165).
+        .select("*")
         .order("ovr", { ascending: false })
         .order("display_name"),
-      supabase
-        .schema("kut")
-        .from("player_directory")
-        .select(
-          "id, slug, display_name, archetype, photo_path, live_ovr, pac, sho, pas, dri, def, phy, rarity_tier",
-        )
-        .order("display_name"),
+      supabase.schema("kut").from("player_directory").select("*").order("display_name"),
       supabase.schema("kut").from("profiles").select("player_id").eq("id", user.id).maybeSingle(),
       // Club Value moved onto this header when /club retired (ADR-053). Non-critical:
       // the page's own throw below stays reserved for the cards query.
@@ -113,7 +109,13 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
   // describe the whole collection, not the current filter) in one round trip.
   const all = (data ?? []) as CollectionCard[];
   const clubValue = clubValueResponse.data?.club_value ?? null;
-  const directory = (rosterResponse.data ?? []) as AlbumDirectoryPlayer[];
+  const everyone = (rosterResponse.data ?? []) as (AlbumDirectoryPlayer & {
+    lifecycle_stage?: string | null;
+  })[];
+  // Album completion counts the First Team; Retired copies get their own set
+  // after the last page (ADR-165, #246 S1 C4).
+  const directory = firstTeamOnly(everyone);
+  const retiredPlayers = everyone.filter(isRetiredRow);
   const ownPlayer = profileResponse.data?.player_id
     ? directory.find((player) => player.id === profileResponse.data?.player_id)
     : null;
@@ -128,6 +130,23 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
       live_ovr: card.ovr,
     })) as unknown as AlbumCollectionCard[];
     const roster = directory;
+    const retiredWeeks =
+      retiredPlayers.length > 0
+        ? new Map(
+            (await fetchLifecycle(supabase, { stage: "retired" })).map((row) => [
+              row.player_id,
+              row.retired_week,
+            ]),
+          )
+        : new Map<string, string | null>();
+    const retiredSet = retiredPlayers.map((player) => {
+      const week = retiredWeeks.get(player.id);
+      return {
+        player,
+        since: week ? weekLabel(week) : null,
+        copies: albumCards.filter((card) => card.player_id === player.id),
+      };
+    });
     const filteredSlots = applyLens(buildSlots(roster, albumCards), parseLens(query.lens));
     const albumTotal = paginate(filteredSlots, 1).total;
     if (page !== "all" && Number(page) > albumTotal) notFound();
@@ -144,7 +163,10 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
               ...(right <= albumTotal ? paginate(filteredSlots, right).slots : []),
             ];
           })();
-    const visiblePaths = visibleSlots.flatMap((slot) => slot.copies.map((card) => card.photo_path));
+    const visiblePaths = [
+      ...visibleSlots.flatMap((slot) => slot.copies.map((card) => card.photo_path)),
+      ...retiredSet.flatMap((entry) => entry.copies.slice(0, 1).map((card) => card.photo_path)),
+    ];
     const [photoUrls, injuredPlayerIds] = await Promise.all([
       resolvePhotoUrls(supabase, visiblePaths),
       fetchInjuredPlayerIds(supabase),
@@ -160,6 +182,7 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
             pageValue={page}
             injuredPlayerIds={injuredPlayerIds}
             photoUrls={photoUrls}
+            retiredSet={retiredSet}
             roster={roster}
           />
         </section>
@@ -190,7 +213,10 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
     ),
     fetchInjuredPlayerIds(supabase),
   ]);
-  const uniquePlayers = new Set(all.map((card) => card.player_id)).size;
+  const firstTeamIds = new Set(directory.map((player) => player.id));
+  const uniquePlayers = new Set(
+    all.filter((card) => firstTeamIds.has(card.player_id)).map((card) => card.player_id),
+  ).size;
   const totalPlayers = directory.length;
   const filtered = Boolean(term || rarity);
 

@@ -44,7 +44,7 @@ export default async function CorrectionPage({ params }: CorrectionPageProps) {
       supabase
         .schema("kut")
         .from("players")
-        .select("id, display_name, is_active")
+        .select("id, display_name, is_active, lifecycle_stage")
         .order("display_name"),
       supabase
         .schema("kut")

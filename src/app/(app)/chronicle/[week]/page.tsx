@@ -9,6 +9,7 @@ import { requireUser } from "@/lib/auth/user";
 import { formatChronicleDate, isMonday, issueStandfirst } from "@/lib/chronicle";
 import { finalizeDueSurveys } from "@/lib/session-reports/finalize-due-surveys";
 import { createClient } from "@/lib/supabase/server";
+import { ACADEMY, fetchLifecycleEvents, tierLabel } from "@/lib/academy";
 
 type Week = {
   week_start: string;
@@ -116,7 +117,7 @@ export default async function ChronicleIssuePage({
   if (!issue) notFound();
   const current = issue as Week;
 
-  const [sessionsResponse, crossingsResponse] = await Promise.all([
+  const [sessionsResponse, crossingsResponse, lifecycleEvents] = await Promise.all([
     supabase
       .schema("kut")
       .from("match_sessions")
@@ -130,7 +131,44 @@ export default async function ChronicleIssuePage({
       .from("chronicle_tier_changes")
       .select("player_id,slug,display_name,from_tier,to_tier,live_ovr")
       .eq("week_start", week),
+    // The roster (ADR-165): promotions, retirements and returns from go-live,
+    // with the card as it was at the event. At risk is not news. Empty on a
+    // failed read or before go-live.
+    fetchLifecycleEvents(supabase),
   ]);
+  const rosterRows = lifecycleEvents
+    .filter((event) => event.effective_week === week)
+    .map((event) => {
+      const comeback =
+        event.kind === "promotion" &&
+        lifecycleEvents.some(
+          (earlier) =>
+            earlier.kind === "retirement" &&
+            earlier.player_id === event.player_id &&
+            earlier.effective_week < event.effective_week,
+        );
+      const card = `${tierLabel(event.rarity_tier)} ${event.live_ovr}`;
+      return event.kind === "retirement"
+        ? {
+            event,
+            tag: { tone: "out" as const, text: "Retired" },
+            text: `${event.display_name} retires`,
+            meta: `${ACADEMY.retireWeeks} counted weeks without a game · ${card} · copies stay tradeable`,
+          }
+        : comeback
+          ? {
+              event,
+              tag: { tone: "won" as const, text: "Back" },
+              text: `${event.display_name} is back in the First Team`,
+              meta: `Out of retirement with the same card · ${card}`,
+            }
+          : {
+              event,
+              tag: { tone: "won" as const, text: "Promoted" },
+              text: `${event.display_name} joins the First Team`,
+              meta: `${event.reason === "admin" ? "Added to the First Team" : "From the Academy"} · ${card} · in packs`,
+            };
+    });
   if (sessionsResponse.error || crossingsResponse.error)
     throw new Error("Could not load the matchday reports.");
   const sessions = (sessionsResponse.data ?? []) as Session[];
@@ -362,6 +400,31 @@ export default async function ChronicleIssuePage({
             </Block>
           );
         })}
+
+        {rosterRows.length > 0 && (
+          <Block id="roster" title="The roster">
+            <ul className="grid">
+              {rosterRows.map((row) => (
+                <li
+                  className="grid grid-cols-[minmax(0,1fr)] gap-1 border-b border-line/40 py-2.5 last:border-b-0"
+                  key={row.event.id}
+                >
+                  <span className="flex flex-wrap items-center gap-2 text-body">
+                    <Tag tone={row.tag.tone}>{row.tag.text}</Tag>
+                    <Link
+                      prefetch={false}
+                      className="inline-flex min-h-11 min-w-0 items-center font-semibold hover:text-brass"
+                      href={`/players/${row.event.slug}`}
+                    >
+                      {row.text}
+                    </Link>
+                  </span>
+                  <span className="text-small text-ink-dim">{row.meta}</span>
+                </li>
+              ))}
+            </ul>
+          </Block>
+        )}
 
         {crossings.length > 0 && (
           <Block title="Crossings">

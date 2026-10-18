@@ -972,6 +972,57 @@ body {
   }
 }
 
+/* ===== RETIRED — the club's rubber stamp ===================================
+   A Retired Player's card (ADR-165, #246 S1 direction A) keeps its face, tier
+   and rating; its colours fade and a red "Retired" stamp sits in the band
+   under the shirt number, where the cast writes: never across a face or the
+   rating. The fade is a backdrop filter over the whole card, so the stamp
+   above it keeps its red. Current card surfaces only, never snapshots. */
+.live-card[data-retired] {
+  --stamp: #c4362c;
+}
+.live-card__retired-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  -webkit-backdrop-filter: saturate(0.4) brightness(0.9);
+  backdrop-filter: saturate(0.4) brightness(0.9);
+  pointer-events: none;
+}
+.live-card__stamp {
+  position: absolute;
+  top: 56.5%;
+  left: 50%;
+  z-index: 8;
+  display: grid;
+  justify-items: center;
+  padding: 1.2cqi 3.4cqi 1cqi;
+  border: 1.1cqi solid var(--stamp);
+  border-radius: 2.2cqi;
+  box-shadow: inset 0 0 0 1.2cqi var(--stamp);
+  color: var(--stamp);
+  background: rgb(244 239 227 / 8%);
+  transform: translate(-50%, -50%) rotate(-6deg);
+  pointer-events: none;
+  /* Uneven ink: a fixed speckle knocks out a little of the stamp. */
+  -webkit-mask-image:
+    radial-gradient(circle at 18% 30%, transparent 0.9cqi, #000 1cqi),
+    radial-gradient(circle at 71% 64%, transparent 0.7cqi, #000 0.8cqi);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(circle at 18% 30%, transparent 0.9cqi, #000 1cqi),
+    radial-gradient(circle at 71% 64%, transparent 0.7cqi, #000 0.8cqi);
+  mask-composite: intersect;
+}
+.live-card__stamp b {
+  font-family: var(--font-sans);
+  font-size: 8.6cqi;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 /* ---- no-photo card ------------------------------------------------------- */
 /* The shirt back: surname across the shoulders, live rating as the squad
    number. Drawn in the tier's own material, so it inherits the foil, the film

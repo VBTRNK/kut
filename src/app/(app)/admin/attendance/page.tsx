@@ -23,7 +23,8 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
     supabase
       .schema("kut")
       .from("players")
-      .select("id, display_name")
+      // Talents and Retired Players are listed too, with a word (ADR-165).
+      .select("id, display_name, lifecycle_stage")
       .eq("is_active", true)
       .order("display_name"),
     supabase

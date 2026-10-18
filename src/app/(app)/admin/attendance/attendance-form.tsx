@@ -1,15 +1,20 @@
 "use client";
 
-import { useActionState, useMemo, useRef, useState } from "react";
+import { useActionState, useMemo, useRef, useState, useTransition } from "react";
 import {
+  addTalentOnTheSpot,
   correctPublishedAttendanceSession,
   publishAttendanceSession,
   type PublishAttendanceState,
+  type SimilarPlayer,
 } from "./actions";
 import { sessionUsesMemberReports } from "@/game/session-reporting";
 import { countAttributive, countLabel, countNoun } from "@/game/reported-count";
 
-type Player = { id: string; display_name: string };
+// `lifecycle_stage`: Talents and Retired Players carry a word (ADR-165).
+type Player = { id: string; display_name: string; lifecycle_stage?: string | null };
+
+const STAGE_WORD: Record<string, string> = { talent: "Talent", retired: "Retired" };
 type CorrectionSession = {
   id: string;
   sessionDate: string;
@@ -24,13 +29,20 @@ const initialState: PublishAttendanceState = { error: null };
 
 export function AttendanceForm({
   correctionSession,
-  players,
+  players: listed,
   v2StartsWeek,
 }: {
   correctionSession?: CorrectionSession;
   players: Player[];
   v2StartsWeek?: string | null;
 }) {
+  // Talents added on the spot join the list, ticked. The server action's
+  // revalidation refreshes `listed` with them too, so each is kept once.
+  const [added, setAdded] = useState<Player[]>([]);
+  const players = useMemo(() => {
+    const ids = new Set(listed.map((player) => player.id));
+    return [...listed, ...added.filter((player) => !ids.has(player.id))];
+  }, [listed, added]);
   const isCorrection = Boolean(correctionSession);
   const isCancelledSession = correctionSession?.status === "cancelled";
   const [selected, setSelected] = useState<string[]>(
@@ -85,14 +97,6 @@ export function AttendanceForm({
       current.includes(playerId)
         ? current.filter((selectedPlayerId) => selectedPlayerId !== playerId)
         : [...current, playerId],
-    );
-  }
-
-  if (players.length === 0) {
-    return (
-      <p className="rounded-xl bg-panel p-4 text-ink-dim">
-        There are no active players to record yet.
-      </p>
     );
   }
 
@@ -189,16 +193,35 @@ export function AttendanceForm({
               return (
                 <button
                   aria-pressed={isSelected}
-                  className={`min-h-12 rounded-xl border px-4 py-3 text-left font-semibold ${isSelected ? "border-brass bg-brass text-ink-on-accent" : "border-line bg-panel text-ink"}`}
+                  className={`flex min-h-12 items-center justify-between gap-2 rounded-xl border px-4 py-3 text-left font-semibold ${isSelected ? "border-brass bg-brass text-ink-on-accent" : "border-line bg-panel text-ink"}`}
                   key={player.id}
                   onClick={() => togglePlayer(player.id)}
                   type="button"
                 >
-                  {player.display_name}
+                  <span className="truncate">{player.display_name}</span>
+                  {player.lifecycle_stage && STAGE_WORD[player.lifecycle_stage] && (
+                    <span
+                      className={`text-label font-semibold ${isSelected ? "text-ink-on-accent" : "text-ink-faint"}`}
+                    >
+                      {STAGE_WORD[player.lifecycle_stage]}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
+          <SpotTalent
+            onAdded={(player) => {
+              setAdded((current) => [...current, player]);
+              setSelected((current) => [...current, player.id]);
+            }}
+            onTick={(playerId) =>
+              setSelected((current) =>
+                current.includes(playerId) ? current : [...current, playerId],
+              )
+            }
+            players={players}
+          />
           <button
             className="min-h-12 w-full rounded-xl bg-brass px-4 py-3 font-semibold text-ink-on-accent disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-faint"
             disabled={selected.length === 0 || !sessionDate}
@@ -329,5 +352,101 @@ export function AttendanceForm({
         </section>
       )}
     </form>
+  );
+}
+
+/**
+ * "Not on the list?" (ADR-165, #246 S1 E2): add a Talent on the spot. A
+ * similar existing name is offered first; ticking them beats a duplicate.
+ */
+function SpotTalent({
+  players,
+  onAdded,
+  onTick,
+}: {
+  players: Player[];
+  onAdded: (player: Player) => void;
+  onTick: (playerId: string) => void;
+}) {
+  const [name, setName] = useState("");
+  const [similar, setSimilar] = useState<SimilarPlayer[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const listed = new Set(players.map((player) => player.id));
+
+  function add(allowSimilar: boolean) {
+    startTransition(async () => {
+      const result = await addTalentOnTheSpot(name, allowSimilar);
+      if (result.ok) {
+        onAdded({ ...result.player, lifecycle_stage: "talent" });
+        setName("");
+        setSimilar(null);
+        setError(null);
+      } else if (result.similar) {
+        setSimilar(result.similar);
+        setError(null);
+      } else {
+        setError(result.error);
+      }
+    });
+  }
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-line bg-panel p-4">
+      <label className="block space-y-2">
+        <span className="font-semibold">Not on the list? Add a Talent</span>
+        <input
+          className="min-h-12 w-full rounded-xl border border-line bg-board-deep/60 px-4"
+          maxLength={80}
+          onChange={(event) => {
+            setName(event.target.value);
+            setSimilar(null);
+          }}
+          placeholder="Display name"
+          value={name}
+        />
+        <span className="block text-small text-ink-dim">
+          They join the Academy as a Talent. A card comes with promotion.
+        </span>
+      </label>
+      {similar && (
+        <div className="space-y-3 rounded-xl border border-warning-line bg-warning-bg/55 p-3 text-small text-ink-dim">
+          {similar.map((match) => (
+            <div
+              className="flex flex-wrap items-center justify-between gap-2"
+              key={match.player_id}
+            >
+              <span>
+                <b className="text-warning">Is this {match.display_name}?</b>{" "}
+                {STAGE_WORD[match.lifecycle_stage] ?? "First Team"}
+                {match.is_active ? "" : ", inactive: reactivate them on the roster"}.
+              </span>
+              {listed.has(match.player_id) && (
+                <button
+                  className="min-h-11 rounded-lg border border-line px-3 font-semibold text-ink"
+                  onClick={() => {
+                    onTick(match.player_id);
+                    setName("");
+                    setSimilar(null);
+                  }}
+                  type="button"
+                >
+                  Tick {match.display_name}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {error && <p className="rounded-xl bg-brick-bg p-3 text-small text-brick">{error}</p>}
+      <button
+        className="min-h-12 rounded-xl border border-line bg-panel-2 px-4 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+        disabled={isPending || name.trim().length === 0}
+        onClick={() => add(Boolean(similar))}
+        type="button"
+      >
+        {isPending ? "Adding…" : similar ? `Add ${name.trim()} as new` : "Add Talent"}
+      </button>
+    </div>
   );
 }

@@ -8,8 +8,17 @@ import type { LiveCardPlayer } from "@/components/live-card";
  * cast's signatures hash it.
  */
 
+/**
+ * The Player's stage on a current card view (ADR-165): `player_directory`
+ * carries `lifecycle_stage`, `my_collection_cards` and `active_market_listings`
+ * carry `player_stage`. Snapshot views (pack results, locked Midweek entries)
+ * carry neither, so their cards never get the Retired stamp. Both are absent
+ * on a schema older than `20261024000000`.
+ */
+type StageColumns = { lifecycle_stage?: string | null; player_stage?: string | null };
+
 /** The columns every card view carries for the card face. */
-export type CardFaceRow = {
+export type CardFaceRow = StageColumns & {
   display_name: string;
   archetype: string;
   photo_path: string | null;
@@ -55,6 +64,7 @@ function cardFace(row: CardFaceRow, ovr: number, photoUrls: ReadonlyMap<string, 
     phy: row.phy,
     rarityTier: row.rarity_tier,
     photoUrl: row.photo_path ? (photoUrls.get(row.photo_path) ?? null) : null,
+    retired: (row.player_stage ?? row.lifecycle_stage) === "retired",
   };
 }
 
