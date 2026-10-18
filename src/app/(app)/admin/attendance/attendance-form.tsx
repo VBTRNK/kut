@@ -36,9 +36,13 @@ export function AttendanceForm({
   players: Player[];
   v2StartsWeek?: string | null;
 }) {
-  // Talents added on the spot join the list, ticked.
+  // Talents added on the spot join the list, ticked. The server action's
+  // revalidation refreshes `listed` with them too, so each is kept once.
   const [added, setAdded] = useState<Player[]>([]);
-  const players = useMemo(() => [...listed, ...added], [listed, added]);
+  const players = useMemo(() => {
+    const ids = new Set(listed.map((player) => player.id));
+    return [...listed, ...added.filter((player) => !ids.has(player.id))];
+  }, [listed, added]);
   const isCorrection = Boolean(correctionSession);
   const isCancelledSession = correctionSession?.status === "cancelled";
   const [selected, setSelected] = useState<string[]>(
