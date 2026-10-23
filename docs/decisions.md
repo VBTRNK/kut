@@ -271,7 +271,7 @@ Rules: [#246 comment](https://github.com/VibeTrunk/kut/issues/246#issuecomment-6
 - Go-live is activation; absence counts from it. Existing Players become
   founding First Team in the migration. Named trialists are names only,
   frozen at the lock.
-- Part L 29-31 in `docs/INVARIANTS.md` (S2): (1) promotion is
+- Part L 29-31 in `docs/INVARIANTS.md`: (1) promotion is
   server-authoritative, from published attendance plus audited credits or an
   audited admin promotion, permanent, and re-evaluation never duplicates
   events or messages; (2) a lifecycle change never mints, burns, moves or
