@@ -287,7 +287,7 @@ export function simulateTournament(
   const sides = new Map(entries.map((entry) => [entry.userId, toMatchSide(entry)]));
   const bracket = drawBracket(
     rng,
-    entries.map((entry) => entry.userId),
+    entries.map(({ userId, auto }) => ({ userId, auto })),
   );
   const pays = roundPayouts(bracket.rounds, cfg);
 

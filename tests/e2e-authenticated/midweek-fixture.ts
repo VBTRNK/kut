@@ -21,8 +21,9 @@ import {
  * PR 8 adds a completed week, `COMPLETED_WEEK`, played by release_member and
  * four fixture members (and any member already on the stack who owns a card,
  * since the worker enters everyone). Five entrants make 8 slots, so round 1
- * mixes byes with matches, which the bracket tree check needs (KB-031). It is
- * seeded as
+ * mixes byes with matches, which the bracket tree check needs (KB-031).
+ * release_member's is the only saved squad, so it takes one of the byes
+ * (ADR-166) and plays from the semi-finals. It is seeded as
  * `tests/integration/midweek-race.test.ts` seeds one: a published session in
  * the football week before it for the club-break gate, the tournament
  * inserted open with its lock ahead, release_member's five saved, the lock
@@ -312,9 +313,30 @@ async function seedCompletedWeek(database: Client, memberId: string) {
       "select status from kut.midweek_tournaments where id = $1",
       [tournamentId],
     );
-    if (status.rows[0].status === "complete") return;
+    if (status.rows[0].status === "complete")
+      return assertSavedBye(database, tournamentId, memberId);
   }
   throw new Error("The completed Midweek fixture week did not complete.");
+}
+
+/**
+ * ADR-166: release_member's is the only saved squad, so they hold a round-1
+ * bye and then play at least one match. The results tests cover both paths
+ * through this week, so a field that breaks either fails here.
+ */
+async function assertSavedBye(database: Client, tournamentId: string, memberId: string) {
+  const path = await database.query<{ byes: number; played: number }>(
+    `select count(*) filter (where round = 1 and bye)::int as byes, count(*) filter (where not bye)::int as played
+     from kut.midweek_matches
+     where tournament_id = $1 and $2 in (side_0_user_id, side_1_user_id)`,
+    [tournamentId, memberId],
+  );
+  const { byes, played } = path.rows[0];
+  if (byes !== 1 || played < 1) {
+    throw new Error(
+      `The completed Midweek fixture week needs release_member on a round-1 bye and then a match; got ${byes} bye(s) and ${played} match(es).`,
+    );
+  }
 }
 
 /**

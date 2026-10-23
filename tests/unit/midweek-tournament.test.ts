@@ -1,9 +1,11 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Archetype } from "@/game/archetypes";
 import { MIDWEEK } from "@/game/midweek/config";
-import { bracketShape, drawBracket } from "@/game/midweek/bracket";
+import { bracketShape, drawBracket, type Bracket, type DrawEntrant } from "@/game/midweek/bracket";
 import { roundPayouts } from "@/game/midweek/rewards";
-import { shaRng } from "@/game/midweek/rng";
+import { shaRng, shuffle } from "@/game/midweek/rng";
 import {
   autoSquad,
   buildField,
@@ -21,6 +23,42 @@ function card(player: number, ovr = 50, archetype: Archetype = "all_rounder"): E
   return { cardId: `c${nextCard}`, playerId: `p${player}`, ovr, archetype, injured: false };
 }
 
+/** Draw entrants u00, u01, ... in ID order; the listed indexes are saved. */
+function mixed(size: number, saved: readonly number[]): DrawEntrant[] {
+  return Array.from({ length: size }, (_, i) => ({
+    userId: `u${String(i).padStart(2, "0")}`,
+    auto: !saved.includes(i),
+  }));
+}
+
+/** Which pairings are byes, who holds them and who plays, in pairing order. */
+function layout(bracket: Bracket) {
+  return {
+    byePairings: bracket.pairings.flatMap(([, second], i) => (second === null ? [i] : [])),
+    holders: bracket.pairings.flatMap(([first, second]) => (second === null ? [first] : [])),
+    players: bracket.pairings.flatMap(([first, second]) =>
+      second === null ? [] : [first, second],
+    ),
+  };
+}
+
+/** The ADR-166 procedure spelled out from the two tagged shuffles. */
+function procedure(n: number, entrants: DrawEntrant[]) {
+  const { size } = bracketShape(entrants.length);
+  const byeCount = size - entrants.length;
+  const pairings = Array.from({ length: size / 2 }, (_, i) => i);
+  const pairingOrder = shuffle(shaRng(seed(n)), "bracket:bye", pairings);
+  const seat = shuffle(shaRng(seed(n)), "bracket:seat", entrants);
+  const holders = [...seat.filter((e) => !e.auto), ...seat.filter((e) => e.auto)]
+    .slice(0, byeCount)
+    .map((e) => e.userId);
+  return {
+    byePairings: pairingOrder.slice(0, byeCount).sort((a, b) => a - b),
+    holders,
+    players: seat.map((e) => e.userId).filter((id) => !holders.includes(id)),
+  };
+}
+
 function field(size: number, picked = true): EntrantInput[] {
   return Array.from({ length: size }, (_, i) => {
     const owned = [card(i), card(i + 1, 60), card(i + 2, 40, "goalkeeper")];
@@ -36,18 +74,121 @@ describe("midweek bracket", () => {
     expect(() => bracketShape(1)).toThrow();
   });
 
-  it("seats every entrant once and draws the byes at random", () => {
-    const ids = Array.from({ length: 11 }, (_, i) => `u${i}`);
+  it("seats every entrant once and draws the bye pairings at random", () => {
+    const entrants = mixed(11, [1, 4, 6]);
     const placements = new Set<string>();
     for (let n = 0; n < 50; n += 1) {
-      const bracket = drawBracket(shaRng(seed(n)), ids);
+      const bracket = drawBracket(shaRng(seed(n)), entrants);
       const seated = bracket.pairings.flat().filter((id): id is string => id !== null);
-      expect([...seated].sort()).toEqual([...ids].sort());
+      expect([...seated].sort()).toEqual(entrants.map((e) => e.userId));
       const byes = bracket.pairings.flatMap(([, second], i) => (second === null ? [i] : []));
       expect(byes).toHaveLength(16 - 11);
       placements.add(byes.join(","));
     }
     expect(placements.size).toBeGreaterThan(10);
+  });
+
+  // ADR-166, checked by hand from the two literal shuffles. The same field is
+  // the golden tournament "saved squads get the byes first", so the SQL parity
+  // test pins this layout too.
+  it("gives saved squads the byes first: a hand-checked draw", () => {
+    const [u901, u905, u904, u903, u902] = [
+      "26d30fc6-afd8-4138-8be7-19a7e9fcec3b",
+      "55043d58-c392-4ed1-853a-5a8502357377",
+      "77649d8e-57ce-46d6-8b65-dffa9ae333ed",
+      "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7",
+      "bf8397d2-965a-432b-82ff-369fbd0478e2",
+    ];
+    const golden = JSON.parse(
+      readFileSync(path.resolve(import.meta.dirname, "../fixtures/midweek-golden.json"), "utf8"),
+    ) as {
+      tournaments: Array<{
+        name: string;
+        seed: string;
+        entrants: EntrantInput[];
+        result: SimulatedTournament;
+      }>;
+    };
+    const hand = golden.tournaments.find((t) => t.name === "saved squads get the byes first")!;
+    expect(hand.seed).toBe("6d9a21927ae2b37ee2929d6e4d03086ff86231c0db572c6675d8020b17e78450");
+    // Canonical ID order is 901, 905, 904, 903, 902. Only 903 and 905 saved,
+    // 905 a single card.
+    expect(hand.entrants.map((e) => [e.userId, e.saved.length])).toEqual([
+      [u901, 0],
+      [u902, 0],
+      [u903, 5],
+      [u904, 0],
+      [u905, 1],
+    ]);
+
+    // Pairings 0, 2 and 1 hold the byes; the seat order is 902, 904, 901, 903, 905.
+    expect(shuffle(shaRng(hand.seed), "bracket:bye", [0, 1, 2, 3])).toEqual([0, 2, 1, 3]);
+    expect(shuffle(shaRng(hand.seed), "bracket:seat", [0, 1, 2, 3, 4])).toEqual([4, 2, 0, 3, 1]);
+
+    // Bye queue: saved 903, 905 in seat order, then the first auto, 902.
+    // Match queue: 904, 901. The old draw gave 902, 904 and 901 the byes and
+    // made 903 play 905.
+    const ordered: DrawEntrant[] = [u901, u905, u904, u903, u902].map((userId) => ({
+      userId,
+      auto: userId !== u903 && userId !== u905,
+    }));
+    expect(drawBracket(shaRng(hand.seed), ordered).pairings).toEqual([
+      [u903, null],
+      [u905, null],
+      [u902, null],
+      [u904, u901],
+    ]);
+
+    for (const result of [
+      simulateTournament(shaRng(hand.seed), hand.entrants) as SimulatedTournament,
+      hand.result,
+    ]) {
+      expect(result.byes).toEqual([
+        { pairing: 0, userId: u903 },
+        { pairing: 1, userId: u905 },
+        { pairing: 2, userId: u902 },
+      ]);
+      expect(result.matches.filter((m) => m.round === 1)).toMatchObject([
+        { pairing: 3, userIds: [u904, u901] },
+      ]);
+    }
+  });
+
+  it("follows the draw procedure at every edge", () => {
+    const cases: Array<[string, DrawEntrant[], number]> = [
+      ["no byes", mixed(8, [0, 3, 5]), 0],
+      ["no saved squad", mixed(6, []), 2],
+      ["every squad saved", mixed(6, [0, 1, 2, 3, 4, 5]), 2],
+      ["as many byes as saved squads", mixed(6, [1, 4]), 2],
+      ["more byes than saved squads", mixed(5, [3]), 3],
+      ["fewer byes than saved squads", mixed(6, [0, 2, 3, 5]), 2],
+      ["a lone saved squad among 22", mixed(22, [21]), 10],
+    ];
+    for (const [name, entrants, byeCount] of cases) {
+      for (let n = 0; n < 20; n += 1) {
+        const expected = procedure(n, entrants);
+        expect(layout(drawBracket(shaRng(seed(n)), entrants)), `${name}, seed ${n}`).toEqual(
+          expected,
+        );
+        expect(expected.holders).toHaveLength(byeCount);
+      }
+    }
+  });
+
+  it("never gives an auto squad a bye while a saved squad plays", () => {
+    for (let n = 0; n < 300; n += 1) {
+      const rng = shaRng(seed(10_000 + n));
+      const size = 4 + (rng("size") % 19);
+      const entrants = mixed(
+        size,
+        Array.from({ length: size }, (_, i) => i).filter((i) => rng(`saved:${i}`) % 3 !== 0),
+      );
+      const { holders } = layout(drawBracket(rng, entrants));
+      const saved = entrants.filter((e) => !e.auto).map((e) => e.userId);
+      const autoBye = entrants.some((e) => e.auto && holders.includes(e.userId));
+      if (autoBye) expect(saved.every((id) => holders.includes(id))).toBe(true);
+      expect(holders).toHaveLength(bracketShape(size).size - size);
+    }
   });
 });
 
@@ -60,7 +201,7 @@ describe("midweek tournament", () => {
   });
 
   it("is a pure function of the entrants and the seed, whatever their order", () => {
-    const entrants = field(7);
+    const entrants = field(7).map((e, i) => (i % 2 === 0 ? { ...e, saved: [] } : e));
     const a = simulateTournament(shaRng(seed(2)), entrants);
     expect(simulateTournament(shaRng(seed(2)), [...entrants].reverse())).toEqual(a);
     expect(simulateTournament(shaRng(seed(3)), entrants)).not.toEqual(a);
@@ -88,6 +229,16 @@ describe("midweek tournament", () => {
       }
       expect(Math.max(...perRound.values())).toBe(1);
       expect(result.matches).toHaveLength(size - 1);
+    }
+  });
+
+  it("counts a squad with one surviving saved card as saved for the byes", () => {
+    const entrants = field(5, false);
+    entrants[3] = { ...entrants[3], saved: entrants[3].owned.slice(0, 1) };
+    for (let n = 0; n < 20; n += 1) {
+      const result = simulateTournament(shaRng(seed(n)), entrants) as SimulatedTournament;
+      expect(result.entries.find((e) => e.userId === "u03")!.auto).toBe(false);
+      expect(result.byes.map((b) => b.userId)).toContain("u03");
     }
   });
 

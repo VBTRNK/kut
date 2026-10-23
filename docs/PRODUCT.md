@@ -239,17 +239,18 @@ Ground rules for every area:
 
 **Behaviour.**
 - **The week.** Every football week, members' five-card squads play a seeded
-  knockout on Wednesday evening (BUILD_SPEC §44, the canonical rules).
+  knockout on Wednesday evening (BUILD_SPEC §44; byes ADR-166).
   - The lock is **19:55 Europe/Amsterdam**. Round *r* starts at
     lock + 5 + 15(*r*−1) minutes.
   - A match is 14 chance slots of 20 s, then a shoot-out if needed.
   - Each week keeps the clock version it opened with (ADR-104).
 - **Who plays.**
   - Every active member who owns a card and hasn't opted out is entered.
-    Non-pickers get a random **auto squad** at a 0.55 handicap.
+    Non-pickers get a random **auto squad** at a 0.55 handicap, and a bye only
+    once every saved squad has one (one surviving saved card counts).
   - Empty slots get **trialists**, named after Talents (ADR-165).
-  - The week is skipped with fewer than 4 entrants, or when the previous week
-    had no published session.
+  - The week is skipped below 4 entrants or after a week without a published
+    session.
 - **Squads.** One Player per slot. Power is the OVR factor (1.00–1.12) × form
   roll × pick factor × fitness × handicap, and a fresh day roll every match.
 - **Shape** (ADR-116):
@@ -257,13 +258,12 @@ Ground rules for every area:
   - each plus short of 3 in an outfield line multiplies the squad by 0.88;
   - one card plays in goal.
 - **Archetypes for the week.** They are frozen when the week opens (ADR-099).
-  Unclaimed Players draw a new archetype each week from the week's seed
-  (ADR-110).
+  Unclaimed Players draw a new one each week from its seed (ADR-110).
 - **Rewards.**
   - Wins pay by round, summing to **250** for the champion (ADR-096), paid
-    lazily after the final in the transaction that completes the week.
+    lazily as the week completes.
   - Members who are already out may **call** the winners of later matches, on
-    the Calls page or the match's pre-match. Correct calls pay 30 divided by the
+    the Calls page or the pre-match. Correct calls pay 30 divided by the
     matches after round 1, at most 30 a night (ADR-118, ADR-149).
   - Every entrant gets one `midweek_result` message (ADR-109).
 - **After the night.**

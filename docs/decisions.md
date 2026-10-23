@@ -279,3 +279,21 @@ Rules: [#246 comment](https://github.com/VibeTrunk/kut/issues/246#issuecomment-6
   entry (promotion may create an edition, never a copy); (3) the server caps
   credits at 2, and they never create attendance, rating input, rewards or
   Chronicle entries.
+
+## ADR-166 — Midweek byes go to saved squads first
+
+Date: 2026-10-24 (#314). Supersedes BUILD_SPEC §44.6's bye rule (one shuffle
+seated everyone). Migration `20261026000000`.
+
+- A bye pays like a win, so it rewards saving a squad. Saved squads take the
+  byes first; auto squads get a bye only once every saved squad has one. A
+  squad with at least one saved card surviving the lock checks counts as saved.
+- The draw, in both twins: entrants in ID order; the first B of the
+  `bracket:bye` shuffle are the bye pairings; the `bracket:seat` shuffle is
+  the seat order; the bye queue is the first B of [saved, then auto], each in
+  seat order; the match queue the seat order without them. Pairings 0..P-1 in
+  turn take the next bye holder, or the next two of the match queue.
+- Random within each group, no new draws. Not a goal: steering leftover saved
+  squads towards auto opponents.
+- Stored weeks keep their bracket; a week first simulated after the push uses
+  the rule, an overdue open week included. Golden vectors regenerated (ADR-090).
