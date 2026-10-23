@@ -247,7 +247,7 @@ Ground rules for every area:
 - **Who plays.**
   - Every active member who owns a card and hasn't opted out is entered.
     Non-pickers get a random **auto squad** at a 0.55 handicap.
-  - Empty slots get **trialists**.
+  - Empty slots get **trialists**, named after Talents (ADR-165).
   - The week is skipped with fewer than 4 entrants, or when the previous week
     had no published session.
 - **Squads.** One Player per slot. Power is the OVR factor (1.00–1.12) × form
@@ -299,7 +299,7 @@ Ground rules for every area:
 - **Reveals:** time-gated `midweek_*_public` views (§44.9). Nothing is revealed
   by a job.
 - **Names (ADR-151):** clubs (`*_club`, ADR-145) where the team plays or wins;
-  account names (`*_name`) where the member acts, and for trialists.
+  account names (`*_name`) where the member acts, and unnamed trialists.
   `clubName`/`sideClub` (`rows.ts`) fall back to the account.
 - **Lazy trigger:** `src/lib/midweek/run-due.ts`, called from Home and every
   Midweek page.
@@ -359,18 +359,18 @@ running Wednesday evening.
 - Stages: **Talent** (no Live card) → **First Team** → **Retired**. At risk is
   a warning, not a stage. Every Player keeps a profile.
 - **Progress** = counted weeks played in the last 8 + active credits (≤2,
-  admin-given with a reason, expiring after 8 counted weeks). The Academy on
+  with a reason, expiring after 8 counted weeks). The Academy on
   Players shows progress ≥2; ≥3 with a real week promotes, permanently.
 - **First Team:** 8 counted weeks absent warns (At risk tag, profile and card
   block, owners' message); 12 retires. Injury weeks don't count; a game resets
-  it. Retirement is recomputed; a comeback needs a new promotion.
+  it. Retirement is recomputed; a comeback needs re-promotion.
 - **Retired:** copies stay owned and tradeable; no new copies (packs, starter,
   reset, rotation: `can_mint_copies`); no Midweek (lock, save, picker); a stamp
   on current cards, never snapshots; out of ratings, risers and album
   completion, into a Retired set and `/players/retired`.
 - Promotion week: Home "New:" tile, Packs inset, Chronicle roster block.
 - Admin: Add a Player (Talent with 0–2 credits, or First Team; similar names
-  offered first), Stage and Clock columns, Credit, Promote / Bring back;
+  first), Stage and Clock columns, Credit, Promote / Bring back;
   attendance marks Talents and adds one on the spot.
 
 **Part L:** 27, 29, 30, 31.

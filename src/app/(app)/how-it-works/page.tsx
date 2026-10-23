@@ -573,6 +573,8 @@ export default async function HowItWorksPage() {
               handicapped. It rarely gets far; picking is always better. Empty slots are filled by{" "}
               <strong className="text-ink">trialists</strong>: Common All-rounders at OVR{" "}
               {MIDWEEK.trialist.ovr}, handicapped so a real card always beats one.
+              {academyLive &&
+                " Trialists borrow the names of Talents in the Academy, but they play exactly the same."}
             </p>
           </Question>
           {academyLive && (
@@ -798,8 +800,8 @@ export default async function HowItWorksPage() {
               </Link>
               , wherever your team plays, wins or goes through: the bracket, the match pages, the
               results and the images. Your own name stays where you act: your night, your calls and
-              the picker. A trialist is still named after you. Renaming your club renames it on past
-              weeks too.
+              the picker. A trialist without a Talent&rsquo;s name is still named after you.
+              Renaming your club renames it on past weeks too.
             </p>
             <p>
               After the final, Your night can make two images for the club&rsquo;s group chat: the

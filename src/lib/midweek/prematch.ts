@@ -84,8 +84,8 @@ const ORDINALS = ["first", "second", "third", "fourth", "fifth"];
 /**
  * One side's five as the pre-match shows it, or null when the member has no
  * entry or the view hasn't released the week's Power yet (before round 1's
- * kick-off). Trialists are named as the report names them: the account's,
- * numbered when there is more than one (DR4-12).
+ * kick-off). Trialists are named as the report names them: after a Talent
+ * (ADR-165), or else the account's, numbered when there is more than one (DR4-12).
  */
 export function preMatchSide(entries: readonly EntryCardRow[], userId: string): PreSide | null {
   const rows = entries.filter((row) => row.user_id === userId).sort((a, b) => a.slot - b.slot);
@@ -95,12 +95,13 @@ export function preMatchSide(entries: readonly EntryCardRow[], userId: string): 
     isArchetype(row.archetype) ? row.archetype : "all_rounder",
   );
   const { lines, short, balancePpm } = squadBalance(archetypes, first.keeper_slot);
-  const trialists = rows.filter((row) => row.trialist || row.player_name === null).length;
+  const isTrialist = (row: EntryCardRow) => row.trialist || row.player_name === null;
+  const trialists = rows.filter((row) => isTrialist(row) && !row.trialist_name).length;
   let seen = 0;
   const cards = rows.map((row): PreCard => {
-    const trialist = row.trialist || row.player_name === null;
-    let name = row.player_name ?? "";
-    if (trialist) {
+    const trialist = isTrialist(row);
+    let name = (trialist ? row.trialist_name : row.player_name) ?? "";
+    if (trialist && !name) {
       name = `${first.manager_name}'s ${trialists > 1 ? `${ORDINALS[seen]} ` : ""}trialist`;
       seen += 1;
     }

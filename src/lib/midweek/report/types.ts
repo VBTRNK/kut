@@ -7,7 +7,7 @@ import type { MatchOutcome, Side } from "@/game/midweek/match";
  * from the stored entries; the renderer never reads the database.
  */
 export type ReportCard = {
-  /** Display name; null for a trialist. */
+  /** Display name: a trialist's is the Talent it was named after (ADR-165), or null. */
   name: string | null;
   trialist: boolean;
   injured: boolean;
@@ -26,7 +26,7 @@ export type ReportCard = {
 };
 
 export type ReportSide = {
-  /** The manager: the entrant's display name. A trialist is named after it (DR4-12). */
+  /** The manager: the entrant's display name. An unnamed trialist is named after it (DR4-12). */
   manager: string;
   /** The entrant's club (ADR-145), which the text uses for the team. */
   club: string;

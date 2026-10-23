@@ -408,6 +408,23 @@ describe("the evening from the lock (ADR-113)", () => {
       ],
     });
     expect(fiveOf([], "u")).toBeNull();
+    // A trialist named after a Talent at the lock (ADR-165) keeps its trialist line.
+    expect(
+      fiveOf(
+        [
+          card(0, {
+            trialist: true,
+            player_id: null,
+            player_name: null,
+            ovr: 30,
+            trialist_name: "Fenna L.",
+          }),
+        ],
+        "u",
+      )?.cards,
+    ).toEqual([
+      { slot: 0, name: "Fenna L.", detail: "Common All-rounder · 30 · trialist", mini: null },
+    ]);
   });
 
   it("lists past weeks newest first, with the member's finish or why nothing was played", () => {
