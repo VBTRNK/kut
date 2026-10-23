@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { MidweekNotice } from "@/components/midweek/bits";
+import { MIDWEEK } from "@/game/midweek/config";
 import { Block, Inset, Stat } from "@/components/ui/block";
 import { InfoLink, LinkRow } from "@/components/ui/links";
 import { Figure, Tag } from "@/components/ui/tag";
@@ -176,16 +177,24 @@ export function TalentRoad({ row, tierLabel }: { row: LifecycleRow; tierLabel: s
         <WeekStrip weeks={weekStrip(row)} />
         <InfoLink href={HOW_ACADEMY}>How the Academy works</InfoLink>
       </Block>
-      <Block title="Rating">
-        <dl className="grid grid-cols-2 gap-3">
-          <Stat label="OVR now" note={tierLabel} value={row.live_ovr} />
-          <Stat label="In packs" note="After promotion" value="No" />
-        </dl>
-        <p className="text-small text-ink-dim">
-          Their rating builds from their first game, so a promoted Talent&rsquo;s card starts where
-          this one is.
-        </p>
-      </Block>
+      <div className="grid min-w-0 gap-6">
+        <Block title="Rating">
+          <dl className="grid grid-cols-2 gap-3">
+            <Stat label="OVR now" note={tierLabel} value={row.live_ovr} />
+            <Stat label="In packs" note="After promotion" value="No" />
+          </dl>
+          <p className="text-small text-ink-dim">
+            Their rating builds from their first game, so a promoted Talent&rsquo;s card starts
+            where this one is.
+          </p>
+        </Block>
+        <Block title="Midweek">
+          <p className="text-body text-ink-dim">
+            Talents in the Academy fill Midweek&rsquo;s trialist slots by name. They play at OVR{" "}
+            {MIDWEEK.trialist.ovr}, like any trialist.
+          </p>
+        </Block>
+      </div>
     </div>
   );
 }

@@ -42,6 +42,49 @@ describe("midweek report from stored rows", () => {
     }
   });
 
+  it("names a trialist after its stored Talent and changes nothing else (ADR-165)", () => {
+    let named = 0;
+    for (const { name, seedHash, result } of simulated) {
+      const entries = entryRows(result, true);
+      const withNames = entries.map((row) =>
+        row.trialist
+          ? { ...row, trialist_name: `Talent ${row.user_id.slice(0, 4)} ${row.slot}` }
+          : row,
+      );
+      for (const match of result.matches) {
+        const build = (rows: typeof entries) =>
+          reportInputFromRows({
+            seedHash,
+            rounds: result.rounds,
+            match: matchRow(match),
+            events: eventRows(match),
+            entries: rows,
+            ownersPublished: true,
+          })!;
+        const plain = build(entries);
+        const input = build(withNames);
+        input.sides.forEach((side, s) =>
+          side.cards.forEach((card, slot) => {
+            const before = plain.sides[s].cards[slot];
+            if (!card.trialist) return expect(card, name).toEqual(before);
+            named += 1;
+            expect(card.name, name).toMatch(/^Talent /);
+            expect({ ...card, name: null }, name).toEqual(before);
+          }),
+        );
+        const why = renderMatchReport(input).why;
+        why.forEach((side, s) =>
+          side.cards.forEach((card, slot) => {
+            if (!card.trialist) return;
+            expect(card.name).toContain(input.sides[s].cards[slot].name as string);
+            expect(card.pickLabel).toBeNull();
+          }),
+        );
+      }
+    }
+    expect(named).toBeGreaterThan(0);
+  });
+
   it("has no report for a bye", () => {
     const { seedHash, result } = simulated.find((t) => t.result.byes.length > 0)!;
     const bye = result.byes[0];

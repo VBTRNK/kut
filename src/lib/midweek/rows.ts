@@ -155,6 +155,12 @@ export type EntryCardRow = {
    * the rule, and absent until the migration that adds it is on the database.
    */
   balance_ppm?: number | null;
+  /**
+   * The visible Talent a trialist was named after at the lock (ADR-165). Null
+   * for a card and an anonymous trialist, and absent until the migration that
+   * adds it is on the database; pages then say "<manager>'s trialist".
+   */
+  trialist_name?: string | null;
 };
 
 /** A `kut.midweek_pick_shares_public` row, for a complete week. */

@@ -817,8 +817,8 @@ export function fiveOf(entries: readonly EntryCardRow[], userId: string): FiveVi
       if (row.trialist || row.player_name === null) {
         return {
           slot: row.slot,
-          name: "Trialist",
-          detail: `Common ${archetypeLabel(row.archetype)} · ${row.ovr}${inGoal}`,
+          name: row.trialist_name || "Trialist",
+          detail: `Common ${archetypeLabel(row.archetype)} · ${row.ovr}${inGoal}${row.trialist_name ? " · trialist" : ""}`,
           mini: null,
         };
       }

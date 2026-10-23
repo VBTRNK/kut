@@ -214,6 +214,17 @@ describe("a five before kick-off (Q2, DR4-7)", () => {
     expect(side.cards.map((c) => c.name)).toContain("Sanne's trialist");
   });
 
+  it("names a trialist after its Talent, numbering only the anonymous ones (ADR-165)", () => {
+    const named = five.map((row) =>
+      row.user_id === "N" && row.slot === 3 ? { ...row, trialist_name: "Fenna L." } : row,
+    );
+    const side = preMatchSide(named, "N")!;
+    expect(side.cards.slice(3).map((c) => [c.name, c.trialist, c.ovr])).toEqual([
+      ["Fenna L.", true, 30],
+      ["Niels's trialist", true, 30],
+    ]);
+  });
+
   it("is null before the week's Power is out, or for someone not entered", () => {
     expect(preMatchSide([card(0, { power_ppm: null }), card(1)], "N")).toBeNull();
     expect(preMatchSide(five, "nobody")).toBeNull();
