@@ -21,7 +21,7 @@ coupling to `VibeTrunk/home` beyond the shared Supabase project.
   or `market_listings`.
 - A deliberate learning project in production-grade practice: clear structure,
   decisions recorded in markdown.
-- Latest hosted migration: `20261025000000_midweek_named_trialists.sql` (ADR-165).
+- Latest hosted migration: `20261026000000_midweek_saved_byes.sql` (ADR-166).
   The `VibeTrunk/supabase` catalogue is the hosted history.
 
 ## Reading: grep on demand
