@@ -8454,11 +8454,11 @@
         "byes": [
           {
             "pairing": 1,
-            "userId": "5429b5af-7a33-4554-86dd-b638ef5a32d3"
+            "userId": "a0744652-7dcf-49f8-8ef8-3bcf79fcfc46"
           },
           {
             "pairing": 2,
-            "userId": "3bc0f8af-ce5c-4dc4-8aff-61dfdc4c2afa"
+            "userId": "f1dd873c-b232-4949-8703-3bbb048b32f8"
           }
         ],
         "matches": [
@@ -8466,17 +8466,20 @@
             "round": 1,
             "pairing": 0,
             "userIds": [
-              "a0744652-7dcf-49f8-8ef8-3bcf79fcfc46",
-              "f1dd873c-b232-4949-8703-3bbb048b32f8"
+              "5429b5af-7a33-4554-86dd-b638ef5a32d3",
+              "3bc0f8af-ce5c-4dc4-8aff-61dfdc4c2afa"
             ],
             "outcome": {
               "goals": [
-                1,
+                2,
                 2
               ],
-              "penalties": null,
-              "winnerSide": 1,
-              "winChancePpm": 358430,
+              "penalties": [
+                7,
+                6
+              ],
+              "winnerSide": 0,
+              "winChancePpm": 582951,
               "dayRollsPpm": [
                 [
                   971640,
@@ -8498,100 +8501,244 @@
                   "kind": "chance",
                   "minute": 3,
                   "side": 1,
-                  "creator": 3,
-                  "shooter": 4,
-                  "chanceType": "first_time",
+                  "creator": 0,
+                  "shooter": 0,
+                  "chanceType": "scramble",
                   "outcome": "goal",
-                  "pGoalPpm": 364626,
+                  "pGoalPpm": 496022,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 12,
-                  "side": 1,
+                  "side": 0,
                   "creator": 3,
-                  "shooter": 3,
-                  "chanceType": "free_kick",
-                  "outcome": "block",
-                  "pGoalPpm": 185510,
-                  "defender": 1
+                  "shooter": 0,
+                  "chanceType": "volley",
+                  "outcome": "goal",
+                  "pGoalPpm": 381722,
+                  "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 21,
                   "side": 1,
                   "creator": 2,
-                  "shooter": 4,
+                  "shooter": 1,
                   "chanceType": "breakaway",
                   "outcome": "goal",
-                  "pGoalPpm": 437551,
+                  "pGoalPpm": 529220,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 49,
                   "side": 0,
-                  "creator": 4,
-                  "shooter": 1,
-                  "chanceType": "breakaway",
+                  "creator": 0,
+                  "shooter": 0,
+                  "chanceType": "scramble",
                   "outcome": "goal",
-                  "pGoalPpm": 216822,
+                  "pGoalPpm": 548725,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 52,
                   "side": 0,
-                  "creator": 3,
+                  "creator": 4,
                   "shooter": 1,
-                  "chanceType": "wing_run",
+                  "chanceType": "curler",
                   "outcome": "save",
-                  "pGoalPpm": 153582,
-                  "defender": 1
+                  "pGoalPpm": 290275,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 62,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 2,
-                  "chanceType": "breakaway",
+                  "creator": 0,
+                  "shooter": 1,
+                  "chanceType": "curler",
                   "outcome": "block",
-                  "pGoalPpm": 274235,
-                  "defender": 0
+                  "pGoalPpm": 308711,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 69,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 4,
-                  "chanceType": "curler",
+                  "creator": 0,
+                  "shooter": 1,
+                  "chanceType": "long_shot",
                   "outcome": "block",
-                  "pGoalPpm": 255238,
-                  "defender": 1
+                  "pGoalPpm": 198457,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 79,
                   "side": 1,
-                  "creator": 2,
-                  "shooter": 0,
-                  "chanceType": "long_shot",
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "free_kick",
                   "outcome": "wide",
-                  "pGoalPpm": 61071,
-                  "defender": 0
+                  "pGoalPpm": 242559,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 86,
                   "side": 0,
-                  "creator": 0,
-                  "shooter": 3,
-                  "chanceType": "scramble",
+                  "creator": 3,
+                  "shooter": 0,
+                  "chanceType": "volley",
                   "outcome": "block",
-                  "pGoalPpm": 323545,
-                  "defender": 4
+                  "pGoalPpm": 381722,
+                  "defender": 2
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 0,
+                  "kicker": 0,
+                  "keeper": 4,
+                  "outcome": "save",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 1,
+                  "kicker": 1,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 0,
+                  "kicker": 1,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 949023
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 1,
+                  "kicker": 0,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 0,
+                  "kicker": 3,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 926865
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 1,
+                  "kicker": 2,
+                  "keeper": 2,
+                  "outcome": "save",
+                  "pGoalPpm": 644463
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 0,
+                  "kicker": 4,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 904692
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 1,
+                  "kicker": 3,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 625755
+                },
+                {
+                  "kind": "penalty",
+                  "round": 5,
+                  "side": 0,
+                  "kicker": 2,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 752547
+                },
+                {
+                  "kind": "penalty",
+                  "round": 5,
+                  "side": 1,
+                  "kicker": 4,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 710857
+                },
+                {
+                  "kind": "penalty",
+                  "round": 6,
+                  "side": 0,
+                  "kicker": 0,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 6,
+                  "side": 1,
+                  "kicker": 1,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 7,
+                  "side": 0,
+                  "kicker": 1,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 949023
+                },
+                {
+                  "kind": "penalty",
+                  "round": 7,
+                  "side": 1,
+                  "kicker": 0,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 8,
+                  "side": 0,
+                  "kicker": 3,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 926865
+                },
+                {
+                  "kind": "penalty",
+                  "round": 8,
+                  "side": 1,
+                  "kicker": 2,
+                  "keeper": 2,
+                  "outcome": "save",
+                  "pGoalPpm": 644463
                 }
               ]
             }
@@ -8723,8 +8870,8 @@
             "round": 2,
             "pairing": 0,
             "userIds": [
-              "f1dd873c-b232-4949-8703-3bbb048b32f8",
-              "5429b5af-7a33-4554-86dd-b638ef5a32d3"
+              "5429b5af-7a33-4554-86dd-b638ef5a32d3",
+              "a0744652-7dcf-49f8-8ef8-3bcf79fcfc46"
             ],
             "outcome": {
               "goals": [
@@ -8733,7 +8880,7 @@
               ],
               "penalties": null,
               "winnerSide": 0,
-              "winChancePpm": 689985,
+              "winChancePpm": 445747,
               "dayRollsPpm": [
                 [
                   1062472,
@@ -8756,65 +8903,65 @@
                   "minute": 9,
                   "side": 0,
                   "creator": 1,
-                  "shooter": 2,
-                  "chanceType": "cutback",
+                  "shooter": 0,
+                  "chanceType": "through_ball",
                   "outcome": "block",
-                  "pGoalPpm": 487134,
-                  "defender": 4
+                  "pGoalPpm": 380062,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 18,
                   "side": 0,
-                  "creator": 0,
-                  "shooter": 3,
-                  "chanceType": "cutback",
+                  "creator": 2,
+                  "shooter": 0,
+                  "chanceType": "free_kick",
                   "outcome": "block",
-                  "pGoalPpm": 569975,
-                  "defender": 1
+                  "pGoalPpm": 190031,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
                   "minute": 23,
                   "side": 0,
-                  "creator": 0,
-                  "shooter": 4,
-                  "chanceType": "first_time",
+                  "creator": 3,
+                  "shooter": 0,
+                  "chanceType": "header",
                   "outcome": "goal",
-                  "pGoalPpm": 465319,
+                  "pGoalPpm": 310960,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 26,
                   "side": 0,
-                  "creator": 0,
-                  "shooter": 4,
-                  "chanceType": "cutback",
+                  "creator": 1,
+                  "shooter": 0,
+                  "chanceType": "one_two",
                   "outcome": "goal",
-                  "pGoalPpm": 581649,
+                  "pGoalPpm": 380062,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 49,
                   "side": 0,
-                  "creator": 3,
-                  "shooter": 3,
-                  "chanceType": "breakaway",
+                  "creator": 1,
+                  "shooter": 0,
+                  "chanceType": "through_ball",
                   "outcome": "goal",
-                  "pGoalPpm": 547176,
+                  "pGoalPpm": 380062,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 55,
                   "side": 0,
-                  "creator": 3,
-                  "shooter": 0,
-                  "chanceType": "long_shot",
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "breakaway",
                   "outcome": "save",
-                  "pGoalPpm": 118184,
+                  "pGoalPpm": 286858,
                   "defender": 2
                 },
                 {
@@ -8825,51 +8972,51 @@
                   "shooter": 4,
                   "chanceType": "long_shot",
                   "outcome": "wide",
-                  "pGoalPpm": 122449,
+                  "pGoalPpm": 137774,
                   "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 70,
                   "side": 0,
-                  "creator": 3,
-                  "shooter": 4,
-                  "chanceType": "wing_run",
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "free_kick",
                   "outcome": "woodwork",
-                  "pGoalPpm": 395521,
+                  "pGoalPpm": 131476,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 71,
                   "side": 1,
-                  "creator": 0,
-                  "shooter": 4,
-                  "chanceType": "scramble",
+                  "creator": 4,
+                  "shooter": 3,
+                  "chanceType": "curler",
                   "outcome": "block",
-                  "pGoalPpm": 312926,
-                  "defender": 0
+                  "pGoalPpm": 248253,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 79,
                   "side": 0,
-                  "creator": 4,
-                  "shooter": 3,
-                  "chanceType": "breakaway",
+                  "creator": 1,
+                  "shooter": 0,
+                  "chanceType": "first_time",
                   "outcome": "save",
-                  "pGoalPpm": 547176,
+                  "pGoalPpm": 345511,
                   "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 90,
                   "side": 1,
-                  "creator": 1,
+                  "creator": 0,
                   "shooter": 0,
-                  "chanceType": "cutback",
+                  "chanceType": "scramble",
                   "outcome": "goal",
-                  "pGoalPpm": 484431,
+                  "pGoalPpm": 322123,
                   "defender": null
                 }
               ]
@@ -8879,7 +9026,7 @@
             "round": 2,
             "pairing": 1,
             "userIds": [
-              "3bc0f8af-ce5c-4dc4-8aff-61dfdc4c2afa",
+              "f1dd873c-b232-4949-8703-3bbb048b32f8",
               "c54dfec1-63ce-4fa7-8c3b-de2512e1b80c"
             ],
             "outcome": {
@@ -8888,11 +9035,11 @@
                 1
               ],
               "penalties": [
-                4,
-                2
+                3,
+                0
               ],
               "winnerSide": 0,
-              "winChancePpm": 654385,
+              "winChancePpm": 854870,
               "dayRollsPpm": [
                 [
                   886093,
@@ -8914,11 +9061,11 @@
                   "kind": "chance",
                   "minute": 6,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 2,
-                  "chanceType": "wing_run",
+                  "creator": 4,
+                  "shooter": 3,
+                  "chanceType": "volley",
                   "outcome": "wide",
-                  "pGoalPpm": 290592,
+                  "pGoalPpm": 362587,
                   "defender": 4
                 },
                 {
@@ -8929,8 +9076,8 @@
                   "shooter": 4,
                   "chanceType": "long_shot",
                   "outcome": "block",
-                  "pGoalPpm": 154177,
-                  "defender": 2
+                  "pGoalPpm": 108208,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
@@ -8940,29 +9087,29 @@
                   "shooter": 1,
                   "chanceType": "long_shot",
                   "outcome": "save",
-                  "pGoalPpm": 182681,
-                  "defender": 4
+                  "pGoalPpm": 138365,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 42,
-                  "side": 1,
-                  "creator": 0,
+                  "side": 0,
+                  "creator": 3,
                   "shooter": 2,
-                  "chanceType": "curler",
+                  "chanceType": "wing_run",
                   "outcome": "wide",
-                  "pGoalPpm": 230456,
-                  "defender": 0
+                  "pGoalPpm": 324519,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 48,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 1,
+                  "creator": 2,
+                  "shooter": 3,
                   "chanceType": "curler",
                   "outcome": "goal",
-                  "pGoalPpm": 303500,
+                  "pGoalPpm": 317264,
                   "defender": null
                 },
                 {
@@ -8973,8 +9120,8 @@
                   "shooter": 4,
                   "chanceType": "wing_run",
                   "outcome": "save",
-                  "pGoalPpm": 291224,
-                  "defender": 4
+                  "pGoalPpm": 204393,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
@@ -8984,18 +9131,18 @@
                   "shooter": 1,
                   "chanceType": "cutback",
                   "outcome": "goal",
-                  "pGoalPpm": 507448,
+                  "pGoalPpm": 384349,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 65,
                   "side": 0,
-                  "creator": 3,
-                  "shooter": 3,
+                  "creator": 4,
+                  "shooter": 4,
                   "chanceType": "long_shot",
                   "outcome": "woodwork",
-                  "pGoalPpm": 139209,
+                  "pGoalPpm": 217621,
                   "defender": null
                 },
                 {
@@ -9003,10 +9150,10 @@
                   "minute": 72,
                   "side": 0,
                   "creator": 3,
-                  "shooter": 1,
-                  "chanceType": "one_two",
+                  "shooter": 4,
+                  "chanceType": "free_kick",
                   "outcome": "block",
-                  "pGoalPpm": 476929,
+                  "pGoalPpm": 265981,
                   "defender": 4
                 },
                 {
@@ -9014,47 +9161,47 @@
                   "minute": 82,
                   "side": 0,
                   "creator": 0,
-                  "shooter": 2,
-                  "chanceType": "one_two",
+                  "shooter": 3,
+                  "chanceType": "chase",
                   "outcome": "save",
-                  "pGoalPpm": 376060,
+                  "pGoalPpm": 453234,
                   "defender": 3
                 },
                 {
                   "kind": "penalty",
                   "round": 1,
                   "side": 0,
-                  "kicker": 1,
+                  "kicker": 4,
                   "keeper": 3,
                   "outcome": "goal",
-                  "pGoalPpm": 914407
+                  "pGoalPpm": 950000
                 },
                 {
                   "kind": "penalty",
                   "round": 1,
                   "side": 1,
                   "kicker": 1,
-                  "keeper": 4,
-                  "outcome": "goal",
-                  "pGoalPpm": 911496
+                  "keeper": 1,
+                  "outcome": "woodwork",
+                  "pGoalPpm": 530326
                 },
                 {
                   "kind": "penalty",
                   "round": 2,
                   "side": 0,
-                  "kicker": 0,
+                  "kicker": 3,
                   "keeper": 3,
                   "outcome": "goal",
-                  "pGoalPpm": 913780
+                  "pGoalPpm": 950000
                 },
                 {
                   "kind": "penalty",
                   "round": 2,
                   "side": 1,
                   "kicker": 4,
-                  "keeper": 4,
+                  "keeper": 1,
                   "outcome": "save",
-                  "pGoalPpm": 744516
+                  "pGoalPpm": 400000
                 },
                 {
                   "kind": "penalty",
@@ -9063,34 +9210,16 @@
                   "kicker": 2,
                   "keeper": 3,
                   "outcome": "goal",
-                  "pGoalPpm": 663813
+                  "pGoalPpm": 767829
                 },
                 {
                   "kind": "penalty",
                   "round": 3,
                   "side": 1,
                   "kicker": 2,
-                  "keeper": 4,
-                  "outcome": "goal",
-                  "pGoalPpm": 710571
-                },
-                {
-                  "kind": "penalty",
-                  "round": 4,
-                  "side": 0,
-                  "kicker": 3,
-                  "keeper": 3,
-                  "outcome": "goal",
-                  "pGoalPpm": 584232
-                },
-                {
-                  "kind": "penalty",
-                  "round": 4,
-                  "side": 1,
-                  "kicker": 0,
-                  "keeper": 4,
-                  "outcome": "wide",
-                  "pGoalPpm": 467922
+                  "keeper": 1,
+                  "outcome": "save",
+                  "pGoalPpm": 400000
                 }
               ]
             }
@@ -9099,17 +9228,20 @@
             "round": 3,
             "pairing": 0,
             "userIds": [
-              "f1dd873c-b232-4949-8703-3bbb048b32f8",
-              "3bc0f8af-ce5c-4dc4-8aff-61dfdc4c2afa"
+              "5429b5af-7a33-4554-86dd-b638ef5a32d3",
+              "f1dd873c-b232-4949-8703-3bbb048b32f8"
             ],
             "outcome": {
               "goals": [
-                5,
-                1
+                3,
+                3
               ],
-              "penalties": null,
-              "winnerSide": 0,
-              "winChancePpm": 756751,
+              "penalties": [
+                2,
+                4
+              ],
+              "winnerSide": 1,
+              "winChancePpm": 310014,
               "dayRollsPpm": [
                 [
                   886784,
@@ -9130,123 +9262,195 @@
                 {
                   "kind": "chance",
                   "minute": 6,
-                  "side": 0,
-                  "creator": 0,
-                  "shooter": 2,
-                  "chanceType": "wing_run",
+                  "side": 1,
+                  "creator": 4,
+                  "shooter": 3,
+                  "chanceType": "one_two",
                   "outcome": "goal",
-                  "pGoalPpm": 340791,
+                  "pGoalPpm": 521543,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 22,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 4,
-                  "chanceType": "scramble",
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "free_kick",
                   "outcome": "goal",
-                  "pGoalPpm": 556455,
+                  "pGoalPpm": 174879,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 27,
                   "side": 1,
-                  "creator": 2,
-                  "shooter": 0,
-                  "chanceType": "one_two",
-                  "outcome": "block",
-                  "pGoalPpm": 407872,
-                  "defender": 2
+                  "creator": 0,
+                  "shooter": 4,
+                  "chanceType": "scramble",
+                  "outcome": "goal",
+                  "pGoalPpm": 539345,
+                  "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 33,
                   "side": 0,
-                  "creator": 3,
-                  "shooter": 3,
-                  "chanceType": "wing_run",
+                  "creator": 4,
+                  "shooter": 1,
+                  "chanceType": "scramble",
                   "outcome": "goal",
-                  "pGoalPpm": 406444,
+                  "pGoalPpm": 365657,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 43,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 3,
-                  "chanceType": "cutback",
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "curler",
                   "outcome": "goal",
-                  "pGoalPpm": 597712,
+                  "pGoalPpm": 222573,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 49,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 2,
-                  "chanceType": "cutback",
+                  "creator": 3,
+                  "shooter": 4,
+                  "chanceType": "first_time",
                   "outcome": "block",
-                  "pGoalPpm": 323768,
-                  "defender": 0
+                  "pGoalPpm": 468996,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 55,
-                  "side": 0,
-                  "creator": 0,
-                  "shooter": 2,
+                  "side": 1,
+                  "creator": 4,
+                  "shooter": 0,
                   "chanceType": "through_ball",
-                  "outcome": "goal",
-                  "pGoalPpm": 441024,
-                  "defender": null
+                  "outcome": "save",
+                  "pGoalPpm": 281063,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 68,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 4,
-                  "chanceType": "first_time",
+                  "creator": 1,
+                  "shooter": 0,
+                  "chanceType": "through_ball",
                   "outcome": "save",
-                  "pGoalPpm": 483874,
-                  "defender": 4
+                  "pGoalPpm": 399550,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 77,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "through_ball",
+                  "creator": 0,
+                  "shooter": 4,
+                  "chanceType": "free_kick",
                   "outcome": "wide",
-                  "pGoalPpm": 407872,
-                  "defender": 2
+                  "pGoalPpm": 257947,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 83,
                   "side": 1,
-                  "creator": 2,
-                  "shooter": 1,
-                  "chanceType": "long_shot",
+                  "creator": 0,
+                  "shooter": 2,
+                  "chanceType": "first_time",
                   "outcome": "block",
-                  "pGoalPpm": 173367,
+                  "pGoalPpm": 382289,
                   "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 86,
                   "side": 1,
-                  "creator": 0,
-                  "shooter": 1,
+                  "creator": 3,
+                  "shooter": 4,
                   "chanceType": "one_two",
                   "outcome": "goal",
-                  "pGoalPpm": 423786,
+                  "pGoalPpm": 515895,
                   "defender": null
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 1,
+                  "kicker": 3,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 0,
+                  "kicker": 0,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 635625
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 1,
+                  "kicker": 4,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 0,
+                  "kicker": 1,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 526231
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 1,
+                  "kicker": 2,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 817891
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 0,
+                  "kicker": 3,
+                  "keeper": 1,
+                  "outcome": "save",
+                  "pGoalPpm": 420756
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 1,
+                  "kicker": 0,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 504306
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 0,
+                  "kicker": 4,
+                  "keeper": 1,
+                  "outcome": "wide",
+                  "pGoalPpm": 400000
                 }
               ]
             }
@@ -9254,19 +9458,19 @@
         ],
         "payouts": [
           {
-            "userId": "f1dd873c-b232-4949-8703-3bbb048b32f8",
+            "userId": "5429b5af-7a33-4554-86dd-b638ef5a32d3",
             "round": 1,
             "amount": 42,
             "bye": false
           },
           {
-            "userId": "5429b5af-7a33-4554-86dd-b638ef5a32d3",
+            "userId": "a0744652-7dcf-49f8-8ef8-3bcf79fcfc46",
             "round": 1,
             "amount": 42,
             "bye": true
           },
           {
-            "userId": "3bc0f8af-ce5c-4dc4-8aff-61dfdc4c2afa",
+            "userId": "f1dd873c-b232-4949-8703-3bbb048b32f8",
             "round": 1,
             "amount": 42,
             "bye": true
@@ -9278,13 +9482,13 @@
             "bye": false
           },
           {
-            "userId": "f1dd873c-b232-4949-8703-3bbb048b32f8",
+            "userId": "5429b5af-7a33-4554-86dd-b638ef5a32d3",
             "round": 2,
             "amount": 83,
             "bye": false
           },
           {
-            "userId": "3bc0f8af-ce5c-4dc4-8aff-61dfdc4c2afa",
+            "userId": "f1dd873c-b232-4949-8703-3bbb048b32f8",
             "round": 2,
             "amount": 83,
             "bye": false
@@ -13472,27 +13676,27 @@
           },
           {
             "pairing": 1,
-            "userId": "6c4b61c3-3bb6-4dc0-8054-16ddbc602952"
-          },
-          {
-            "pairing": 2,
             "userId": "6d127b6b-fae3-4362-8653-b44233e7c4f7"
           },
           {
-            "pairing": 3,
-            "userId": "cf589c3d-16be-418e-8bdf-610605ed354f"
-          },
-          {
-            "pairing": 4,
+            "pairing": 2,
             "userId": "ab222680-419e-405b-8e1e-a00ef8831da1"
           },
           {
-            "pairing": 6,
+            "pairing": 3,
+            "userId": "77649d8e-57ce-46d6-8b65-dffa9ae333ed"
+          },
+          {
+            "pairing": 4,
             "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2"
           },
           {
-            "pairing": 7,
+            "pairing": 6,
             "userId": "26d30fc6-afd8-4138-8be7-19a7e9fcec3b"
+          },
+          {
+            "pairing": 7,
+            "userId": "6c4b61c3-3bb6-4dc0-8054-16ddbc602952"
           }
         ],
         "matches": [
@@ -13500,17 +13704,20 @@
             "round": 1,
             "pairing": 5,
             "userIds": [
-              "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7",
-              "77649d8e-57ce-46d6-8b65-dffa9ae333ed"
+              "cf589c3d-16be-418e-8bdf-610605ed354f",
+              "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7"
             ],
             "outcome": {
               "goals": [
-                2,
-                0
+                1,
+                1
               ],
-              "penalties": null,
-              "winnerSide": 0,
-              "winChancePpm": 252383,
+              "penalties": [
+                2,
+                4
+              ],
+              "winnerSide": 1,
+              "winChancePpm": 207205,
               "dayRollsPpm": [
                 [
                   925285,
@@ -13532,11 +13739,11 @@
                   "kind": "chance",
                   "minute": 11,
                   "side": 0,
-                  "creator": 3,
+                  "creator": 4,
                   "shooter": 2,
-                  "chanceType": "first_time",
+                  "chanceType": "free_kick",
                   "outcome": "woodwork",
-                  "pGoalPpm": 122319,
+                  "pGoalPpm": 153298,
                   "defender": null
                 },
                 {
@@ -13544,77 +13751,77 @@
                   "minute": 16,
                   "side": 1,
                   "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "header",
+                  "shooter": 4,
+                  "chanceType": "cutback",
                   "outcome": "block",
-                  "pGoalPpm": 184938,
-                  "defender": 3
+                  "pGoalPpm": 495093,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 24,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 1,
-                  "chanceType": "free_kick",
+                  "creator": 0,
+                  "shooter": 4,
+                  "chanceType": "header",
                   "outcome": "block",
-                  "pGoalPpm": 133138,
-                  "defender": 3
+                  "pGoalPpm": 175262,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 35,
                   "side": 1,
-                  "creator": 0,
-                  "shooter": 0,
+                  "creator": 4,
+                  "shooter": 4,
                   "chanceType": "scramble",
                   "outcome": "woodwork",
-                  "pGoalPpm": 236310,
+                  "pGoalPpm": 455485,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 41,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 1,
-                  "chanceType": "wing_run",
+                  "creator": 0,
+                  "shooter": 2,
+                  "chanceType": "cutback",
                   "outcome": "goal",
-                  "pGoalPpm": 205759,
+                  "pGoalPpm": 348406,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 48,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 1,
-                  "chanceType": "breakaway",
+                  "creator": 4,
+                  "shooter": 4,
+                  "chanceType": "scramble",
                   "outcome": "woodwork",
-                  "pGoalPpm": 234331,
+                  "pGoalPpm": 455485,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 57,
                   "side": 0,
-                  "creator": 1,
+                  "creator": 2,
                   "shooter": 2,
-                  "chanceType": "chase",
+                  "chanceType": "wing_run",
                   "outcome": "wide",
-                  "pGoalPpm": 122319,
-                  "defender": 1
+                  "pGoalPpm": 236916,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 67,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 1,
-                  "chanceType": "scramble",
-                  "outcome": "goal",
-                  "pGoalPpm": 278380,
-                  "defender": null
+                  "creator": 2,
+                  "shooter": 3,
+                  "chanceType": "through_ball",
+                  "outcome": "save",
+                  "pGoalPpm": 201036,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
@@ -13622,10 +13829,82 @@
                   "side": 1,
                   "creator": 3,
                   "shooter": 1,
-                  "chanceType": "volley",
+                  "chanceType": "breakaway",
+                  "outcome": "goal",
+                  "pGoalPpm": 542923,
+                  "defender": null
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 0,
+                  "kicker": 0,
+                  "keeper": 0,
+                  "outcome": "goal",
+                  "pGoalPpm": 716266
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 1,
+                  "kicker": 1,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 0,
+                  "kicker": 2,
+                  "keeper": 0,
                   "outcome": "save",
-                  "pGoalPpm": 156221,
-                  "defender": 0
+                  "pGoalPpm": 627627
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 1,
+                  "kicker": 4,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 867898
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 0,
+                  "kicker": 4,
+                  "keeper": 0,
+                  "outcome": "save",
+                  "pGoalPpm": 427410
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 1,
+                  "kicker": 2,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 705738
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 0,
+                  "kicker": 3,
+                  "keeper": 0,
+                  "outcome": "goal",
+                  "pGoalPpm": 400000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 1,
+                  "kicker": 3,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 556063
                 }
               ]
             }
@@ -13635,16 +13914,16 @@
             "pairing": 0,
             "userIds": [
               "55043d58-c392-4ed1-853a-5a8502357377",
-              "6c4b61c3-3bb6-4dc0-8054-16ddbc602952"
+              "6d127b6b-fae3-4362-8653-b44233e7c4f7"
             ],
             "outcome": {
               "goals": [
-                3,
-                0
+                2,
+                1
               ],
               "penalties": null,
               "winnerSide": 0,
-              "winChancePpm": 897066,
+              "winChancePpm": 723490,
               "dayRollsPpm": [
                 [
                   903442,
@@ -13666,11 +13945,11 @@
                   "kind": "chance",
                   "minute": 1,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 2,
-                  "chanceType": "through_ball",
+                  "creator": 0,
+                  "shooter": 1,
+                  "chanceType": "breakaway",
                   "outcome": "wide",
-                  "pGoalPpm": 246532,
+                  "pGoalPpm": 389343,
                   "defender": 0
                 },
                 {
@@ -13681,8 +13960,8 @@
                   "shooter": 0,
                   "chanceType": "scramble",
                   "outcome": "block",
-                  "pGoalPpm": 331133,
-                  "defender": 2
+                  "pGoalPpm": 379551,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
@@ -13692,8 +13971,8 @@
                   "shooter": 4,
                   "chanceType": "long_shot",
                   "outcome": "save",
-                  "pGoalPpm": 223365,
-                  "defender": 1
+                  "pGoalPpm": 233246,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
@@ -13703,8 +13982,8 @@
                   "shooter": 2,
                   "chanceType": "free_kick",
                   "outcome": "block",
-                  "pGoalPpm": 219964,
-                  "defender": 2
+                  "pGoalPpm": 239555,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
@@ -13714,40 +13993,40 @@
                   "shooter": 4,
                   "chanceType": "header",
                   "outcome": "block",
-                  "pGoalPpm": 446731,
-                  "defender": 4
+                  "pGoalPpm": 466493,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
                   "minute": 43,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 4,
-                  "chanceType": "scramble",
+                  "creator": 3,
+                  "shooter": 2,
+                  "chanceType": "free_kick",
                   "outcome": "wide",
-                  "pGoalPpm": 232265,
+                  "pGoalPpm": 216920,
                   "defender": 0
                 },
                 {
                   "kind": "chance",
                   "minute": 49,
-                  "side": 0,
-                  "creator": 3,
-                  "shooter": 4,
-                  "chanceType": "scramble",
+                  "side": 1,
+                  "creator": 4,
+                  "shooter": 1,
+                  "chanceType": "breakaway",
                   "outcome": "save",
-                  "pGoalPpm": 570823,
+                  "pGoalPpm": 389343,
                   "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 57,
                   "side": 1,
-                  "creator": 0,
-                  "shooter": 3,
+                  "creator": 1,
+                  "shooter": 2,
                   "chanceType": "volley",
                   "outcome": "save",
-                  "pGoalPpm": 131640,
+                  "pGoalPpm": 315520,
                   "defender": 1
                 },
                 {
@@ -13758,18 +14037,18 @@
                   "shooter": 2,
                   "chanceType": "one_two",
                   "outcome": "goal",
-                  "pGoalPpm": 439928,
+                  "pGoalPpm": 479111,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 69,
-                  "side": 0,
-                  "creator": 2,
+                  "side": 1,
+                  "creator": 1,
                   "shooter": 2,
-                  "chanceType": "curler",
+                  "chanceType": "volley",
                   "outcome": "goal",
-                  "pGoalPpm": 279954,
+                  "pGoalPpm": 315520,
                   "defender": null
                 },
                 {
@@ -13780,7 +14059,7 @@
                   "shooter": 3,
                   "chanceType": "chase",
                   "outcome": "goal",
-                  "pGoalPpm": 447576,
+                  "pGoalPpm": 477316,
                   "defender": null
                 }
               ]
@@ -13790,17 +14069,20 @@
             "round": 2,
             "pairing": 1,
             "userIds": [
-              "6d127b6b-fae3-4362-8653-b44233e7c4f7",
-              "cf589c3d-16be-418e-8bdf-610605ed354f"
+              "ab222680-419e-405b-8e1e-a00ef8831da1",
+              "77649d8e-57ce-46d6-8b65-dffa9ae333ed"
             ],
             "outcome": {
               "goals": [
-                2,
+                1,
                 1
               ],
-              "penalties": null,
+              "penalties": [
+                4,
+                3
+              ],
               "winnerSide": 0,
-              "winChancePpm": 870724,
+              "winChancePpm": 307541,
               "dayRollsPpm": [
                 [
                   1068805,
@@ -13822,110 +14104,110 @@
                   "kind": "chance",
                   "minute": 4,
                   "side": 0,
-                  "creator": 4,
-                  "shooter": 1,
-                  "chanceType": "scramble",
+                  "creator": 2,
+                  "shooter": 0,
+                  "chanceType": "curler",
                   "outcome": "save",
-                  "pGoalPpm": 563152,
-                  "defender": 1
+                  "pGoalPpm": 205025,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 9,
                   "side": 1,
-                  "creator": 3,
-                  "shooter": 0,
-                  "chanceType": "curler",
+                  "creator": 1,
+                  "shooter": 4,
+                  "chanceType": "header",
                   "outcome": "save",
-                  "pGoalPpm": 289531,
-                  "defender": 4
+                  "pGoalPpm": 371896,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 13,
                   "side": 0,
                   "creator": 1,
-                  "shooter": 1,
-                  "chanceType": "long_shot",
+                  "shooter": 2,
+                  "chanceType": "free_kick",
                   "outcome": "save",
-                  "pGoalPpm": 220364,
-                  "defender": 1
+                  "pGoalPpm": 107694,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 22,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "breakaway",
-                  "outcome": "goal",
-                  "pGoalPpm": 567397,
-                  "defender": null
+                  "creator": 4,
+                  "shooter": 4,
+                  "chanceType": "long_shot",
+                  "outcome": "wide",
+                  "pGoalPpm": 82406,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
                   "minute": 38,
                   "side": 1,
-                  "creator": 2,
-                  "shooter": 2,
-                  "chanceType": "breakaway",
+                  "creator": 0,
+                  "shooter": 1,
+                  "chanceType": "first_time",
                   "outcome": "goal",
-                  "pGoalPpm": 456902,
+                  "pGoalPpm": 347698,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 44,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 2,
-                  "chanceType": "curler",
+                  "creator": 0,
+                  "shooter": 0,
+                  "chanceType": "breakaway",
                   "outcome": "goal",
-                  "pGoalPpm": 364680,
+                  "pGoalPpm": 351471,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 48,
                   "side": 0,
-                  "creator": 2,
+                  "creator": 0,
                   "shooter": 1,
-                  "chanceType": "one_two",
+                  "chanceType": "wing_run",
                   "outcome": "save",
-                  "pGoalPpm": 538667,
-                  "defender": 1
+                  "pGoalPpm": 306162,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 53,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 2,
-                  "chanceType": "breakaway",
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "wing_run",
                   "outcome": "wide",
-                  "pGoalPpm": 456902,
-                  "defender": 2
+                  "pGoalPpm": 295543,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 60,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 3,
+                  "creator": 3,
+                  "shooter": 4,
                   "chanceType": "scramble",
                   "outcome": "save",
-                  "pGoalPpm": 339849,
-                  "defender": 4
+                  "pGoalPpm": 475201,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 83,
                   "side": 0,
-                  "creator": 3,
-                  "shooter": 1,
-                  "chanceType": "breakaway",
+                  "creator": 0,
+                  "shooter": 0,
+                  "chanceType": "wing_run",
                   "outcome": "wide",
-                  "pGoalPpm": 587637,
+                  "pGoalPpm": 248959,
                   "defender": 4
                 },
                 {
@@ -13934,10 +14216,100 @@
                   "side": 0,
                   "creator": 2,
                   "shooter": 1,
-                  "chanceType": "free_kick",
+                  "chanceType": "one_two",
                   "outcome": "save",
-                  "pGoalPpm": 269333,
-                  "defender": 1
+                  "pGoalPpm": 396210,
+                  "defender": 2
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 1,
+                  "kicker": 3,
+                  "keeper": 3,
+                  "outcome": "woodwork",
+                  "pGoalPpm": 891613
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 0,
+                  "kicker": 1,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 824616
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 1,
+                  "kicker": 4,
+                  "keeper": 3,
+                  "outcome": "goal",
+                  "pGoalPpm": 889950
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 0,
+                  "kicker": 0,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 655057
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 1,
+                  "kicker": 1,
+                  "keeper": 3,
+                  "outcome": "save",
+                  "pGoalPpm": 714139
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 0,
+                  "kicker": 2,
+                  "keeper": 2,
+                  "outcome": "save",
+                  "pGoalPpm": 423805
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 1,
+                  "kicker": 0,
+                  "keeper": 3,
+                  "outcome": "goal",
+                  "pGoalPpm": 691573
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 0,
+                  "kicker": 4,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 400000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 5,
+                  "side": 1,
+                  "kicker": 2,
+                  "keeper": 3,
+                  "outcome": "goal",
+                  "pGoalPpm": 769203
+                },
+                {
+                  "kind": "penalty",
+                  "round": 5,
+                  "side": 0,
+                  "kicker": 3,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 419107
                 }
               ]
             }
@@ -13946,7 +14318,7 @@
             "round": 2,
             "pairing": 2,
             "userIds": [
-              "ab222680-419e-405b-8e1e-a00ef8831da1",
+              "bf8397d2-965a-432b-82ff-369fbd0478e2",
               "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7"
             ],
             "outcome": {
@@ -13959,7 +14331,7 @@
                 3
               ],
               "winnerSide": 0,
-              "winChancePpm": 568148,
+              "winChancePpm": 628459,
               "dayRollsPpm": [
                 [
                   1098431,
@@ -13981,33 +14353,33 @@
                   "kind": "chance",
                   "minute": 1,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 2,
-                  "chanceType": "long_shot",
+                  "creator": 1,
+                  "shooter": 0,
+                  "chanceType": "header",
                   "outcome": "wide",
-                  "pGoalPpm": 128261,
+                  "pGoalPpm": 371454,
                   "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 12,
                   "side": 0,
-                  "creator": 0,
-                  "shooter": 1,
-                  "chanceType": "volley",
+                  "creator": 1,
+                  "shooter": 4,
+                  "chanceType": "cutback",
                   "outcome": "block",
-                  "pGoalPpm": 314084,
+                  "pGoalPpm": 351894,
                   "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 18,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 2,
-                  "chanceType": "wing_run",
+                  "creator": 1,
+                  "shooter": 0,
+                  "chanceType": "through_ball",
                   "outcome": "wide",
-                  "pGoalPpm": 242271,
+                  "pGoalPpm": 454000,
                   "defender": 2
                 },
                 {
@@ -14018,18 +14390,18 @@
                   "shooter": 3,
                   "chanceType": "scramble",
                   "outcome": "save",
-                  "pGoalPpm": 288613,
-                  "defender": 3
+                  "pGoalPpm": 204591,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 35,
                   "side": 0,
-                  "creator": 2,
+                  "creator": 4,
                   "shooter": 0,
-                  "chanceType": "chase",
+                  "chanceType": "through_ball",
                   "outcome": "block",
-                  "pGoalPpm": 359164,
+                  "pGoalPpm": 454000,
                   "defender": 2
                 },
                 {
@@ -14040,122 +14412,122 @@
                   "shooter": 3,
                   "chanceType": "through_ball",
                   "outcome": "block",
-                  "pGoalPpm": 276064,
-                  "defender": 4
+                  "pGoalPpm": 195695,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 47,
                   "side": 0,
                   "creator": 0,
-                  "shooter": 4,
-                  "chanceType": "first_time",
+                  "shooter": 3,
+                  "chanceType": "one_two",
                   "outcome": "save",
-                  "pGoalPpm": 233044,
+                  "pGoalPpm": 293810,
                   "defender": 0
                 },
                 {
                   "kind": "chance",
                   "minute": 59,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 1,
-                  "chanceType": "chase",
+                  "creator": 1,
+                  "shooter": 3,
+                  "chanceType": "cutback",
                   "outcome": "wide",
-                  "pGoalPpm": 392605,
+                  "pGoalPpm": 333876,
                   "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 68,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 0,
-                  "chanceType": "curler",
+                  "creator": 0,
+                  "shooter": 3,
+                  "chanceType": "through_ball",
                   "outcome": "block",
-                  "pGoalPpm": 251415,
+                  "pGoalPpm": 293810,
                   "defender": 2
                 },
                 {
                   "kind": "penalty",
                   "round": 1,
                   "side": 0,
-                  "kicker": 1,
+                  "kicker": 0,
                   "keeper": 0,
                   "outcome": "goal",
-                  "pGoalPpm": 928306
+                  "pGoalPpm": 950000
                 },
                 {
                   "kind": "penalty",
                   "round": 1,
                   "side": 1,
                   "kicker": 1,
-                  "keeper": 3,
+                  "keeper": 2,
                   "outcome": "goal",
-                  "pGoalPpm": 950000
+                  "pGoalPpm": 809167
                 },
                 {
                   "kind": "penalty",
                   "round": 2,
                   "side": 0,
-                  "kicker": 0,
+                  "kicker": 1,
                   "keeper": 0,
                   "outcome": "goal",
-                  "pGoalPpm": 841878
+                  "pGoalPpm": 666462
                 },
                 {
                   "kind": "penalty",
                   "round": 2,
                   "side": 1,
                   "kicker": 4,
-                  "keeper": 3,
+                  "keeper": 2,
                   "outcome": "goal",
-                  "pGoalPpm": 813085
+                  "pGoalPpm": 629650
                 },
                 {
                   "kind": "penalty",
                   "round": 3,
                   "side": 0,
-                  "kicker": 2,
+                  "kicker": 4,
                   "keeper": 0,
                   "outcome": "goal",
-                  "pGoalPpm": 655501
+                  "pGoalPpm": 646852
                 },
                 {
                   "kind": "penalty",
                   "round": 3,
                   "side": 1,
                   "kicker": 2,
-                  "keeper": 3,
+                  "keeper": 2,
                   "outcome": "goal",
-                  "pGoalPpm": 636189
+                  "pGoalPpm": 465610
                 },
                 {
                   "kind": "penalty",
                   "round": 4,
                   "side": 0,
-                  "kicker": 4,
+                  "kicker": 3,
                   "keeper": 0,
                   "outcome": "goal",
-                  "pGoalPpm": 528967
+                  "pGoalPpm": 611493
                 },
                 {
                   "kind": "penalty",
                   "round": 4,
                   "side": 1,
                   "kicker": 3,
-                  "keeper": 3,
+                  "keeper": 2,
                   "outcome": "save",
-                  "pGoalPpm": 469720
+                  "pGoalPpm": 400000
                 },
                 {
                   "kind": "penalty",
                   "round": 5,
                   "side": 0,
-                  "kicker": 3,
+                  "kicker": 2,
                   "keeper": 0,
                   "outcome": "goal",
-                  "pGoalPpm": 585916
+                  "pGoalPpm": 515995
                 }
               ]
             }
@@ -14164,8 +14536,8 @@
             "round": 2,
             "pairing": 3,
             "userIds": [
-              "bf8397d2-965a-432b-82ff-369fbd0478e2",
-              "26d30fc6-afd8-4138-8be7-19a7e9fcec3b"
+              "26d30fc6-afd8-4138-8be7-19a7e9fcec3b",
+              "6c4b61c3-3bb6-4dc0-8054-16ddbc602952"
             ],
             "outcome": {
               "goals": [
@@ -14174,7 +14546,7 @@
               ],
               "penalties": null,
               "winnerSide": 1,
-              "winChancePpm": 563215,
+              "winChancePpm": 712810,
               "dayRollsPpm": [
                 [
                   918494,
@@ -14196,67 +14568,67 @@
                   "kind": "chance",
                   "minute": 9,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 1,
-                  "chanceType": "scramble",
+                  "creator": 0,
+                  "shooter": 0,
+                  "chanceType": "curler",
                   "outcome": "goal",
-                  "pGoalPpm": 546446,
+                  "pGoalPpm": 298887,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 17,
-                  "side": 1,
-                  "creator": 2,
-                  "shooter": 1,
-                  "chanceType": "curler",
+                  "side": 0,
+                  "creator": 1,
+                  "shooter": 3,
+                  "chanceType": "one_two",
                   "outcome": "save",
-                  "pGoalPpm": 332619,
-                  "defender": 2
+                  "pGoalPpm": 365711,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 31,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "first_time",
+                  "creator": 0,
+                  "shooter": 1,
+                  "chanceType": "through_ball",
                   "outcome": "goal",
-                  "pGoalPpm": 473133,
+                  "pGoalPpm": 510140,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 42,
                   "side": 1,
-                  "creator": 3,
-                  "shooter": 0,
-                  "chanceType": "header",
+                  "creator": 0,
+                  "shooter": 4,
+                  "chanceType": "wing_run",
                   "outcome": "goal",
-                  "pGoalPpm": 396985,
+                  "pGoalPpm": 265106,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 49,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 1,
-                  "chanceType": "wing_run",
+                  "creator": 0,
+                  "shooter": 3,
+                  "chanceType": "cutback",
                   "outcome": "block",
-                  "pGoalPpm": 403895,
-                  "defender": 4
+                  "pGoalPpm": 392569,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 75,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "through_ball",
+                  "creator": 0,
+                  "shooter": 1,
+                  "chanceType": "volley",
                   "outcome": "block",
-                  "pGoalPpm": 520446,
-                  "defender": 0
+                  "pGoalPpm": 371011,
+                  "defender": 2
                 }
               ]
             }
@@ -14266,7 +14638,7 @@
             "pairing": 0,
             "userIds": [
               "55043d58-c392-4ed1-853a-5a8502357377",
-              "6d127b6b-fae3-4362-8653-b44233e7c4f7"
+              "ab222680-419e-405b-8e1e-a00ef8831da1"
             ],
             "outcome": {
               "goals": [
@@ -14275,7 +14647,7 @@
               ],
               "penalties": null,
               "winnerSide": 1,
-              "winChancePpm": 723490,
+              "winChancePpm": 777829,
               "dayRollsPpm": [
                 [
                   926198,
@@ -14301,8 +14673,8 @@
                   "shooter": 2,
                   "chanceType": "first_time",
                   "outcome": "wide",
-                  "pGoalPpm": 444651,
-                  "defender": 3
+                  "pGoalPpm": 470890,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
@@ -14312,18 +14684,18 @@
                   "shooter": 4,
                   "chanceType": "first_time",
                   "outcome": "woodwork",
-                  "pGoalPpm": 516121,
+                  "pGoalPpm": 532131,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 34,
                   "side": 1,
-                  "creator": 3,
-                  "shooter": 1,
+                  "creator": 0,
+                  "shooter": 4,
                   "chanceType": "through_ball",
                   "outcome": "goal",
-                  "pGoalPpm": 349682,
+                  "pGoalPpm": 226744,
                   "defender": null
                 },
                 {
@@ -14331,32 +14703,32 @@
                   "minute": 50,
                   "side": 1,
                   "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "breakaway",
+                  "shooter": 1,
+                  "chanceType": "curler",
                   "outcome": "wide",
-                  "pGoalPpm": 340680,
+                  "pGoalPpm": 280168,
                   "defender": 0
                 },
                 {
                   "kind": "chance",
                   "minute": 55,
                   "side": 1,
-                  "creator": 3,
-                  "shooter": 2,
-                  "chanceType": "volley",
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "long_shot",
                   "outcome": "wide",
-                  "pGoalPpm": 326029,
+                  "pGoalPpm": 180108,
                   "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 59,
                   "side": 1,
-                  "creator": 3,
-                  "shooter": 3,
-                  "chanceType": "curler",
+                  "creator": 0,
+                  "shooter": 1,
+                  "chanceType": "free_kick",
                   "outcome": "save",
-                  "pGoalPpm": 187633,
+                  "pGoalPpm": 220132,
                   "defender": 1
                 },
                 {
@@ -14367,18 +14739,18 @@
                   "shooter": 3,
                   "chanceType": "header",
                   "outcome": "save",
-                  "pGoalPpm": 428256,
-                  "defender": 4
+                  "pGoalPpm": 448217,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 78,
                   "side": 1,
                   "creator": 0,
-                  "shooter": 3,
-                  "chanceType": "header",
+                  "shooter": 1,
+                  "chanceType": "wing_run",
                   "outcome": "wide",
-                  "pGoalPpm": 241243,
+                  "pGoalPpm": 340204,
                   "defender": 0
                 }
               ]
@@ -14388,20 +14760,17 @@
             "round": 3,
             "pairing": 1,
             "userIds": [
-              "ab222680-419e-405b-8e1e-a00ef8831da1",
-              "26d30fc6-afd8-4138-8be7-19a7e9fcec3b"
+              "bf8397d2-965a-432b-82ff-369fbd0478e2",
+              "6c4b61c3-3bb6-4dc0-8054-16ddbc602952"
             ],
             "outcome": {
               "goals": [
-                2,
-                2
+                3,
+                0
               ],
-              "penalties": [
-                4,
-                5
-              ],
-              "winnerSide": 1,
-              "winChancePpm": 500728,
+              "penalties": null,
+              "winnerSide": 0,
+              "winChancePpm": 761931,
               "dayRollsPpm": [
                 [
                   1003510,
@@ -14423,45 +14792,45 @@
                   "kind": "chance",
                   "minute": 3,
                   "side": 0,
-                  "creator": 0,
+                  "creator": 1,
                   "shooter": 0,
-                  "chanceType": "breakaway",
+                  "chanceType": "first_time",
                   "outcome": "goal",
-                  "pGoalPpm": 534649,
+                  "pGoalPpm": 467109,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 11,
                   "side": 0,
-                  "creator": 4,
-                  "shooter": 2,
-                  "chanceType": "curler",
+                  "creator": 3,
+                  "shooter": 0,
+                  "chanceType": "overhead",
                   "outcome": "save",
-                  "pGoalPpm": 274304,
-                  "defender": 4
+                  "pGoalPpm": 186843,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 29,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 1,
-                  "chanceType": "scramble",
-                  "outcome": "goal",
-                  "pGoalPpm": 605671,
-                  "defender": null
+                  "creator": 2,
+                  "shooter": 0,
+                  "chanceType": "wing_run",
+                  "outcome": "block",
+                  "pGoalPpm": 323246,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 38,
-                  "side": 1,
-                  "creator": 2,
-                  "shooter": 1,
-                  "chanceType": "first_time",
+                  "side": 0,
+                  "creator": 1,
+                  "shooter": 4,
+                  "chanceType": "through_ball",
                   "outcome": "save",
-                  "pGoalPpm": 526671,
-                  "defender": 3
+                  "pGoalPpm": 388169,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
@@ -14471,153 +14840,63 @@
                   "shooter": 0,
                   "chanceType": "breakaway",
                   "outcome": "goal",
-                  "pGoalPpm": 534649,
+                  "pGoalPpm": 560531,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 50,
                   "side": 0,
-                  "creator": 4,
+                  "creator": 1,
                   "shooter": 1,
-                  "chanceType": "scramble",
+                  "chanceType": "long_shot",
                   "outcome": "save",
-                  "pGoalPpm": 549872,
-                  "defender": 4
+                  "pGoalPpm": 165885,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 53,
                   "side": 1,
-                  "creator": 2,
-                  "shooter": 1,
+                  "creator": 3,
+                  "shooter": 2,
                   "chanceType": "long_shot",
                   "outcome": "woodwork",
-                  "pGoalPpm": 237001,
+                  "pGoalPpm": 139062,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 70,
                   "side": 0,
-                  "creator": 0,
+                  "creator": 1,
                   "shooter": 1,
-                  "chanceType": "first_time",
+                  "chanceType": "free_kick",
                   "outcome": "block",
-                  "pGoalPpm": 478150,
-                  "defender": 3
+                  "pGoalPpm": 202749,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 75,
-                  "side": 1,
-                  "creator": 3,
+                  "side": 0,
+                  "creator": 1,
                   "shooter": 0,
                   "chanceType": "breakaway",
                   "outcome": "goal",
-                  "pGoalPpm": 576555,
+                  "pGoalPpm": 560531,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 90,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "free_kick",
+                  "creator": 4,
+                  "shooter": 2,
+                  "chanceType": "wing_run",
                   "outcome": "wide",
-                  "pGoalPpm": 264254,
-                  "defender": 0
-                },
-                {
-                  "kind": "penalty",
-                  "round": 1,
-                  "side": 0,
-                  "kicker": 1,
-                  "keeper": 4,
-                  "outcome": "goal",
-                  "pGoalPpm": 950000
-                },
-                {
-                  "kind": "penalty",
-                  "round": 1,
-                  "side": 1,
-                  "kicker": 1,
-                  "keeper": 3,
-                  "outcome": "goal",
-                  "pGoalPpm": 950000
-                },
-                {
-                  "kind": "penalty",
-                  "round": 2,
-                  "side": 0,
-                  "kicker": 0,
-                  "keeper": 4,
-                  "outcome": "goal",
-                  "pGoalPpm": 950000
-                },
-                {
-                  "kind": "penalty",
-                  "round": 2,
-                  "side": 1,
-                  "kicker": 0,
-                  "keeper": 3,
-                  "outcome": "goal",
-                  "pGoalPpm": 950000
-                },
-                {
-                  "kind": "penalty",
-                  "round": 3,
-                  "side": 0,
-                  "kicker": 2,
-                  "keeper": 4,
-                  "outcome": "goal",
-                  "pGoalPpm": 930189
-                },
-                {
-                  "kind": "penalty",
-                  "round": 3,
-                  "side": 1,
-                  "kicker": 3,
-                  "keeper": 3,
-                  "outcome": "goal",
-                  "pGoalPpm": 905650
-                },
-                {
-                  "kind": "penalty",
-                  "round": 4,
-                  "side": 0,
-                  "kicker": 4,
-                  "keeper": 4,
-                  "outcome": "wide",
-                  "pGoalPpm": 778441
-                },
-                {
-                  "kind": "penalty",
-                  "round": 4,
-                  "side": 1,
-                  "kicker": 2,
-                  "keeper": 3,
-                  "outcome": "goal",
-                  "pGoalPpm": 820185
-                },
-                {
-                  "kind": "penalty",
-                  "round": 5,
-                  "side": 0,
-                  "kicker": 3,
-                  "keeper": 4,
-                  "outcome": "goal",
-                  "pGoalPpm": 839571
-                },
-                {
-                  "kind": "penalty",
-                  "round": 5,
-                  "side": 1,
-                  "kicker": 4,
-                  "keeper": 3,
-                  "outcome": "goal",
-                  "pGoalPpm": 881911
+                  "pGoalPpm": 262672,
+                  "defender": 4
                 }
               ]
             }
@@ -14626,8 +14905,8 @@
             "round": 4,
             "pairing": 0,
             "userIds": [
-              "6d127b6b-fae3-4362-8653-b44233e7c4f7",
-              "26d30fc6-afd8-4138-8be7-19a7e9fcec3b"
+              "ab222680-419e-405b-8e1e-a00ef8831da1",
+              "bf8397d2-965a-432b-82ff-369fbd0478e2"
             ],
             "outcome": {
               "goals": [
@@ -14636,7 +14915,7 @@
               ],
               "penalties": null,
               "winnerSide": 1,
-              "winChancePpm": 573008,
+              "winChancePpm": 437501,
               "dayRollsPpm": [
                 [
                   1091745,
@@ -14658,66 +14937,66 @@
                   "kind": "chance",
                   "minute": 10,
                   "side": 0,
-                  "creator": 0,
-                  "shooter": 3,
-                  "chanceType": "one_two",
+                  "creator": 2,
+                  "shooter": 1,
+                  "chanceType": "wing_run",
                   "outcome": "save",
-                  "pGoalPpm": 411167,
-                  "defender": 4
+                  "pGoalPpm": 392277,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 18,
                   "side": 1,
-                  "creator": 0,
+                  "creator": 3,
                   "shooter": 1,
-                  "chanceType": "first_time",
+                  "chanceType": "breakaway",
                   "outcome": "block",
-                  "pGoalPpm": 485051,
-                  "defender": 0
+                  "pGoalPpm": 526017,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 25,
                   "side": 1,
-                  "creator": 0,
+                  "creator": 1,
                   "shooter": 0,
-                  "chanceType": "wing_run",
+                  "chanceType": "chase",
                   "outcome": "goal",
-                  "pGoalPpm": 378198,
+                  "pGoalPpm": 506985,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 60,
                   "side": 1,
-                  "creator": 2,
-                  "shooter": 0,
-                  "chanceType": "cutback",
+                  "creator": 1,
+                  "shooter": 4,
+                  "chanceType": "curler",
                   "outcome": "goal",
-                  "pGoalPpm": 556173,
+                  "pGoalPpm": 303942,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 67,
                   "side": 0,
-                  "creator": 0,
-                  "shooter": 3,
-                  "chanceType": "first_time",
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "long_shot",
                   "outcome": "goal",
-                  "pGoalPpm": 373788,
+                  "pGoalPpm": 207676,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 87,
                   "side": 1,
-                  "creator": 0,
+                  "creator": 1,
                   "shooter": 3,
-                  "chanceType": "scramble",
+                  "chanceType": "through_ball",
                   "outcome": "goal",
-                  "pGoalPpm": 425128,
+                  "pGoalPpm": 464260,
                   "defender": null
                 }
               ]
@@ -14732,25 +15011,25 @@
             "bye": true
           },
           {
-            "userId": "6c4b61c3-3bb6-4dc0-8054-16ddbc602952",
-            "round": 1,
-            "amount": 25,
-            "bye": true
-          },
-          {
             "userId": "6d127b6b-fae3-4362-8653-b44233e7c4f7",
             "round": 1,
             "amount": 25,
             "bye": true
           },
           {
-            "userId": "cf589c3d-16be-418e-8bdf-610605ed354f",
+            "userId": "ab222680-419e-405b-8e1e-a00ef8831da1",
             "round": 1,
             "amount": 25,
             "bye": true
           },
           {
-            "userId": "ab222680-419e-405b-8e1e-a00ef8831da1",
+            "userId": "77649d8e-57ce-46d6-8b65-dffa9ae333ed",
+            "round": 1,
+            "amount": 25,
+            "bye": true
+          },
+          {
+            "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2",
             "round": 1,
             "amount": 25,
             "bye": true
@@ -14762,13 +15041,13 @@
             "bye": false
           },
           {
-            "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2",
+            "userId": "26d30fc6-afd8-4138-8be7-19a7e9fcec3b",
             "round": 1,
             "amount": 25,
             "bye": true
           },
           {
-            "userId": "26d30fc6-afd8-4138-8be7-19a7e9fcec3b",
+            "userId": "6c4b61c3-3bb6-4dc0-8054-16ddbc602952",
             "round": 1,
             "amount": 25,
             "bye": true
@@ -14780,43 +15059,43 @@
             "bye": false
           },
           {
-            "userId": "6d127b6b-fae3-4362-8653-b44233e7c4f7",
-            "round": 2,
-            "amount": 50,
-            "bye": false
-          },
-          {
             "userId": "ab222680-419e-405b-8e1e-a00ef8831da1",
             "round": 2,
             "amount": 50,
             "bye": false
           },
           {
-            "userId": "26d30fc6-afd8-4138-8be7-19a7e9fcec3b",
+            "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2",
             "round": 2,
             "amount": 50,
             "bye": false
           },
           {
-            "userId": "6d127b6b-fae3-4362-8653-b44233e7c4f7",
+            "userId": "6c4b61c3-3bb6-4dc0-8054-16ddbc602952",
+            "round": 2,
+            "amount": 50,
+            "bye": false
+          },
+          {
+            "userId": "ab222680-419e-405b-8e1e-a00ef8831da1",
             "round": 3,
             "amount": 75,
             "bye": false
           },
           {
-            "userId": "26d30fc6-afd8-4138-8be7-19a7e9fcec3b",
+            "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2",
             "round": 3,
             "amount": 75,
             "bye": false
           },
           {
-            "userId": "26d30fc6-afd8-4138-8be7-19a7e9fcec3b",
+            "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2",
             "round": 4,
             "amount": 100,
             "bye": false
           }
         ],
-        "championUserId": "26d30fc6-afd8-4138-8be7-19a7e9fcec3b"
+        "championUserId": "bf8397d2-965a-432b-82ff-369fbd0478e2"
       }
     },
     {
@@ -15961,7 +16240,7 @@
           },
           {
             "pairing": 3,
-            "userId": "b01364f6-b218-4d04-8497-6ae876af2fa2"
+            "userId": "1fdc6570-9944-4388-82b9-fae0af4f242e"
           }
         ],
         "matches": [
@@ -15969,17 +16248,17 @@
             "round": 1,
             "pairing": 1,
             "userIds": [
-              "1fdc6570-9944-4388-82b9-fae0af4f242e",
-              "6b96e2f9-3626-475a-8981-e199ad24949b"
+              "6b96e2f9-3626-475a-8981-e199ad24949b",
+              "c07b6378-3551-46cf-8f32-ac047465d873"
             ],
             "outcome": {
               "goals": [
                 1,
-                5
+                3
               ],
               "penalties": null,
               "winnerSide": 1,
-              "winChancePpm": 404468,
+              "winChancePpm": 860549,
               "dayRollsPpm": [
                 [
                   893531,
@@ -16001,55 +16280,55 @@
                   "kind": "chance",
                   "minute": 3,
                   "side": 0,
-                  "creator": 1,
+                  "creator": 3,
                   "shooter": 2,
-                  "chanceType": "header",
+                  "chanceType": "curler",
                   "outcome": "wide",
-                  "pGoalPpm": 276739,
-                  "defender": 3
+                  "pGoalPpm": 327372,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 12,
                   "side": 0,
                   "creator": 4,
-                  "shooter": 1,
-                  "chanceType": "cutback",
+                  "shooter": 2,
+                  "chanceType": "long_shot",
                   "outcome": "wide",
-                  "pGoalPpm": 463814,
-                  "defender": 1
+                  "pGoalPpm": 210453,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 19,
                   "side": 1,
-                  "creator": 1,
+                  "creator": 0,
                   "shooter": 2,
-                  "chanceType": "free_kick",
+                  "chanceType": "header",
                   "outcome": "goal",
-                  "pGoalPpm": 248764,
+                  "pGoalPpm": 195598,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 25,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "breakaway",
+                  "creator": 4,
+                  "shooter": 1,
+                  "chanceType": "first_time",
                   "outcome": "wide",
-                  "pGoalPpm": 431647,
-                  "defender": 1
+                  "pGoalPpm": 421707,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 26,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 2,
-                  "chanceType": "breakaway",
+                  "creator": 0,
+                  "shooter": 4,
+                  "chanceType": "long_shot",
                   "outcome": "goal",
-                  "pGoalPpm": 542758,
+                  "pGoalPpm": 92970,
                   "defender": null
                 },
                 {
@@ -16057,88 +16336,88 @@
                   "minute": 33,
                   "side": 1,
                   "creator": 2,
-                  "shooter": 4,
-                  "chanceType": "cutback",
+                  "shooter": 0,
+                  "chanceType": "volley",
                   "outcome": "goal",
-                  "pGoalPpm": 469108,
+                  "pGoalPpm": 248754,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 45,
-                  "side": 1,
+                  "side": 0,
                   "creator": 4,
-                  "shooter": 3,
+                  "shooter": 2,
                   "chanceType": "breakaway",
                   "outcome": "wide",
-                  "pGoalPpm": 433311,
+                  "pGoalPpm": 561210,
                   "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 51,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 1,
-                  "chanceType": "one_two",
+                  "creator": 1,
+                  "shooter": 4,
+                  "chanceType": "wing_run",
                   "outcome": "wide",
-                  "pGoalPpm": 408156,
-                  "defender": 3
+                  "pGoalPpm": 303531,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 56,
-                  "side": 1,
-                  "creator": 2,
-                  "shooter": 4,
-                  "chanceType": "chase",
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 2,
+                  "chanceType": "through_ball",
                   "outcome": "goal",
-                  "pGoalPpm": 375286,
+                  "pGoalPpm": 514442,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 58,
                   "side": 1,
-                  "creator": 1,
+                  "creator": 4,
                   "shooter": 2,
-                  "chanceType": "cutback",
-                  "outcome": "goal",
-                  "pGoalPpm": 565373,
-                  "defender": null
+                  "chanceType": "volley",
+                  "outcome": "block",
+                  "pGoalPpm": 173865,
+                  "defender": 3
                 },
                 {
                   "kind": "chance",
                   "minute": 68,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "cutback",
-                  "outcome": "goal",
-                  "pGoalPpm": 449632,
+                  "creator": 4,
+                  "shooter": 1,
+                  "chanceType": "curler",
+                  "outcome": "woodwork",
+                  "pGoalPpm": 295194,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 73,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 2,
-                  "chanceType": "curler",
+                  "creator": 2,
+                  "shooter": 1,
+                  "chanceType": "first_time",
                   "outcome": "save",
-                  "pGoalPpm": 215241,
-                  "defender": 0
+                  "pGoalPpm": 421707,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 90,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 2,
-                  "chanceType": "breakaway",
+                  "creator": 4,
+                  "shooter": 1,
+                  "chanceType": "chase",
                   "outcome": "block",
-                  "pGoalPpm": 368985,
-                  "defender": 4
+                  "pGoalPpm": 421707,
+                  "defender": 3
                 }
               ]
             }
@@ -16147,17 +16426,17 @@
             "round": 1,
             "pairing": 2,
             "userIds": [
-              "c07b6378-3551-46cf-8f32-ac047465d873",
-              "c7b85ce8-294d-47da-8b34-715a8565e93a"
+              "c7b85ce8-294d-47da-8b34-715a8565e93a",
+              "b01364f6-b218-4d04-8497-6ae876af2fa2"
             ],
             "outcome": {
               "goals": [
-                2,
+                3,
                 0
               ],
               "penalties": null,
               "winnerSide": 0,
-              "winChancePpm": 302622,
+              "winChancePpm": 579356,
               "dayRollsPpm": [
                 [
                   944988,
@@ -16179,67 +16458,67 @@
                   "kind": "chance",
                   "minute": 1,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 1,
-                  "chanceType": "through_ball",
+                  "creator": 0,
+                  "shooter": 3,
+                  "chanceType": "one_two",
                   "outcome": "save",
-                  "pGoalPpm": 398904,
-                  "defender": 1
+                  "pGoalPpm": 185839,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
                   "minute": 11,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 3,
+                  "creator": 4,
+                  "shooter": 1,
                   "chanceType": "cutback",
                   "outcome": "wide",
-                  "pGoalPpm": 348807,
-                  "defender": 4
+                  "pGoalPpm": 362699,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 19,
                   "side": 0,
-                  "creator": 4,
-                  "shooter": 3,
-                  "chanceType": "header",
+                  "creator": 2,
+                  "shooter": 2,
+                  "chanceType": "scramble",
                   "outcome": "goal",
-                  "pGoalPpm": 251141,
+                  "pGoalPpm": 350505,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 23,
                   "side": 0,
-                  "creator": 4,
-                  "shooter": 4,
-                  "chanceType": "free_kick",
-                  "outcome": "wide",
-                  "pGoalPpm": 121845,
-                  "defender": 2
+                  "creator": 1,
+                  "shooter": 3,
+                  "chanceType": "cutback",
+                  "outcome": "goal",
+                  "pGoalPpm": 381099,
+                  "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 45,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 1,
-                  "chanceType": "through_ball",
+                  "creator": 3,
+                  "shooter": 0,
+                  "chanceType": "curler",
                   "outcome": "save",
-                  "pGoalPpm": 398904,
-                  "defender": 1
+                  "pGoalPpm": 165829,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
                   "minute": 46,
                   "side": 0,
-                  "creator": 1,
-                  "shooter": 2,
-                  "chanceType": "free_kick",
+                  "creator": 2,
+                  "shooter": 3,
+                  "chanceType": "volley",
                   "outcome": "wide",
-                  "pGoalPpm": 135709,
-                  "defender": 3
+                  "pGoalPpm": 243903,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
@@ -16249,30 +16528,30 @@
                   "shooter": 3,
                   "chanceType": "volley",
                   "outcome": "goal",
-                  "pGoalPpm": 223236,
+                  "pGoalPpm": 243903,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 77,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 3,
-                  "chanceType": "scramble",
+                  "creator": 0,
+                  "shooter": 4,
+                  "chanceType": "first_time",
                   "outcome": "woodwork",
-                  "pGoalPpm": 425681,
+                  "pGoalPpm": 369731,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 81,
                   "side": 1,
-                  "creator": 3,
-                  "shooter": 1,
+                  "creator": 1,
+                  "shooter": 3,
                   "chanceType": "header",
                   "outcome": "save",
-                  "pGoalPpm": 326376,
-                  "defender": 1
+                  "pGoalPpm": 152050,
+                  "defender": 0
                 }
               ]
             }
@@ -16282,16 +16561,16 @@
             "pairing": 0,
             "userIds": [
               "af6612f6-11a8-4bfd-843c-c64135754e80",
-              "6b96e2f9-3626-475a-8981-e199ad24949b"
+              "c07b6378-3551-46cf-8f32-ac047465d873"
             ],
             "outcome": {
               "goals": [
                 2,
-                4
+                3
               ],
               "penalties": null,
               "winnerSide": 1,
-              "winChancePpm": 405666,
+              "winChancePpm": 808137,
               "dayRollsPpm": [
                 [
                   908802,
@@ -16312,23 +16591,23 @@
                 {
                   "kind": "chance",
                   "minute": 4,
-                  "side": 1,
-                  "creator": 2,
-                  "shooter": 4,
-                  "chanceType": "header",
+                  "side": 0,
+                  "creator": 4,
+                  "shooter": 3,
+                  "chanceType": "cutback",
                   "outcome": "save",
-                  "pGoalPpm": 208382,
-                  "defender": 2
+                  "pGoalPpm": 440222,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 11,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 2,
-                  "chanceType": "one_two",
+                  "creator": 3,
+                  "shooter": 3,
+                  "chanceType": "curler",
                   "outcome": "goal",
-                  "pGoalPpm": 371074,
+                  "pGoalPpm": 142107,
                   "defender": null
                 },
                 {
@@ -16339,29 +16618,29 @@
                   "shooter": 4,
                   "chanceType": "header",
                   "outcome": "goal",
-                  "pGoalPpm": 240277,
+                  "pGoalPpm": 313374,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 26,
-                  "side": 1,
+                  "side": 0,
                   "creator": 3,
-                  "shooter": 3,
-                  "chanceType": "curler",
+                  "shooter": 1,
+                  "chanceType": "chase",
                   "outcome": "save",
-                  "pGoalPpm": 170809,
-                  "defender": 2
+                  "pGoalPpm": 250662,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 39,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 1,
+                  "creator": 2,
+                  "shooter": 3,
                   "chanceType": "curler",
                   "outcome": "goal",
-                  "pGoalPpm": 194808,
+                  "pGoalPpm": 142107,
                   "defender": null
                 },
                 {
@@ -16372,7 +16651,7 @@
                   "shooter": 1,
                   "chanceType": "curler",
                   "outcome": "goal",
-                  "pGoalPpm": 123387,
+                  "pGoalPpm": 175463,
                   "defender": null
                 },
                 {
@@ -16381,43 +16660,43 @@
                   "side": 1,
                   "creator": 2,
                   "shooter": 4,
-                  "chanceType": "cutback",
+                  "chanceType": "one_two",
                   "outcome": "save",
-                  "pGoalPpm": 289419,
+                  "pGoalPpm": 173373,
                   "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 66,
-                  "side": 1,
-                  "creator": 2,
-                  "shooter": 2,
-                  "chanceType": "free_kick",
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 0,
+                  "chanceType": "through_ball",
                   "outcome": "wide",
-                  "pGoalPpm": 185537,
-                  "defender": 0
+                  "pGoalPpm": 248512,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 76,
                   "side": 1,
-                  "creator": 2,
-                  "shooter": 1,
-                  "chanceType": "cutback",
+                  "creator": 3,
+                  "shooter": 0,
+                  "chanceType": "volley",
                   "outcome": "goal",
-                  "pGoalPpm": 347871,
+                  "pGoalPpm": 193601,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 80,
                   "side": 1,
-                  "creator": 3,
-                  "shooter": 1,
-                  "chanceType": "first_time",
-                  "outcome": "goal",
-                  "pGoalPpm": 278297,
-                  "defender": null
+                  "creator": 0,
+                  "shooter": 3,
+                  "chanceType": "free_kick",
+                  "outcome": "save",
+                  "pGoalPpm": 111655,
+                  "defender": 2
                 }
               ]
             }
@@ -16426,8 +16705,8 @@
             "round": 2,
             "pairing": 1,
             "userIds": [
-              "c07b6378-3551-46cf-8f32-ac047465d873",
-              "b01364f6-b218-4d04-8497-6ae876af2fa2"
+              "c7b85ce8-294d-47da-8b34-715a8565e93a",
+              "1fdc6570-9944-4388-82b9-fae0af4f242e"
             ],
             "outcome": {
               "goals": [
@@ -16436,7 +16715,7 @@
               ],
               "penalties": null,
               "winnerSide": 1,
-              "winChancePpm": 374090,
+              "winChancePpm": 354768,
               "dayRollsPpm": [
                 [
                   922331,
@@ -16462,7 +16741,7 @@
                   "shooter": 4,
                   "chanceType": "cutback",
                   "outcome": "woodwork",
-                  "pGoalPpm": 287085,
+                  "pGoalPpm": 429112,
                   "defender": null
                 },
                 {
@@ -16470,77 +16749,77 @@
                   "minute": 12,
                   "side": 0,
                   "creator": 3,
-                  "shooter": 0,
-                  "chanceType": "first_time",
+                  "shooter": 4,
+                  "chanceType": "one_two",
                   "outcome": "save",
-                  "pGoalPpm": 334268,
-                  "defender": 2
+                  "pGoalPpm": 377619,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 16,
                   "side": 1,
-                  "creator": 4,
-                  "shooter": 0,
-                  "chanceType": "through_ball",
+                  "creator": 1,
+                  "shooter": 2,
+                  "chanceType": "first_time",
                   "outcome": "goal",
-                  "pGoalPpm": 342350,
+                  "pGoalPpm": 340422,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 30,
                   "side": 0,
-                  "creator": 3,
-                  "shooter": 0,
+                  "creator": 2,
+                  "shooter": 3,
                   "chanceType": "volley",
                   "outcome": "save",
-                  "pGoalPpm": 267414,
-                  "defender": 2
+                  "pGoalPpm": 297221,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 61,
                   "side": 1,
-                  "creator": 0,
-                  "shooter": 4,
-                  "chanceType": "volley",
+                  "creator": 3,
+                  "shooter": 0,
+                  "chanceType": "one_two",
                   "outcome": "block",
-                  "pGoalPpm": 316798,
-                  "defender": 3
+                  "pGoalPpm": 463135,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 71,
                   "side": 0,
-                  "creator": 4,
-                  "shooter": 2,
+                  "creator": 2,
+                  "shooter": 4,
                   "chanceType": "curler",
                   "outcome": "block",
-                  "pGoalPpm": 178962,
-                  "defender": 3
+                  "pGoalPpm": 240303,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 82,
                   "side": 1,
-                  "creator": 0,
-                  "shooter": 0,
-                  "chanceType": "curler",
+                  "creator": 2,
+                  "shooter": 3,
+                  "chanceType": "one_two",
                   "outcome": "goal",
-                  "pGoalPpm": 217859,
+                  "pGoalPpm": 226838,
                   "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 87,
                   "side": 1,
-                  "creator": 3,
-                  "shooter": 0,
-                  "chanceType": "header",
+                  "creator": 0,
+                  "shooter": 2,
+                  "chanceType": "curler",
                   "outcome": "wide",
-                  "pGoalPpm": 280105,
-                  "defender": 4
+                  "pGoalPpm": 238295,
+                  "defender": 3
                 }
               ]
             }
@@ -16549,17 +16828,20 @@
             "round": 3,
             "pairing": 0,
             "userIds": [
-              "6b96e2f9-3626-475a-8981-e199ad24949b",
-              "b01364f6-b218-4d04-8497-6ae876af2fa2"
+              "c07b6378-3551-46cf-8f32-ac047465d873",
+              "1fdc6570-9944-4388-82b9-fae0af4f242e"
             ],
             "outcome": {
               "goals": [
                 1,
-                0
+                1
               ],
-              "penalties": null,
+              "penalties": [
+                9,
+                8
+              ],
               "winnerSide": 0,
-              "winChancePpm": 786701,
+              "winChancePpm": 192634,
               "dayRollsPpm": [
                 [
                   1105524,
@@ -16582,65 +16864,65 @@
                   "minute": 8,
                   "side": 1,
                   "creator": 0,
-                  "shooter": 0,
-                  "chanceType": "curler",
+                  "shooter": 3,
+                  "chanceType": "through_ball",
                   "outcome": "block",
-                  "pGoalPpm": 146612,
-                  "defender": 3
+                  "pGoalPpm": 277174,
+                  "defender": 4
                 },
                 {
                   "kind": "chance",
                   "minute": 15,
                   "side": 0,
-                  "creator": 3,
-                  "shooter": 4,
-                  "chanceType": "chase",
+                  "creator": 4,
+                  "shooter": 0,
+                  "chanceType": "first_time",
                   "outcome": "block",
-                  "pGoalPpm": 326627,
-                  "defender": 1
+                  "pGoalPpm": 411612,
+                  "defender": 0
                 },
                 {
                   "kind": "chance",
                   "minute": 26,
                   "side": 1,
-                  "creator": 1,
-                  "shooter": 3,
-                  "chanceType": "volley",
+                  "creator": 2,
+                  "shooter": 1,
+                  "chanceType": "wing_run",
                   "outcome": "save",
-                  "pGoalPpm": 96351,
-                  "defender": 0
+                  "pGoalPpm": 379500,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 35,
-                  "side": 0,
+                  "side": 1,
                   "creator": 3,
-                  "shooter": 3,
-                  "chanceType": "long_shot",
-                  "outcome": "block",
-                  "pGoalPpm": 147348,
-                  "defender": 1
+                  "shooter": 0,
+                  "chanceType": "through_ball",
+                  "outcome": "goal",
+                  "pGoalPpm": 497704,
+                  "defender": null
                 },
                 {
                   "kind": "chance",
                   "minute": 42,
                   "side": 1,
-                  "creator": 0,
-                  "shooter": 1,
-                  "chanceType": "through_ball",
+                  "creator": 2,
+                  "shooter": 0,
+                  "chanceType": "free_kick",
                   "outcome": "save",
-                  "pGoalPpm": 172032,
-                  "defender": 0
+                  "pGoalPpm": 248852,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 49,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 3,
-                  "chanceType": "first_time",
+                  "creator": 3,
+                  "shooter": 2,
+                  "chanceType": "free_kick",
                   "outcome": "woodwork",
-                  "pGoalPpm": 327441,
+                  "pGoalPpm": 169026,
                   "defender": null
                 },
                 {
@@ -16648,44 +16930,224 @@
                   "minute": 54,
                   "side": 1,
                   "creator": 1,
-                  "shooter": 0,
-                  "chanceType": "cutback",
+                  "shooter": 1,
+                  "chanceType": "breakaway",
                   "outcome": "save",
-                  "pGoalPpm": 261807,
-                  "defender": 0
+                  "pGoalPpm": 535764,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 65,
                   "side": 1,
-                  "creator": 3,
+                  "creator": 2,
                   "shooter": 1,
-                  "chanceType": "long_shot",
+                  "chanceType": "one_two",
                   "outcome": "block",
-                  "pGoalPpm": 70376,
-                  "defender": 4
+                  "pGoalPpm": 491117,
+                  "defender": 2
                 },
                 {
                   "kind": "chance",
                   "minute": 71,
                   "side": 1,
-                  "creator": 0,
-                  "shooter": 0,
-                  "chanceType": "long_shot",
+                  "creator": 3,
+                  "shooter": 2,
+                  "chanceType": "free_kick",
                   "outcome": "save",
-                  "pGoalPpm": 94250,
-                  "defender": 0
+                  "pGoalPpm": 212486,
+                  "defender": 1
                 },
                 {
                   "kind": "chance",
                   "minute": 78,
                   "side": 0,
-                  "creator": 2,
-                  "shooter": 2,
-                  "chanceType": "wing_run",
+                  "creator": 4,
+                  "shooter": 0,
+                  "chanceType": "cutback",
                   "outcome": "goal",
-                  "pGoalPpm": 343554,
+                  "pGoalPpm": 514515,
                   "defender": null
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 1,
+                  "kicker": 0,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 0,
+                  "kicker": 0,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 1,
+                  "kicker": 1,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 0,
+                  "kicker": 3,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 802050
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 1,
+                  "kicker": 2,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 824238
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 0,
+                  "kicker": 2,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 704235
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 1,
+                  "kicker": 3,
+                  "keeper": 1,
+                  "outcome": "save",
+                  "pGoalPpm": 492202
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 0,
+                  "kicker": 4,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 697251
+                },
+                {
+                  "kind": "penalty",
+                  "round": 5,
+                  "side": 1,
+                  "kicker": 4,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 511612
+                },
+                {
+                  "kind": "penalty",
+                  "round": 5,
+                  "side": 0,
+                  "kicker": 1,
+                  "keeper": 4,
+                  "outcome": "wide",
+                  "pGoalPpm": 424132
+                },
+                {
+                  "kind": "penalty",
+                  "round": 6,
+                  "side": 1,
+                  "kicker": 0,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 6,
+                  "side": 0,
+                  "kicker": 0,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 7,
+                  "side": 1,
+                  "kicker": 1,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 950000
+                },
+                {
+                  "kind": "penalty",
+                  "round": 7,
+                  "side": 0,
+                  "kicker": 3,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 802050
+                },
+                {
+                  "kind": "penalty",
+                  "round": 8,
+                  "side": 1,
+                  "kicker": 2,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 824238
+                },
+                {
+                  "kind": "penalty",
+                  "round": 8,
+                  "side": 0,
+                  "kicker": 2,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 704235
+                },
+                {
+                  "kind": "penalty",
+                  "round": 9,
+                  "side": 1,
+                  "kicker": 3,
+                  "keeper": 1,
+                  "outcome": "goal",
+                  "pGoalPpm": 492202
+                },
+                {
+                  "kind": "penalty",
+                  "round": 9,
+                  "side": 0,
+                  "kicker": 4,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 697251
+                },
+                {
+                  "kind": "penalty",
+                  "round": 10,
+                  "side": 1,
+                  "kicker": 4,
+                  "keeper": 1,
+                  "outcome": "save",
+                  "pGoalPpm": 511612
+                },
+                {
+                  "kind": "penalty",
+                  "round": 10,
+                  "side": 0,
+                  "kicker": 1,
+                  "keeper": 4,
+                  "outcome": "goal",
+                  "pGoalPpm": 424132
                 }
               ]
             }
@@ -16699,43 +17161,43 @@
             "bye": true
           },
           {
-            "userId": "6b96e2f9-3626-475a-8981-e199ad24949b",
-            "round": 1,
-            "amount": 42,
-            "bye": false
-          },
-          {
             "userId": "c07b6378-3551-46cf-8f32-ac047465d873",
             "round": 1,
             "amount": 42,
             "bye": false
           },
           {
-            "userId": "b01364f6-b218-4d04-8497-6ae876af2fa2",
+            "userId": "c7b85ce8-294d-47da-8b34-715a8565e93a",
+            "round": 1,
+            "amount": 42,
+            "bye": false
+          },
+          {
+            "userId": "1fdc6570-9944-4388-82b9-fae0af4f242e",
             "round": 1,
             "amount": 42,
             "bye": true
           },
           {
-            "userId": "6b96e2f9-3626-475a-8981-e199ad24949b",
+            "userId": "c07b6378-3551-46cf-8f32-ac047465d873",
             "round": 2,
             "amount": 83,
             "bye": false
           },
           {
-            "userId": "b01364f6-b218-4d04-8497-6ae876af2fa2",
+            "userId": "1fdc6570-9944-4388-82b9-fae0af4f242e",
             "round": 2,
             "amount": 83,
             "bye": false
           },
           {
-            "userId": "6b96e2f9-3626-475a-8981-e199ad24949b",
+            "userId": "c07b6378-3551-46cf-8f32-ac047465d873",
             "round": 3,
             "amount": 125,
             "bye": false
           }
         ],
-        "championUserId": "6b96e2f9-3626-475a-8981-e199ad24949b"
+        "championUserId": "c07b6378-3551-46cf-8f32-ac047465d873"
       }
     },
     {
@@ -17728,7 +18190,7 @@
           },
           {
             "pairing": 3,
-            "userId": "c54dfec1-63ce-4fa7-8c3b-de2512e1b80c"
+            "userId": "5429b5af-7a33-4554-86dd-b638ef5a32d3"
           }
         ],
         "matches": [
@@ -17736,8 +18198,8 @@
             "round": 1,
             "pairing": 2,
             "userIds": [
-              "5429b5af-7a33-4554-86dd-b638ef5a32d3",
-              "f1dd873c-b232-4949-8703-3bbb048b32f8"
+              "f1dd873c-b232-4949-8703-3bbb048b32f8",
+              "c54dfec1-63ce-4fa7-8c3b-de2512e1b80c"
             ],
             "outcome": {
               "goals": [
@@ -18037,8 +18499,8 @@
             "round": 2,
             "pairing": 1,
             "userIds": [
-              "5429b5af-7a33-4554-86dd-b638ef5a32d3",
-              "c54dfec1-63ce-4fa7-8c3b-de2512e1b80c"
+              "f1dd873c-b232-4949-8703-3bbb048b32f8",
+              "5429b5af-7a33-4554-86dd-b638ef5a32d3"
             ],
             "outcome": {
               "goals": [
@@ -18308,7 +18770,7 @@
             "pairing": 0,
             "userIds": [
               "a0744652-7dcf-49f8-8ef8-3bcf79fcfc46",
-              "5429b5af-7a33-4554-86dd-b638ef5a32d3"
+              "f1dd873c-b232-4949-8703-3bbb048b32f8"
             ],
             "outcome": {
               "goals": [
@@ -18441,13 +18903,13 @@
             "bye": true
           },
           {
-            "userId": "5429b5af-7a33-4554-86dd-b638ef5a32d3",
+            "userId": "f1dd873c-b232-4949-8703-3bbb048b32f8",
             "round": 1,
             "amount": 42,
             "bye": false
           },
           {
-            "userId": "c54dfec1-63ce-4fa7-8c3b-de2512e1b80c",
+            "userId": "5429b5af-7a33-4554-86dd-b638ef5a32d3",
             "round": 1,
             "amount": 42,
             "bye": true
@@ -18459,7 +18921,7 @@
             "bye": false
           },
           {
-            "userId": "5429b5af-7a33-4554-86dd-b638ef5a32d3",
+            "userId": "f1dd873c-b232-4949-8703-3bbb048b32f8",
             "round": 2,
             "amount": 83,
             "bye": false
@@ -18472,6 +18934,1630 @@
           }
         ],
         "championUserId": "a0744652-7dcf-49f8-8ef8-3bcf79fcfc46"
+      }
+    },
+    {
+      "name": "saved squads get the byes first",
+      "seed": "6d9a21927ae2b37ee2929d6e4d03086ff86231c0db572c6675d8020b17e78450",
+      "seedHash": "d8dfdb60d5854a1c86c0c4c5aa3a6b82ba30e1471c572b6b7aafea69acd89c53",
+      "entrants": [
+        {
+          "userId": "26d30fc6-afd8-4138-8be7-19a7e9fcec3b",
+          "owned": [
+            {
+              "cardId": "122727c3-3809-40e6-82a2-2c47b99f9ac7",
+              "playerId": "0c1ce514-a360-41ad-86c0-0308b3f961c3",
+              "ovr": 64,
+              "archetype": "finisher",
+              "injured": false
+            },
+            {
+              "cardId": "f42d4aca-04ea-4430-8a6f-01b96f04191c",
+              "playerId": "01de250d-d954-491f-8ca4-9c7dcbf45fa0",
+              "ovr": 58,
+              "archetype": "goalkeeper",
+              "injured": false
+            },
+            {
+              "cardId": "5ec7cf87-a815-4b48-88bf-75bc640ac59e",
+              "playerId": "f1c668cf-c742-45b3-80c3-ad8fce776fba",
+              "ovr": 47,
+              "archetype": "tank",
+              "injured": false
+            }
+          ],
+          "saved": []
+        },
+        {
+          "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2",
+          "owned": [
+            {
+              "cardId": "2ab94234-aa3d-4dbc-82ca-9d20599fac59",
+              "playerId": "5f6ba779-6b54-43d8-87e8-a5fd0af755fe",
+              "ovr": 52,
+              "archetype": "playmaker",
+              "injured": false
+            },
+            {
+              "cardId": "9aae0c58-45e2-428a-85d9-2099c030b2d9",
+              "playerId": "50ab9847-4ca5-41ef-8149-92c50e645df5",
+              "ovr": 49,
+              "archetype": "defender",
+              "injured": false
+            },
+            {
+              "cardId": "5cccf4e9-c987-4763-8693-64d9f5fe5b6d",
+              "playerId": "5f910228-220f-4780-8c9a-a90c4437cc3d",
+              "ovr": 70,
+              "archetype": "speedster",
+              "injured": false
+            }
+          ],
+          "saved": []
+        },
+        {
+          "userId": "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7",
+          "owned": [
+            {
+              "cardId": "06840b1c-399a-4a27-82fb-1d4917f28032",
+              "playerId": "32f6282f-54eb-49cb-8d1b-25719e1bfbff",
+              "ovr": 45,
+              "archetype": "goalkeeper",
+              "injured": false
+            },
+            {
+              "cardId": "a07ff93d-706c-4108-8c75-db7d4964eb23",
+              "playerId": "f6e5e0cc-ce6b-46ca-8c07-8773bf3e2418",
+              "ovr": 51,
+              "archetype": "defender",
+              "injured": false
+            },
+            {
+              "cardId": "0eec3aa5-54f5-470a-8e0b-cc55f6f79855",
+              "playerId": "d324c5a8-ee6f-4655-8415-ed5ccd9ec6ab",
+              "ovr": 56,
+              "archetype": "playmaker",
+              "injured": false
+            },
+            {
+              "cardId": "d9bbe60d-3220-4814-8a7f-a58a77430f79",
+              "playerId": "9344697e-8167-437d-88c6-39df7b602754",
+              "ovr": 60,
+              "archetype": "speedster",
+              "injured": false
+            },
+            {
+              "cardId": "849869be-f6ed-4d12-8d09-3924d0be436b",
+              "playerId": "f805da20-dcf3-4a94-8072-d721a62e03e1",
+              "ovr": 66,
+              "archetype": "finisher",
+              "injured": false
+            }
+          ],
+          "saved": [
+            {
+              "cardId": "06840b1c-399a-4a27-82fb-1d4917f28032",
+              "playerId": "32f6282f-54eb-49cb-8d1b-25719e1bfbff",
+              "ovr": 45,
+              "archetype": "goalkeeper",
+              "injured": false
+            },
+            {
+              "cardId": "a07ff93d-706c-4108-8c75-db7d4964eb23",
+              "playerId": "f6e5e0cc-ce6b-46ca-8c07-8773bf3e2418",
+              "ovr": 51,
+              "archetype": "defender",
+              "injured": false
+            },
+            {
+              "cardId": "0eec3aa5-54f5-470a-8e0b-cc55f6f79855",
+              "playerId": "d324c5a8-ee6f-4655-8415-ed5ccd9ec6ab",
+              "ovr": 56,
+              "archetype": "playmaker",
+              "injured": false
+            },
+            {
+              "cardId": "d9bbe60d-3220-4814-8a7f-a58a77430f79",
+              "playerId": "9344697e-8167-437d-88c6-39df7b602754",
+              "ovr": 60,
+              "archetype": "speedster",
+              "injured": false
+            },
+            {
+              "cardId": "849869be-f6ed-4d12-8d09-3924d0be436b",
+              "playerId": "f805da20-dcf3-4a94-8072-d721a62e03e1",
+              "ovr": 66,
+              "archetype": "finisher",
+              "injured": false
+            }
+          ]
+        },
+        {
+          "userId": "77649d8e-57ce-46d6-8b65-dffa9ae333ed",
+          "owned": [
+            {
+              "cardId": "b9e1575c-8de5-4944-8a67-d1bfa81d8e88",
+              "playerId": "f8a298f0-7786-4a0a-851b-aedec66b33bb",
+              "ovr": 61,
+              "archetype": "all_rounder",
+              "injured": false
+            },
+            {
+              "cardId": "08495a2c-4811-4cb1-8288-fdfc4f8e1be0",
+              "playerId": "ead6a4ef-d4b2-4bd3-870e-085171c0782f",
+              "ovr": 43,
+              "archetype": "goalkeeper",
+              "injured": false
+            },
+            {
+              "cardId": "6dc32638-1a03-4ecb-8a3b-f84ac2de5419",
+              "playerId": "43399fef-3d12-4690-88ef-9157565e97c4",
+              "ovr": 55,
+              "archetype": "tank",
+              "injured": false
+            }
+          ],
+          "saved": []
+        },
+        {
+          "userId": "55043d58-c392-4ed1-853a-5a8502357377",
+          "owned": [
+            {
+              "cardId": "b5adb002-b966-4099-8874-e2f1ee63920d",
+              "playerId": "ba998199-999b-433f-806d-603fb7fcd9b8",
+              "ovr": 72,
+              "archetype": "all_rounder",
+              "injured": false
+            },
+            {
+              "cardId": "b9978599-db70-4ed8-8b10-102d5d7f9056",
+              "playerId": "3c79353d-b01a-4911-8a14-28da86357b32",
+              "ovr": 39,
+              "archetype": "goalkeeper",
+              "injured": false
+            },
+            {
+              "cardId": "f61011a2-61f2-479b-8629-cfc7ecaf6122",
+              "playerId": "fd56e59b-0732-4afa-8c87-9dfc31c8a263",
+              "ovr": 50,
+              "archetype": "tank",
+              "injured": false
+            }
+          ],
+          "saved": [
+            {
+              "cardId": "b5adb002-b966-4099-8874-e2f1ee63920d",
+              "playerId": "ba998199-999b-433f-806d-603fb7fcd9b8",
+              "ovr": 72,
+              "archetype": "all_rounder",
+              "injured": false
+            }
+          ]
+        }
+      ],
+      "result": {
+        "status": "simulated",
+        "size": 8,
+        "rounds": 3,
+        "entries": [
+          {
+            "userId": "26d30fc6-afd8-4138-8be7-19a7e9fcec3b",
+            "auto": true,
+            "cards": [
+              {
+                "slot": 0,
+                "cardId": "5ec7cf87-a815-4b48-88bf-75bc640ac59e",
+                "playerId": "f1c668cf-c742-45b3-80c3-ad8fce776fba",
+                "trialist": false,
+                "ovr": 47,
+                "archetype": "tank",
+                "injured": false,
+                "ovrFactorPpm": 1038490,
+                "formRollPpm": 850316,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 550000,
+                "powerPpm": 485674,
+                "lines": {
+                  "attPpm": 500000,
+                  "midPpm": 1500000,
+                  "defPpm": 1800000
+                }
+              },
+              {
+                "slot": 1,
+                "cardId": "122727c3-3809-40e6-82a2-2c47b99f9ac7",
+                "playerId": "0c1ce514-a360-41ad-86c0-0308b3f961c3",
+                "trialist": false,
+                "ovr": 64,
+                "archetype": "finisher",
+                "injured": false,
+                "ovrFactorPpm": 1076981,
+                "formRollPpm": 989556,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 550000,
+                "powerPpm": 586153,
+                "lines": {
+                  "attPpm": 2000000,
+                  "midPpm": 1000000,
+                  "defPpm": 200000
+                }
+              },
+              {
+                "slot": 2,
+                "cardId": "f42d4aca-04ea-4430-8a6f-01b96f04191c",
+                "playerId": "01de250d-d954-491f-8ca4-9c7dcbf45fa0",
+                "trialist": false,
+                "ovr": 58,
+                "archetype": "goalkeeper",
+                "injured": false,
+                "ovrFactorPpm": 1063396,
+                "formRollPpm": 905154,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 550000,
+                "powerPpm": 529395,
+                "lines": {
+                  "attPpm": 500000,
+                  "midPpm": 500000,
+                  "defPpm": 2600000
+                }
+              },
+              {
+                "slot": 3,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 1142612,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 453750,
+                "powerPpm": 518460,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              },
+              {
+                "slot": 4,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 1053817,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 453750,
+                "powerPpm": 478169,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              }
+            ],
+            "keeperSlot": 2,
+            "keeperless": false,
+            "balancePpm": 1000000
+          },
+          {
+            "userId": "55043d58-c392-4ed1-853a-5a8502357377",
+            "auto": false,
+            "cards": [
+              {
+                "slot": 0,
+                "cardId": "b5adb002-b966-4099-8874-e2f1ee63920d",
+                "playerId": "ba998199-999b-433f-806d-603fb7fcd9b8",
+                "trialist": false,
+                "ovr": 72,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1095094,
+                "formRollPpm": 979253,
+                "pickFactorPpm": 979167,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 1000000,
+                "powerPpm": 1050033,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              },
+              {
+                "slot": 1,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 938836,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 825000,
+                "powerPpm": 774539,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              },
+              {
+                "slot": 2,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 835689,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 825000,
+                "powerPpm": 689443,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              },
+              {
+                "slot": 3,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 923044,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 825000,
+                "powerPpm": 761511,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              },
+              {
+                "slot": 4,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 1086586,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 825000,
+                "powerPpm": 896433,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              }
+            ],
+            "keeperSlot": 0,
+            "keeperless": true,
+            "balancePpm": 1000000
+          },
+          {
+            "userId": "77649d8e-57ce-46d6-8b65-dffa9ae333ed",
+            "auto": true,
+            "cards": [
+              {
+                "slot": 0,
+                "cardId": "6dc32638-1a03-4ecb-8a3b-f84ac2de5419",
+                "playerId": "43399fef-3d12-4690-88ef-9157565e97c4",
+                "trialist": false,
+                "ovr": 55,
+                "archetype": "tank",
+                "injured": false,
+                "ovrFactorPpm": 1056603,
+                "formRollPpm": 1110831,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 550000,
+                "powerPpm": 645538,
+                "lines": {
+                  "attPpm": 500000,
+                  "midPpm": 1500000,
+                  "defPpm": 1800000
+                }
+              },
+              {
+                "slot": 1,
+                "cardId": "b9e1575c-8de5-4944-8a67-d1bfa81d8e88",
+                "playerId": "f8a298f0-7786-4a0a-851b-aedec66b33bb",
+                "trialist": false,
+                "ovr": 61,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1070188,
+                "formRollPpm": 971355,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 550000,
+                "powerPpm": 571742,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              },
+              {
+                "slot": 2,
+                "cardId": "08495a2c-4811-4cb1-8288-fdfc4f8e1be0",
+                "playerId": "ead6a4ef-d4b2-4bd3-870e-085171c0782f",
+                "trialist": false,
+                "ovr": 43,
+                "archetype": "goalkeeper",
+                "injured": false,
+                "ovrFactorPpm": 1029433,
+                "formRollPpm": 935042,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 550000,
+                "powerPpm": 529409,
+                "lines": {
+                  "attPpm": 500000,
+                  "midPpm": 500000,
+                  "defPpm": 2600000
+                }
+              },
+              {
+                "slot": 3,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 1045218,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 453750,
+                "powerPpm": 474267,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              },
+              {
+                "slot": 4,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 1029193,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 453750,
+                "powerPpm": 466996,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              }
+            ],
+            "keeperSlot": 2,
+            "keeperless": false,
+            "balancePpm": 1000000
+          },
+          {
+            "userId": "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7",
+            "auto": false,
+            "cards": [
+              {
+                "slot": 0,
+                "cardId": "06840b1c-399a-4a27-82fb-1d4917f28032",
+                "playerId": "32f6282f-54eb-49cb-8d1b-25719e1bfbff",
+                "trialist": false,
+                "ovr": 45,
+                "archetype": "goalkeeper",
+                "injured": false,
+                "ovrFactorPpm": 1033962,
+                "formRollPpm": 879767,
+                "pickFactorPpm": 979167,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 1000000,
+                "powerPpm": 890694,
+                "lines": {
+                  "attPpm": 500000,
+                  "midPpm": 500000,
+                  "defPpm": 2600000
+                }
+              },
+              {
+                "slot": 1,
+                "cardId": "a07ff93d-706c-4108-8c75-db7d4964eb23",
+                "playerId": "f6e5e0cc-ce6b-46ca-8c07-8773bf3e2418",
+                "trialist": false,
+                "ovr": 51,
+                "archetype": "defender",
+                "injured": false,
+                "ovrFactorPpm": 1047547,
+                "formRollPpm": 965869,
+                "pickFactorPpm": 979167,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 1000000,
+                "powerPpm": 990714,
+                "lines": {
+                  "attPpm": 500000,
+                  "midPpm": 1000000,
+                  "defPpm": 2600000
+                }
+              },
+              {
+                "slot": 2,
+                "cardId": "0eec3aa5-54f5-470a-8e0b-cc55f6f79855",
+                "playerId": "d324c5a8-ee6f-4655-8415-ed5ccd9ec6ab",
+                "trialist": false,
+                "ovr": 56,
+                "archetype": "playmaker",
+                "injured": false,
+                "ovrFactorPpm": 1058867,
+                "formRollPpm": 998591,
+                "pickFactorPpm": 979167,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 1000000,
+                "powerPpm": 1035346,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 2000000,
+                  "defPpm": 200000
+                }
+              },
+              {
+                "slot": 3,
+                "cardId": "d9bbe60d-3220-4814-8a7f-a58a77430f79",
+                "playerId": "9344697e-8167-437d-88c6-39df7b602754",
+                "trialist": false,
+                "ovr": 60,
+                "archetype": "speedster",
+                "injured": false,
+                "ovrFactorPpm": 1067924,
+                "formRollPpm": 1072582,
+                "pickFactorPpm": 979167,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 1000000,
+                "powerPpm": 1121573,
+                "lines": {
+                  "attPpm": 1500000,
+                  "midPpm": 1500000,
+                  "defPpm": 200000
+                }
+              },
+              {
+                "slot": 4,
+                "cardId": "849869be-f6ed-4d12-8d09-3924d0be436b",
+                "playerId": "f805da20-dcf3-4a94-8072-d721a62e03e1",
+                "trialist": false,
+                "ovr": 66,
+                "archetype": "finisher",
+                "injured": false,
+                "ovrFactorPpm": 1081509,
+                "formRollPpm": 1026329,
+                "pickFactorPpm": 979167,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 1000000,
+                "powerPpm": 1086859,
+                "lines": {
+                  "attPpm": 2000000,
+                  "midPpm": 1000000,
+                  "defPpm": 200000
+                }
+              }
+            ],
+            "keeperSlot": 0,
+            "keeperless": false,
+            "balancePpm": 1000000
+          },
+          {
+            "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2",
+            "auto": true,
+            "cards": [
+              {
+                "slot": 0,
+                "cardId": "9aae0c58-45e2-428a-85d9-2099c030b2d9",
+                "playerId": "50ab9847-4ca5-41ef-8149-92c50e645df5",
+                "trialist": false,
+                "ovr": 49,
+                "archetype": "defender",
+                "injured": false,
+                "ovrFactorPpm": 1043018,
+                "formRollPpm": 1086754,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 550000,
+                "powerPpm": 623426,
+                "lines": {
+                  "attPpm": 500000,
+                  "midPpm": 1000000,
+                  "defPpm": 2600000
+                }
+              },
+              {
+                "slot": 1,
+                "cardId": "5cccf4e9-c987-4763-8693-64d9f5fe5b6d",
+                "playerId": "5f910228-220f-4780-8c9a-a90c4437cc3d",
+                "trialist": false,
+                "ovr": 70,
+                "archetype": "speedster",
+                "injured": false,
+                "ovrFactorPpm": 1090566,
+                "formRollPpm": 1116132,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 550000,
+                "powerPpm": 669468,
+                "lines": {
+                  "attPpm": 1500000,
+                  "midPpm": 1500000,
+                  "defPpm": 200000
+                }
+              },
+              {
+                "slot": 2,
+                "cardId": "2ab94234-aa3d-4dbc-82ca-9d20599fac59",
+                "playerId": "5f6ba779-6b54-43d8-87e8-a5fd0af755fe",
+                "trialist": false,
+                "ovr": 52,
+                "archetype": "playmaker",
+                "injured": false,
+                "ovrFactorPpm": 1049811,
+                "formRollPpm": 1158503,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 550000,
+                "powerPpm": 668914,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 2000000,
+                  "defPpm": 200000
+                }
+              },
+              {
+                "slot": 3,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 966230,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 453750,
+                "powerPpm": 438426,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              },
+              {
+                "slot": 4,
+                "cardId": null,
+                "playerId": null,
+                "trialist": true,
+                "ovr": 30,
+                "archetype": "all_rounder",
+                "injured": false,
+                "ovrFactorPpm": 1000000,
+                "formRollPpm": 1115555,
+                "pickFactorPpm": 1000000,
+                "fitnessPpm": 1000000,
+                "handicapPpm": 453750,
+                "powerPpm": 506183,
+                "lines": {
+                  "attPpm": 1000000,
+                  "midPpm": 1000000,
+                  "defPpm": 1000000
+                }
+              }
+            ],
+            "keeperSlot": 0,
+            "keeperless": true,
+            "balancePpm": 880000
+          }
+        ],
+        "pickShares": [
+          {
+            "playerId": "01de250d-d954-491f-8ca4-9c7dcbf45fa0",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "0c1ce514-a360-41ad-86c0-0308b3f961c3",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "32f6282f-54eb-49cb-8d1b-25719e1bfbff",
+            "owners": 1,
+            "picks": 1,
+            "sharePpm": 500000,
+            "pickFactorPpm": 979167
+          },
+          {
+            "playerId": "3c79353d-b01a-4911-8a14-28da86357b32",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "43399fef-3d12-4690-88ef-9157565e97c4",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "50ab9847-4ca5-41ef-8149-92c50e645df5",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "5f6ba779-6b54-43d8-87e8-a5fd0af755fe",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "5f910228-220f-4780-8c9a-a90c4437cc3d",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "9344697e-8167-437d-88c6-39df7b602754",
+            "owners": 1,
+            "picks": 1,
+            "sharePpm": 500000,
+            "pickFactorPpm": 979167
+          },
+          {
+            "playerId": "ba998199-999b-433f-806d-603fb7fcd9b8",
+            "owners": 1,
+            "picks": 1,
+            "sharePpm": 500000,
+            "pickFactorPpm": 979167
+          },
+          {
+            "playerId": "d324c5a8-ee6f-4655-8415-ed5ccd9ec6ab",
+            "owners": 1,
+            "picks": 1,
+            "sharePpm": 500000,
+            "pickFactorPpm": 979167
+          },
+          {
+            "playerId": "ead6a4ef-d4b2-4bd3-870e-085171c0782f",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "f1c668cf-c742-45b3-80c3-ad8fce776fba",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "f6e5e0cc-ce6b-46ca-8c07-8773bf3e2418",
+            "owners": 1,
+            "picks": 1,
+            "sharePpm": 500000,
+            "pickFactorPpm": 979167
+          },
+          {
+            "playerId": "f805da20-dcf3-4a94-8072-d721a62e03e1",
+            "owners": 1,
+            "picks": 1,
+            "sharePpm": 500000,
+            "pickFactorPpm": 979167
+          },
+          {
+            "playerId": "f8a298f0-7786-4a0a-851b-aedec66b33bb",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          },
+          {
+            "playerId": "fd56e59b-0732-4afa-8c87-9dfc31c8a263",
+            "owners": 1,
+            "picks": 0,
+            "sharePpm": 250000,
+            "pickFactorPpm": 1093750
+          }
+        ],
+        "byes": [
+          {
+            "pairing": 0,
+            "userId": "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7"
+          },
+          {
+            "pairing": 1,
+            "userId": "55043d58-c392-4ed1-853a-5a8502357377"
+          },
+          {
+            "pairing": 2,
+            "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2"
+          }
+        ],
+        "matches": [
+          {
+            "round": 1,
+            "pairing": 3,
+            "userIds": [
+              "77649d8e-57ce-46d6-8b65-dffa9ae333ed",
+              "26d30fc6-afd8-4138-8be7-19a7e9fcec3b"
+            ],
+            "outcome": {
+              "goals": [
+                1,
+                0
+              ],
+              "penalties": null,
+              "winnerSide": 0,
+              "winChancePpm": 527178,
+              "dayRollsPpm": [
+                [
+                  1068218,
+                  1079997,
+                  917118,
+                  1112905,
+                  893383
+                ],
+                [
+                  1110319,
+                  943230,
+                  974094,
+                  1045927,
+                  1077186
+                ]
+              ],
+              "events": [
+                {
+                  "kind": "chance",
+                  "minute": 2,
+                  "side": 1,
+                  "creator": 3,
+                  "shooter": 3,
+                  "chanceType": "breakaway",
+                  "outcome": "wide",
+                  "pGoalPpm": 309073,
+                  "defender": 1
+                },
+                {
+                  "kind": "chance",
+                  "minute": 8,
+                  "side": 0,
+                  "creator": 4,
+                  "shooter": 1,
+                  "chanceType": "wing_run",
+                  "outcome": "save",
+                  "pGoalPpm": 259110,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 28,
+                  "side": 1,
+                  "creator": 1,
+                  "shooter": 3,
+                  "chanceType": "header",
+                  "outcome": "save",
+                  "pGoalPpm": 231805,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 38,
+                  "side": 0,
+                  "creator": 4,
+                  "shooter": 4,
+                  "chanceType": "breakaway",
+                  "outcome": "block",
+                  "pGoalPpm": 295920,
+                  "defender": 0
+                },
+                {
+                  "kind": "chance",
+                  "minute": 40,
+                  "side": 1,
+                  "creator": 0,
+                  "shooter": 3,
+                  "chanceType": "curler",
+                  "outcome": "save",
+                  "pGoalPpm": 180292,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 51,
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 4,
+                  "chanceType": "scramble",
+                  "outcome": "woodwork",
+                  "pGoalPpm": 283590,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 61,
+                  "side": 1,
+                  "creator": 4,
+                  "shooter": 1,
+                  "chanceType": "header",
+                  "outcome": "save",
+                  "pGoalPpm": 326872,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 70,
+                  "side": 0,
+                  "creator": 0,
+                  "shooter": 4,
+                  "chanceType": "wing_run",
+                  "outcome": "block",
+                  "pGoalPpm": 209610,
+                  "defender": 4
+                },
+                {
+                  "kind": "chance",
+                  "minute": 77,
+                  "side": 1,
+                  "creator": 4,
+                  "shooter": 1,
+                  "chanceType": "scramble",
+                  "outcome": "woodwork",
+                  "pGoalPpm": 417670,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 89,
+                  "side": 0,
+                  "creator": 4,
+                  "shooter": 1,
+                  "chanceType": "scramble",
+                  "outcome": "goal",
+                  "pGoalPpm": 350560,
+                  "defender": null
+                }
+              ]
+            }
+          },
+          {
+            "round": 2,
+            "pairing": 0,
+            "userIds": [
+              "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7",
+              "55043d58-c392-4ed1-853a-5a8502357377"
+            ],
+            "outcome": {
+              "goals": [
+                3,
+                2
+              ],
+              "penalties": null,
+              "winnerSide": 0,
+              "winChancePpm": 794355,
+              "dayRollsPpm": [
+                [
+                  1052517,
+                  1008959,
+                  965093,
+                  980530,
+                  1068999
+                ],
+                [
+                  1098286,
+                  1011112,
+                  1072549,
+                  1087389,
+                  921520
+                ]
+              ],
+              "events": [
+                {
+                  "kind": "chance",
+                  "minute": 8,
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 4,
+                  "chanceType": "scramble",
+                  "outcome": "woodwork",
+                  "pGoalPpm": 512203,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 17,
+                  "side": 1,
+                  "creator": 3,
+                  "shooter": 4,
+                  "chanceType": "scramble",
+                  "outcome": "goal",
+                  "pGoalPpm": 319206,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 20,
+                  "side": 1,
+                  "creator": 1,
+                  "shooter": 2,
+                  "chanceType": "scramble",
+                  "outcome": "block",
+                  "pGoalPpm": 300303,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 29,
+                  "side": 0,
+                  "creator": 2,
+                  "shooter": 2,
+                  "chanceType": "wing_run",
+                  "outcome": "block",
+                  "pGoalPpm": 282197,
+                  "defender": 3
+                },
+                {
+                  "kind": "chance",
+                  "minute": 38,
+                  "side": 1,
+                  "creator": 3,
+                  "shooter": 1,
+                  "chanceType": "scramble",
+                  "outcome": "goal",
+                  "pGoalPpm": 310071,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 48,
+                  "side": 0,
+                  "creator": 2,
+                  "shooter": 4,
+                  "chanceType": "through_ball",
+                  "outcome": "goal",
+                  "pGoalPpm": 489933,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 56,
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 1,
+                  "chanceType": "cutback",
+                  "outcome": "wide",
+                  "pGoalPpm": 286930,
+                  "defender": 1
+                },
+                {
+                  "kind": "chance",
+                  "minute": 58,
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 4,
+                  "chanceType": "cutback",
+                  "outcome": "goal",
+                  "pGoalPpm": 556743,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 67,
+                  "side": 0,
+                  "creator": 2,
+                  "shooter": 2,
+                  "chanceType": "scramble",
+                  "outcome": "save",
+                  "pGoalPpm": 381796,
+                  "defender": 0
+                },
+                {
+                  "kind": "chance",
+                  "minute": 81,
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 4,
+                  "chanceType": "one_two",
+                  "outcome": "goal",
+                  "pGoalPpm": 489933,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 84,
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 2,
+                  "chanceType": "through_ball",
+                  "outcome": "block",
+                  "pGoalPpm": 365196,
+                  "defender": 4
+                }
+              ]
+            }
+          },
+          {
+            "round": 2,
+            "pairing": 1,
+            "userIds": [
+              "bf8397d2-965a-432b-82ff-369fbd0478e2",
+              "77649d8e-57ce-46d6-8b65-dffa9ae333ed"
+            ],
+            "outcome": {
+              "goals": [
+                2,
+                2
+              ],
+              "penalties": [
+                1,
+                3
+              ],
+              "winnerSide": 1,
+              "winChancePpm": 378245,
+              "dayRollsPpm": [
+                [
+                  955853,
+                  910997,
+                  968985,
+                  1115807,
+                  1067599
+                ],
+                [
+                  945533,
+                  1081690,
+                  1060226,
+                  912390,
+                  1022769
+                ]
+              ],
+              "events": [
+                {
+                  "kind": "chance",
+                  "minute": 3,
+                  "side": 0,
+                  "creator": 4,
+                  "shooter": 2,
+                  "chanceType": "free_kick",
+                  "outcome": "save",
+                  "pGoalPpm": 146925,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 10,
+                  "side": 0,
+                  "creator": 4,
+                  "shooter": 3,
+                  "chanceType": "cutback",
+                  "outcome": "wide",
+                  "pGoalPpm": 282918,
+                  "defender": 0
+                },
+                {
+                  "kind": "chance",
+                  "minute": 16,
+                  "side": 0,
+                  "creator": 2,
+                  "shooter": 1,
+                  "chanceType": "through_ball",
+                  "outcome": "save",
+                  "pGoalPpm": 350535,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 21,
+                  "side": 0,
+                  "creator": 2,
+                  "shooter": 1,
+                  "chanceType": "cutback",
+                  "outcome": "goal",
+                  "pGoalPpm": 398336,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 28,
+                  "side": 1,
+                  "creator": 3,
+                  "shooter": 4,
+                  "chanceType": "one_two",
+                  "outcome": "woodwork",
+                  "pGoalPpm": 403633,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 35,
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 4,
+                  "chanceType": "one_two",
+                  "outcome": "woodwork",
+                  "pGoalPpm": 264580,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 45,
+                  "side": 1,
+                  "creator": 0,
+                  "shooter": 4,
+                  "chanceType": "one_two",
+                  "outcome": "goal",
+                  "pGoalPpm": 403633,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 52,
+                  "side": 1,
+                  "creator": 1,
+                  "shooter": 3,
+                  "chanceType": "cutback",
+                  "outcome": "goal",
+                  "pGoalPpm": 440898,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 60,
+                  "side": 1,
+                  "creator": 0,
+                  "shooter": 1,
+                  "chanceType": "cutback",
+                  "outcome": "woodwork",
+                  "pGoalPpm": 503178,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 67,
+                  "side": 0,
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "breakaway",
+                  "outcome": "block",
+                  "pGoalPpm": 382402,
+                  "defender": 0
+                },
+                {
+                  "kind": "chance",
+                  "minute": 74,
+                  "side": 1,
+                  "creator": 1,
+                  "shooter": 1,
+                  "chanceType": "long_shot",
+                  "outcome": "save",
+                  "pGoalPpm": 181144,
+                  "defender": 0
+                },
+                {
+                  "kind": "chance",
+                  "minute": 86,
+                  "side": 0,
+                  "creator": 2,
+                  "shooter": 2,
+                  "chanceType": "free_kick",
+                  "outcome": "goal",
+                  "pGoalPpm": 146925,
+                  "defender": null
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 0,
+                  "kicker": 1,
+                  "keeper": 2,
+                  "outcome": "save",
+                  "pGoalPpm": 697540
+                },
+                {
+                  "kind": "penalty",
+                  "round": 1,
+                  "side": 1,
+                  "kicker": 1,
+                  "keeper": 0,
+                  "outcome": "goal",
+                  "pGoalPpm": 920481
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 0,
+                  "kicker": 2,
+                  "keeper": 2,
+                  "outcome": "goal",
+                  "pGoalPpm": 571711
+                },
+                {
+                  "kind": "penalty",
+                  "round": 2,
+                  "side": 1,
+                  "kicker": 4,
+                  "keeper": 0,
+                  "outcome": "goal",
+                  "pGoalPpm": 826356
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 0,
+                  "kicker": 4,
+                  "keeper": 2,
+                  "outcome": "save",
+                  "pGoalPpm": 508906
+                },
+                {
+                  "kind": "penalty",
+                  "round": 3,
+                  "side": 1,
+                  "kicker": 3,
+                  "keeper": 0,
+                  "outcome": "goal",
+                  "pGoalPpm": 789552
+                },
+                {
+                  "kind": "penalty",
+                  "round": 4,
+                  "side": 0,
+                  "kicker": 3,
+                  "keeper": 2,
+                  "outcome": "save",
+                  "pGoalPpm": 475989
+                }
+              ]
+            }
+          },
+          {
+            "round": 3,
+            "pairing": 0,
+            "userIds": [
+              "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7",
+              "77649d8e-57ce-46d6-8b65-dffa9ae333ed"
+            ],
+            "outcome": {
+              "goals": [
+                2,
+                0
+              ],
+              "penalties": null,
+              "winnerSide": 0,
+              "winChancePpm": 892399,
+              "dayRollsPpm": [
+                [
+                  1030327,
+                  994988,
+                  1085799,
+                  888473,
+                  953929
+                ],
+                [
+                  1020196,
+                  969759,
+                  959951,
+                  1007910,
+                  974362
+                ]
+              ],
+              "events": [
+                {
+                  "kind": "chance",
+                  "minute": 3,
+                  "side": 1,
+                  "creator": 3,
+                  "shooter": 3,
+                  "chanceType": "wing_run",
+                  "outcome": "block",
+                  "pGoalPpm": 171712,
+                  "defender": 1
+                },
+                {
+                  "kind": "chance",
+                  "minute": 9,
+                  "side": 1,
+                  "creator": 3,
+                  "shooter": 1,
+                  "chanceType": "header",
+                  "outcome": "wide",
+                  "pGoalPpm": 200111,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 13,
+                  "side": 0,
+                  "creator": 4,
+                  "shooter": 4,
+                  "chanceType": "breakaway",
+                  "outcome": "save",
+                  "pGoalPpm": 537840,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 20,
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 2,
+                  "chanceType": "chase",
+                  "outcome": "block",
+                  "pGoalPpm": 369295,
+                  "defender": 1
+                },
+                {
+                  "kind": "chance",
+                  "minute": 34,
+                  "side": 0,
+                  "creator": 4,
+                  "shooter": 3,
+                  "chanceType": "header",
+                  "outcome": "woodwork",
+                  "pGoalPpm": 367385,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 51,
+                  "side": 1,
+                  "creator": 1,
+                  "shooter": 4,
+                  "chanceType": "wing_run",
+                  "outcome": "wide",
+                  "pGoalPpm": 166143,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 57,
+                  "side": 0,
+                  "creator": 3,
+                  "shooter": 4,
+                  "chanceType": "one_two",
+                  "outcome": "goal",
+                  "pGoalPpm": 493020,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 62,
+                  "side": 1,
+                  "creator": 0,
+                  "shooter": 1,
+                  "chanceType": "cutback",
+                  "outcome": "woodwork",
+                  "pGoalPpm": 277932,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 69,
+                  "side": 0,
+                  "creator": 2,
+                  "shooter": 4,
+                  "chanceType": "one_two",
+                  "outcome": "goal",
+                  "pGoalPpm": 493020,
+                  "defender": null
+                },
+                {
+                  "kind": "chance",
+                  "minute": 81,
+                  "side": 0,
+                  "creator": 4,
+                  "shooter": 2,
+                  "chanceType": "volley",
+                  "outcome": "save",
+                  "pGoalPpm": 295436,
+                  "defender": 2
+                },
+                {
+                  "kind": "chance",
+                  "minute": 87,
+                  "side": 0,
+                  "creator": 2,
+                  "shooter": 1,
+                  "chanceType": "one_two",
+                  "outcome": "block",
+                  "pGoalPpm": 272176,
+                  "defender": 4
+                }
+              ]
+            }
+          }
+        ],
+        "payouts": [
+          {
+            "userId": "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7",
+            "round": 1,
+            "amount": 42,
+            "bye": true
+          },
+          {
+            "userId": "55043d58-c392-4ed1-853a-5a8502357377",
+            "round": 1,
+            "amount": 42,
+            "bye": true
+          },
+          {
+            "userId": "bf8397d2-965a-432b-82ff-369fbd0478e2",
+            "round": 1,
+            "amount": 42,
+            "bye": true
+          },
+          {
+            "userId": "77649d8e-57ce-46d6-8b65-dffa9ae333ed",
+            "round": 1,
+            "amount": 42,
+            "bye": false
+          },
+          {
+            "userId": "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7",
+            "round": 2,
+            "amount": 83,
+            "bye": false
+          },
+          {
+            "userId": "77649d8e-57ce-46d6-8b65-dffa9ae333ed",
+            "round": 2,
+            "amount": 83,
+            "bye": false
+          },
+          {
+            "userId": "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7",
+            "round": 3,
+            "amount": 125,
+            "bye": false
+          }
+        ],
+        "championUserId": "7b5653eb-7951-4dcb-8d47-f7e1b0f501c7"
       }
     }
   ]

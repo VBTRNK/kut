@@ -719,6 +719,14 @@ export default async function HowItWorksPage() {
               </tbody>
             </table>
           </Question>
+          <Question title="Who gets a bye?">
+            <p>
+              When the field doesn&rsquo;t fill the bracket, some round-1 pairings are byes. Saved
+              squads get them first, drawn at random among them; an auto squad only gets a bye once
+              every saved squad has one. A squad counts as saved if at least one of its saved cards
+              still plays at the lock.
+            </p>
+          </Question>
           <Question title="How ratings work" id="midweek-ratings">
             <p id="ratings" className="scroll-mt-20">
               Every card you entered gets a rating out of 10 for each match it plays, the moment

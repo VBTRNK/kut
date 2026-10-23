@@ -166,6 +166,45 @@ function tournamentCases() {
     ),
   });
 
+  // Hand-checked in tests/unit/midweek-tournament.test.ts (ADR-166): 903 and
+  // 905 (one saved card) take byes ahead of the autos 901, 902 and 904.
+  cases.push({
+    name: "saved squads get the byes first",
+    entrants: [
+      entrant(
+        901,
+        [card(901, 64, "finisher"), card(902, 58, "goalkeeper"), card(903, 47, "tank")],
+        0,
+      ),
+      entrant(
+        902,
+        [card(904, 52, "playmaker"), card(905, 49, "defender"), card(906, 70, "speedster")],
+        0,
+      ),
+      entrant(
+        903,
+        [
+          card(907, 45, "goalkeeper"),
+          card(908, 51, "defender"),
+          card(909, 56, "playmaker"),
+          card(910, 60, "speedster"),
+          card(911, 66, "finisher"),
+        ],
+        5,
+      ),
+      entrant(
+        904,
+        [card(912, 61, "all_rounder"), card(913, 43, "goalkeeper"), card(914, 55, "tank")],
+        0,
+      ),
+      entrant(
+        905,
+        [card(915, 72, "all_rounder"), card(916, 39, "goalkeeper"), card(917, 50, "tank")],
+        1,
+      ),
+    ],
+  });
+
   return cases;
 }
 

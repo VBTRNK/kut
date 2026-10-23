@@ -28,9 +28,9 @@ export function MidweekSeed({
       </summary>
       <div className="grid gap-2 pb-4">
         <p className="text-small text-pretty text-ink-dim">
-          This week&rsquo;s draws were fixed before anyone picked. The seal is a fingerprint
-          (SHA-256) of a secret seed; the seed is published once the final is shown, so anyone can
-          check the fingerprint matches and nobody, admins included, could have re-rolled the week.
+          This week&rsquo;s seed was fixed before anyone picked. The seal is a fingerprint (SHA-256)
+          of a secret seed; the seed is published once the final is shown, so anyone can check the
+          fingerprint matches and nobody, admins included, could have re-rolled the week.
         </p>
         <code className="font-mono text-label break-all text-ink-faint">seal {seedHash}</code>
         {seed && <code className="font-mono text-label break-all text-ink-faint">seed {seed}</code>}
