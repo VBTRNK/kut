@@ -96,7 +96,7 @@ export const PRIMARY_TABS: readonly RouteEntry[] = [
   // where you enter it, and without this the Chronicle would be the one member
   // destination the chrome cannot place you in. Midweek Madness moved from
   // here to Compete (DR1-1, ADR-107); Home keeps its card as the way in.
-  { key: "home", href: "/", label: "Home", owns: ["/", "/chronicle"] },
+  { key: "home", href: "/", label: "Home", owns: ["/", "/chronicle", "/injury"] },
   // Club Value is "my club" and is now reached from the Collection header.
   {
     key: "collection",

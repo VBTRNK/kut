@@ -43,6 +43,7 @@ describe("activeEntryKey — primary tabs", () => {
     ["/leaderboard", "compete"],
     ["/players", "compete"],
     ["/chronicle", "home"],
+    ["/injury", "home"],
     ["/chronicle/2026-08-31", "home"],
     ["/club/value", "collection"],
     // DR1-1/DR1-2 (ADR-107): Midweek Madness moved from Home to Compete, with

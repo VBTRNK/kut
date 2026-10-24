@@ -38,6 +38,7 @@ export async function checkInInjury(
   }
 
   revalidatePath("/");
+  revalidatePath("/injury");
   const result = data as { checked_in?: boolean; amount?: number } | null;
   return result?.checked_in
     ? {

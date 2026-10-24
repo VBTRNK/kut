@@ -387,7 +387,7 @@ running Wednesday evening.
 - `admin_start_injury`, `admin_end_injury`, `injury_check_in(date)`,
   `my_injury_status`, `comeback_form_inputs`.
 - Views: `injured_players`.
-- `src/lib/injuries.ts`, `src/lib/injury-cast.ts`, the `/injury` route.
+- `src/lib/{injuries,injury-cast}.ts`; Home and `/injury` share the form.
 - Tests: `injury_protection.test.sql`, `injury_comeback.test.sql`.
 
 ## Notifications and Home

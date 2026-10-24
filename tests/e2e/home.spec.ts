@@ -61,7 +61,7 @@ test("requires sign-in before showing a private collection", async ({ page }) =>
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 });
 
-for (const route of ["/market", "/market/selling"]) {
+for (const route of ["/market", "/market/selling", "/injury"]) {
   test(`requires sign-in before browsing ${route}`, async ({ page }) => {
     await page.goto(route);
     await expect(page).toHaveURL(/\/login$/);
