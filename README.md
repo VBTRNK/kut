@@ -24,7 +24,7 @@ FLUT is live at [flut.vibetrunk.com](https://flut.vibetrunk.com), deployed from
 its own Vercel project using the shared VibeTrunk Supabase project's `kut`
 schema. Hosted
 migrations are catalogued and deployed only from the central
-[VibeTrunk/supabase](https://github.com/VibeTrunk/supabase) repository.
+[VBTRNK/supabase](https://github.com/VBTRNK/supabase) repository.
 
 ## Current foundation
 

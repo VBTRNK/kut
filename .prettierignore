@@ -41,7 +41,7 @@ node_modules/
 /design/
 
 # Already deployed to the hosted schema; the SQL files are the migration
-# record, and are catalogued and deployed from VibeTrunk/supabase.
+# record, and are catalogued and deployed from VBTRNK/supabase.
 /supabase/
 
 # Agent-safety scaffold — ESLint ignores these too, and they are maintained

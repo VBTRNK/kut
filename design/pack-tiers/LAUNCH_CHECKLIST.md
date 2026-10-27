@@ -1,7 +1,7 @@
 # Pack tiers: owner launch and review checklist
 
-S3 of [#223](https://github.com/VibeTrunk/kut/issues/223) (closed). Open
-reviews: [#340](https://github.com/VibeTrunk/kut/issues/340). No hosted action
+S3 of [#223](https://github.com/VBTRNK/kut/issues/223) (closed). Open
+reviews: [#340](https://github.com/VBTRNK/kut/issues/340). No hosted action
 is performed by this checklist or its PR. Keep aggregate evidence private under
 `.release-evidence/issue-223/`; never attach member metrics to the public issue.
 
@@ -28,7 +28,7 @@ is performed by this checklist or its PR. Keep aggregate evidence private under
   both premiums off and a later owner may already have enabled Silver.
 - [ ] Before Apply or a paid smoke test, confirm a fresh production backup
   using [the backup runbook](../../docs/BACKUP.md). Start it with
-  `gh workflow run backup.yml -R VibeTrunk/kut --ref main`; wait for that
+  `gh workflow run backup.yml -R VBTRNK/kut --ref main`; wait for that
   non-PR run to succeed, including its independent restore check, and record
   the run URL privately. The owner also confirms the decryption key remains
   durably retrievable; never share the key in launch evidence.

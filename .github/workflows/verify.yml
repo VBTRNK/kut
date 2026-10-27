@@ -115,7 +115,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: node scripts/policy/check-migration-policy.mjs --base "$BASE_SHA"
 
-  # Every migration here must already be in the VibeTrunk/supabase catalogue,
+  # Every migration here must already be in the VBTRNK/supabase catalogue,
   # byte-identical (ADR-144). A new migration stays red until its catalogue PR
   # is merged; then rerun this job (docs/RELEASING.md).
   catalogue-parity:
@@ -124,7 +124,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/checkout@v7
         with:
-          repository: VibeTrunk/supabase
+          repository: VBTRNK/supabase
           ref: main
           path: .catalogue
           sparse-checkout: supabase/migrations

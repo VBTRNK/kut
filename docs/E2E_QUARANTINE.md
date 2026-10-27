@@ -44,12 +44,12 @@ longer retention period does not replace this record.
 
 ## Preserved diagnosis: #216 / KB-042
 
-Recorded 13 October 2026 for [#278](https://github.com/VibeTrunk/kut/issues/278).
+Recorded 13 October 2026 for [#278](https://github.com/VBTRNK/kut/issues/278).
 The existing sanitized investigation and S4 PR already preserve the useful
 trace facts; no additional raw trace download is needed for this diagnosis.
 No matching raw trace copy was found in this checkout's `.release-evidence`.
 
-**Run and environment.** [Run 37944131510, failed authenticated job](https://github.com/VibeTrunk/kut/actions/runs/37944131510/job/113865899021),
+**Run and environment.** [Run 37944131510, failed authenticated job](https://github.com/VBTRNK/kut/actions/runs/37944131510/job/113865899021),
 9 October 2026, commit `d4c92afa5149ac3bd222a3c41f15949e672cacba`.
 Linux Chromium, Playwright 1.63.0, project `authenticated-pixel7`.
 The historical config uses the Pixel 7 viewport, 412 × 839; the bracket test
@@ -64,14 +64,14 @@ GitHub artifact metadata checked on 13 October reports
 
 - The original job log reports round 1, group 1: **6.4375 px** from the
   expected quarter point, against a **≤1 px** tolerance, across all retries.
-- The [#216 investigation](https://github.com/VibeTrunk/kut/issues/216#issuecomment-6110729271)
+- The [#216 investigation](https://github.com/VBTRNK/kut/issues/216#issuecomment-6110729271)
   reproduced it on Windows with the real component and five-entrant fixture
   shape: a two-line match beside a one-line bye. With the match first, row
   heights were 63.9 / 41.8 px and the error 5.5 px; bye first, 4.6 px.
   Names were non-wrapping and truncated, disproving the Linux-font/wrapping
   hypothesis. Flex halves were unequal because of their content heights.
 - Equal grid rows (`grid grid-rows-2`, pair `flex-1` removed) measured **0.0 px**
-  in every group. [S4 PR #275](https://github.com/VibeTrunk/kut/pull/275)
+  in every group. [S4 PR #275](https://github.com/VBTRNK/kut/pull/275)
   shipped this and removed the Linux quarantine; it reports both #216 tests
   passing locally and in Linux CI.
 - If it regresses, reproduce a match/bye pair in both orders at 1280 × 900
@@ -84,14 +84,14 @@ report fit the screen", at 412 × 839. The original job log confirms a
 visibility failure in this test on all retries; the 320 × 568 case passed
 according to #216.
 
-- S4's [trace investigation in PR #275](https://github.com/VibeTrunk/kut/pull/275)
+- S4's [trace investigation in PR #275](https://github.com/VBTRNK/kut/pull/275)
   records a pointer at **(108, 563)** after "Show every factor". Focusing
   `Form` scrolled another factor under the pointer; Chromium's hover replaced
   the requested explanation. S4 moved the pointer away before focusing.
   These trace facts are attributed to S4, not a new inspection here.
-- The later [#279 investigation](https://github.com/VibeTrunk/kut/issues/279)
+- The later [#279 investigation](https://github.com/VBTRNK/kut/issues/279)
   revisited whether a keyboard user with a resting mouse had the same problem.
-  [PR #304](https://github.com/VibeTrunk/kut/pull/304) reproduced the product
+  [PR #304](https://github.com/VBTRNK/kut/pull/304) reproduced the product
   defect: `onMouseEnter` cleared the focused/tapped factor. It made focus/tap
   authoritative over hover and removed the pointer workaround from the test.
   Its regression focuses Form then hovers another factor; the old rule failed

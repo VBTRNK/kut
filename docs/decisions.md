@@ -8,7 +8,7 @@ per old number, so `rg "ADR-NNN"` still finds each (ADR-142).
 
 ## ADR-140 — Process reset: merge to main deploys
 
-Date: 2026-10-09, extended 2026-10-10 by S4 (VibeTrunk/kut#212). The original
+Date: 2026-10-09, extended 2026-10-10 by S4 (VBTRNK/kut#212). The original
 text, with the transition rules S1–S3 ran under, is at the tag `docs-archive-2026-10`.
 
 - A merge to `main` deploys to production through Vercel's Git integration.
@@ -23,7 +23,7 @@ text, with the transition rules S1–S3 ran under, is at the tag `docs-archive-2
 
 ## ADR-141 — Nightly encrypted kut backup in GitHub Actions, kut only
 
-Date: 2026-10-09 (S3 spike, VibeTrunk/kut#212). Full text at the tag `docs-archive-2026-10`.
+Date: 2026-10-09 (S3 spike, VBTRNK/kut#212). Full text at the tag `docs-archive-2026-10`.
 
 - No read-only role can read the auth tables on hosted (`postgres` has no grant
   option on schema `auth`), so the backup covers schema `kut` only.
@@ -31,7 +31,7 @@ Date: 2026-10-09 (S3 spike, VibeTrunk/kut#212). Full text at the tag `docs-archi
   `kut_backup` role through the Session pooler. A privilege audit and a
   denied-insert check come first; the role never holds write or migration
   rights, and never the `postgres` credential (which ADR-144 allows only in
-  the `VibeTrunk/supabase` migration workflow).
+  the `VBTRNK/supabase` migration workflow).
 - 2026-10-11: moved from 03:17 UTC, whose runs started about 6.5 h late.
 - The dump and its manifest come from one snapshot, are age-encrypted to the
   owner's key and kept 30 days. A restore check in a disposable `kut_restore`
@@ -90,12 +90,12 @@ Date: 2026-10-10 (#212); extended 2026-10-17 (#334).
 - Inspector labels aren't proof of consent; missing evidence is incomplete.
   Future extra_policy needs a passing paired canary and separate OK.
 
-## ADR-144 — Hosted migrations through a workflow in VibeTrunk/supabase
+## ADR-144 — Hosted migrations through a workflow in VBTRNK/supabase
 
-Date: 2026-10-10 (process reset S9, VibeTrunk/kut#212). Amends ADR-141's
+Date: 2026-10-10 (process reset S9, VBTRNK/kut#212). Amends ADR-141's
 credential rule.
 
-- `apply-migrations.yml` in `VibeTrunk/supabase` applies hosted migrations. It
+- `apply-migrations.yml` in `VBTRNK/supabase` applies hosted migrations. It
   is dispatched with a catalogue commit on main and the kut commit holding the
   same files. The plan job runs `migration list` and `db push --dry-run` and
   refuses any pending migration without a byte-identical copy in kut. The apply
@@ -113,7 +113,7 @@ credential rule.
 - kut CI's required `catalogue-parity` job checks every kut migration against
   the catalogue's main, replacing `test-catalogue-parity.ps1`. A migration PR
   stays red there until its catalogue PR merges (`docs/RELEASING.md`).
-- A local `db push` from `VibeTrunk/supabase` stays a fallback, with the
+- A local `db push` from `VBTRNK/supabase` stays a fallback, with the
   owner's OK.
 
 ## ADR-145, 147–151 — Midweek Madness 3.0: every match live, clubs named
@@ -148,11 +148,11 @@ Date: 2026-10-11 (after Midweek Madness 3.0 S2). Amends `docs/OPERATIONS.md`.
 - The owner runs a read-only hosted smoke query only after a data-changing
   migration (`docs/OPERATIONS.md` tiers). For an additive one, CI on a fresh
   stack and the `apply-migrations` checks (ADR-144) suffice. An access change
-  still gets a member smoke test of the page. In-job smoke: VibeTrunk/supabase#87.
+  still gets a member smoke test of the page. In-job smoke: VBTRNK/supabase#87.
 
 ## ADR-152 — Active membership on base-table and player-photo reads
 
-Date: 2026-10-12 (VibeTrunk/kut#286). Extends ADR-079 to direct reads.
+Date: 2026-10-12 (VBTRNK/kut#286). Extends ADR-079 to direct reads.
 
 - The shared project's `authenticated` role includes other tools' accounts.
   Local policy/grant inspection at `69b3c38` confirmed broad reads and disabled
@@ -257,7 +257,7 @@ Folded 2026-10-17 once #223 closed (design `design/pack-tiers/`, open reviews
 ## ADR-165 — Academy: Talent, First Team and Retired
 
 Date: 2026-10-17 (#246). Live since 2026-10-18 (20261024000000); named trialists 20261025000000.
-Rules: [#246 comment](https://github.com/VibeTrunk/kut/issues/246#issuecomment-6238677630).
+Rules: [#246 comment](https://github.com/VBTRNK/kut/issues/246#issuecomment-6238677630).
 
 - Stages Talent, First Team, Retired; At risk is a derived warning. A counted
   week is a football week with a published session. Progress is distinct real

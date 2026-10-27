@@ -1,5 +1,5 @@
 -- Midweek Madness 3.0, S2 (20261020000000): club names in the Midweek views.
--- VibeTrunk/kut#262; ADR-145.
+-- VBTRNK/kut#262; ADR-145.
 --
 -- The four views that name a member append the club: the name set in Settings,
 -- trimmed, or "<display name>'s Club" when it is null or blank, exactly as

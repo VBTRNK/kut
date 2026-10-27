@@ -3,7 +3,7 @@
 Five proposed designs for the first Special edition, the one-off
 "Groundmasters" cards for the Players who helped renew the pitch agreement.
 The product rules, the integration proposal and the open decisions are in
-issue [#222](https://github.com/VibeTrunk/kut/issues/222).
+issue [#222](https://github.com/VBTRNK/kut/issues/222).
 **Nothing here is built, and no direction has been chosen yet.**
 
 The artboards are archived at the tag `docs-archive-2026-10`

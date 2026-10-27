@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Catalogue parity (process reset S9, ADR-144): every migration in this repo
-// must exist, byte-identical, in the `VibeTrunk/supabase` catalogue, the only
+// must exist, byte-identical, in the `VBTRNK/supabase` catalogue, the only
 // place hosted migrations are applied from. CI checks out the catalogue's main;
 // locally, pass a sibling checkout: `node scripts/policy/check-catalogue-parity.mjs --catalogue ..\supabase`.
 // A new migration is red here until its catalogue PR is merged (docs/RELEASING.md).
@@ -22,7 +22,7 @@ export function compareCatalogue(sourceDir, catalogueDir) {
   for (const name of names) {
     const central = path.join(catalogueDir, name);
     if (!existsSync(central)) {
-      problems.push(`${name} is not in the catalogue. Merge its VibeTrunk/supabase PR first.`);
+      problems.push(`${name} is not in the catalogue. Merge its VBTRNK/supabase PR first.`);
       continue;
     }
     const sourceHash = sha256(readFileSync(path.join(sourceDir, name)));
@@ -39,7 +39,7 @@ function main() {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
   const flag = process.argv.indexOf("--catalogue");
   if (flag === -1 || !process.argv[flag + 1]) {
-    console.error("Usage: check-catalogue-parity.mjs --catalogue <VibeTrunk/supabase checkout>");
+    console.error("Usage: check-catalogue-parity.mjs --catalogue <VBTRNK/supabase checkout>");
     process.exit(2);
   }
   const catalogueDir = path.resolve(process.argv[flag + 1], "supabase", "migrations");

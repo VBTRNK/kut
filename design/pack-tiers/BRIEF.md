@@ -1,6 +1,6 @@
 # Pack tiers — design brief
 
-Issue [#223](https://github.com/VibeTrunk/kut/issues/223), S0. **Approved by the
+Issue [#223](https://github.com/VBTRNK/kut/issues/223), S0. **Approved by the
 owner on 15 October 2026**: this brief and the prototype are the design S2 and
 S3 build. Not built yet; the shop still sells today's single pack.
 

@@ -9,7 +9,7 @@ operations; following it does **not** itself authorize a hosted schema change.
 The shared Supabase project has one global migration ledger. Hosted schema
 changes must be catalogued, reviewed, backed up, dry-run, and applied only
 by the `apply-migrations` workflow in
-[`VibeTrunk/supabase`](https://github.com/VibeTrunk/supabase) (ADR-144). KUT keeps
+[`VBTRNK/supabase`](https://github.com/VBTRNK/supabase) (ADR-144). KUT keeps
 matching migration files only so its local stack and database tests reproduce
 the hosted schema. Do not run a hosted `supabase db push` from this repository.
 
@@ -34,7 +34,7 @@ Always, both tiers:
 1. Confirm the shared Supabase project and database branch in scope. KUT uses
    the `kut` schema and must not affect other VibeTrunk schemas.
 2. Matching reviewed migration files exist in **this** repo and in the
-   `VibeTrunk/supabase` catalogue (ADR-021); the `catalogue-parity` CI job
+   `VBTRNK/supabase` catalogue (ADR-021); the `catalogue-parity` CI job
    passes.
 3. The workflow's plan (its `db push --dry-run` list) reviewed line by line.
 4. Local `npm run verify:fast && npm run test:db` passes. CI's `verify`
@@ -49,7 +49,7 @@ pending after the push. For the data-changing tier the owner then runs a
 read-only hosted smoke query; for the additive tier the workflow's checks and
 CI are enough (ADR-146). Update the "Latest hosted migration" line in
 `AGENTS.md` in the next PR. Only that one line changes in `AGENTS.md`, so the
-file stays orientation rather than a changelog. The `VibeTrunk/supabase`
+file stays orientation rather than a changelog. The `VBTRNK/supabase`
 catalogue is the migration history; there are no per-release records (ADR-140).
 
 Data-changing tier also requires, before the push:

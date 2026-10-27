@@ -19,7 +19,7 @@ production (ADR-140). There is no local gate and no deployment record.
 4. **Check, read-only.** Vercel records each production deployment on GitHub:
 
    ```powershell
-   gh api "repos/VibeTrunk/kut/deployments?environment=Production&per_page=1" --jq '.[0].sha'
+   gh api "repos/VBTRNK/kut/deployments?environment=Production&per_page=1" --jq '.[0].sha'
    curl.exe -sI https://kut.vibetrunk.com/market | Select-String '^(HTTP|location)'
    ```
 
@@ -39,14 +39,14 @@ production (ADR-140). There is no local gate and no deployment record.
 ## Migrations
 
 Hosted migrations are applied only by the `apply-migrations` workflow in
-`VibeTrunk/supabase` (ADR-144). The app must work against both the old and the
+`VBTRNK/supabase` (ADR-144). The app must work against both the old and the
 new schema, which keeps the order safe if anything stalls between steps 4
 and 5. The required `catalogue-parity` check passes only once the catalogue
 has the file, so the order is:
 
 1. The kut migration PR's database tests are green. `catalogue-parity` is
    red, so `merge-gate` is not green yet.
-2. The catalogue PR in `VibeTrunk/supabase` (the file copied unchanged) is
+2. The catalogue PR in `VBTRNK/supabase` (the file copied unchanged) is
    merged.
 3. Rerun the failed jobs on the kut PR; now every required check is green.
 4. Start a fresh backup, then dispatch the workflow with the catalogue's main
@@ -54,10 +54,10 @@ has the file, so the order is:
    list, then approve the apply:
 
    ```powershell
-   gh workflow run backup.yml -R VibeTrunk/kut
-   gh workflow run apply-migrations.yml -R VibeTrunk/supabase `
-     -f catalogue_sha=$(gh api repos/VibeTrunk/supabase/commits/main --jq .sha) `
-     -f kut_ref=$(gh pr view <PR> -R VibeTrunk/kut --json headRefOid --jq .headRefOid)
+   gh workflow run backup.yml -R VBTRNK/kut
+   gh workflow run apply-migrations.yml -R VBTRNK/supabase `
+     -f catalogue_sha=$(gh api repos/VBTRNK/supabase/commits/main --jq .sha) `
+     -f kut_ref=$(gh pr view <PR> -R VBTRNK/kut --json headRefOid --jq .headRefOid)
    ```
 
 5. Merge the kut PR (auto-deploys), and bump "Latest hosted migration" in
