@@ -2,9 +2,9 @@
 
 Closed 17 October 2026. All four slices merged (#320, #321, #323, #324) plus
 the launch-backup fix (#325). Tracking issue:
-[VibeTrunk/kut#223](https://github.com/VibeTrunk/kut/issues/223) (closed, with
+[VBTRNK/kut#223](https://github.com/VBTRNK/kut/issues/223) (closed, with
 the final checkpoint comment). Open work: the +14/+28-day reviews in
-[#340](https://github.com/VibeTrunk/kut/issues/340). ADR-163/164 are folded in
+[#340](https://github.com/VBTRNK/kut/issues/340). ADR-163/164 are folded in
 `docs/decisions.md`. Below is the working log, kept as the record of the
 slices; do not attach private production aggregates to the public issue.
 

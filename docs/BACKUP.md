@@ -9,7 +9,7 @@ and row; it does not cover `auth.users` (no read-only role can read it) or the
 ## Nightly GitHub backup
 
 `.github/workflows/backup.yml` runs at 03:41 UTC and on dispatch
-(`gh workflow run backup.yml -R VibeTrunk/kut`), as the read-only `kut_backup`
+(`gh workflow run backup.yml -R VBTRNK/kut`), as the read-only `kut_backup`
 role through the Session pooler, from the `backup` environment (main only).
 
 - **Each run** audits the role's privileges, dumps `kut` (`pg_dump -Fc`) with a
@@ -33,7 +33,7 @@ role through the Session pooler, from the `backup` environment (main only).
 ## Drill: download, decrypt, restore (owner, about monthly)
 
 ```powershell
-gh run download <run-id> -R VibeTrunk/kut -n kut-backup-<stamp> -D $env:USERPROFILE\backups\kut-github
+gh run download <run-id> -R VBTRNK/kut -n kut-backup-<stamp> -D $env:USERPROFILE\backups\kut-github
 age -d -i $keyFile -o kut-backup.tar kut-backup-<stamp>.tar.age   # key from the password manager
 (Get-FileHash kut-backup.tar -Algorithm SHA256).Hash               # must match the .sha256
 New-Item -ItemType Directory plain | Out-Null; tar -xf kut-backup.tar -C plain

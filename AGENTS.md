@@ -9,7 +9,7 @@ FLUT, Football League Ultimate Team (formerly KUT), is a browser-based
 collectible football-card game for Terrible Football Haarlem (TFH): real
 attendance and match performance drive a card economy of packs, collecting and
 trading. It is a tool in the [VibeTrunk](https://vibetrunk.com) hub; add no
-coupling to `VibeTrunk/home` beyond the shared Supabase project.
+coupling to `VBTRNK/home` beyond the shared Supabase project.
 
 - Stack: Next.js and TypeScript on Vercel (project `kut`, live at
   `https://flut.vibetrunk.com`; `kut.vibetrunk.com` redirects, ADR-139).
@@ -22,7 +22,7 @@ coupling to `VibeTrunk/home` beyond the shared Supabase project.
 - A deliberate learning project in production-grade practice: clear structure,
   decisions recorded in markdown.
 - Latest hosted migration: `20261026000000_midweek_saved_byes.sql` (ADR-166).
-  The `VibeTrunk/supabase` catalogue is the hosted history.
+  The `VBTRNK/supabase` catalogue is the hosted history.
 
 ## Reading: grep on demand
 
@@ -88,7 +88,7 @@ protection and other hosted changes need their own written instruction.
 ## Migrations and database
 
 - Hosted migrations are catalogued in
-  [`VibeTrunk/supabase`](https://github.com/VibeTrunk/supabase) and applied
+  [`VBTRNK/supabase`](https://github.com/VBTRNK/supabase) and applied
   only by its `apply-migrations` workflow (ADR-144, `docs/RELEASING.md`).
   Supabase keeps one global history. This repo keeps matching SQL for local
   use and tests. Never run a hosted `supabase db push` from here.
@@ -147,10 +147,10 @@ This block is generated from `policy/PRODUCTION_INVARIANTS.md`. Run
 - Every game/economy invariant in `docs/INVARIANTS.md` (Part L) must stay true.
 - Never output secrets or reversible encodings of secrets.
 - Database-backed test fixtures create and delete real rows and users. They refuse any non-loopback target unless an operator sets the explicit acknowledgement variable, which CI and every repository script leave unset.
-- Hosted Supabase migrations are applied only from `VibeTrunk/supabase`, never from this repository. Existing migration files are immutable. A PR adds at most one migration, with a database test or a reviewed machine-readable exemption.
+- Hosted Supabase migrations are applied only from `VBTRNK/supabase`, never from this repository. Existing migration files are immutable. A PR adds at most one migration, with a database test or a reviewed machine-readable exemption.
 - New code works against the old schema until its migration is live: a tolerant read, a flag, or a catalogue push ready to follow the merge.
 - Never commit or push without the owner's authorization for that change; no agent rule set auto-allows `git commit` or `git push`. A merge to `main` deploys to production (ADR-140). It authorizes nothing else: migrations, function deployments, secrets, branch protection and other hosted changes each need their own explicit yes.
-- The backup route never holds write or migration rights (ADR-141). The `postgres` credential goes into GitHub only as a secret of the `production` environment in `VibeTrunk/supabase` (main only, the owner as required reviewer) for its `apply-migrations` workflow (ADR-144).
+- The backup route never holds write or migration rights (ADR-141). The `postgres` credential goes into GitHub only as a secret of the `production` environment in `VBTRNK/supabase` (main only, the owner as required reviewer) for its `apply-migrations` workflow (ADR-144).
 - Never declare a backup successful unless its decryption key is durably retrievable and an independent restore check passes.
 <!-- END:KUT-PRODUCTION-INVARIANTS -->
 

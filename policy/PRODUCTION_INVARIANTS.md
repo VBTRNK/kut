@@ -6,8 +6,8 @@ This block is generated from `policy/PRODUCTION_INVARIANTS.md`. Run
 - Every game/economy invariant in `docs/INVARIANTS.md` (Part L) must stay true.
 - Never output secrets or reversible encodings of secrets.
 - Database-backed test fixtures create and delete real rows and users. They refuse any non-loopback target unless an operator sets the explicit acknowledgement variable, which CI and every repository script leave unset.
-- Hosted Supabase migrations are applied only from `VibeTrunk/supabase`, never from this repository. Existing migration files are immutable. A PR adds at most one migration, with a database test or a reviewed machine-readable exemption.
+- Hosted Supabase migrations are applied only from `VBTRNK/supabase`, never from this repository. Existing migration files are immutable. A PR adds at most one migration, with a database test or a reviewed machine-readable exemption.
 - New code works against the old schema until its migration is live: a tolerant read, a flag, or a catalogue push ready to follow the merge.
 - Never commit or push without the owner's authorization for that change; no agent rule set auto-allows `git commit` or `git push`. A merge to `main` deploys to production (ADR-140). It authorizes nothing else: migrations, function deployments, secrets, branch protection and other hosted changes each need their own explicit yes.
-- The backup route never holds write or migration rights (ADR-141). The `postgres` credential goes into GitHub only as a secret of the `production` environment in `VibeTrunk/supabase` (main only, the owner as required reviewer) for its `apply-migrations` workflow (ADR-144).
+- The backup route never holds write or migration rights (ADR-141). The `postgres` credential goes into GitHub only as a secret of the `production` environment in `VBTRNK/supabase` (main only, the owner as required reviewer) for its `apply-migrations` workflow (ADR-144).
 - Never declare a backup successful unless its decryption key is durably retrievable and an independent restore check passes.

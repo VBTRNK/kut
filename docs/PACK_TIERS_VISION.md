@@ -1,6 +1,6 @@
 # Pack tiers: certainty at a premium
 
-Proposal for [#223](https://github.com/VibeTrunk/kut/issues/223), 15 October
+Proposal for [#223](https://github.com/VBTRNK/kut/issues/223), 15 October
 2026. The owner supports the pack proposal and has requested live admin
 balancing controls, with manual price changes and advisory monitoring only.
 This remains a design, not implemented behaviour. The
@@ -384,7 +384,7 @@ Keep “at least one” explicit wherever a premium's contents are explained.
 Keep the initial packs Live-only. Groundmasters and other frozen editions are
 the more natural future scarcity chase once active players' Live tiers settle.
 Their issuance, supply cap, roll, discard multiplier and Midweek effect belong
-to [#222](https://github.com/VibeTrunk/kut/issues/222) and its own decisions.
+to [#222](https://github.com/VBTRNK/kut/issues/222) and its own decisions.
 
 Do not add a Special roll incidentally to this change. An eventual Special
 must not replace a required qualifying card with a card below its floor.

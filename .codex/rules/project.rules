@@ -186,7 +186,7 @@ prefix_rule(
 # /dry-run Supabase CLI commands are auto-allowed; anything that mutates the
 # live schema or rotates live credentials for the ONE Supabase project every
 # VibeTrunk tool shares stays off the allow-list and gets a deliberate look
-# each time. Copied from VibeTrunk/cogitster's .codex/rules/project.rules.
+# each time. Copied from VBTRNK/cogitster's .codex/rules/project.rules.
 
 prefix_rule(
     pattern = ["npx", "supabase", "migration", "list"],

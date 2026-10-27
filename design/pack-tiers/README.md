@@ -1,6 +1,6 @@
 # Pack tiers — S0 review package
 
-First local slice of [#223](https://github.com/VibeTrunk/kut/issues/223): artwork,
+First local slice of [#223](https://github.com/VBTRNK/kut/issues/223): artwork,
 motion and an interactive preview. It does not change the real shop, database,
 admin controls or paid opening flow. Read [the brief](BRIEF.md), the
 [copy and contract audit](COPY_AUDIT.md) and the [checkpoint](CHECKPOINT.md).

@@ -192,7 +192,7 @@ offers, payouts, bibs, injury check-ins, the Midweek result and calls, and the
 admin reset text. Some RPC exceptions carry it too. Changing them means
 re-creating those functions in **one new migration, in its own PR**, with a
 database test, per the batching rules in `CLAUDE.md`. Its hosted application
-then goes through `VibeTrunk/supabase`. Messages already sent keep their
+then goes through `VBTRNK/supabase`. Messages already sent keep their
 wording, and nothing back-fills them. Until that slice ships, new server
 notices still say "KUT Coins". The frontend PR must say so in its body.
 
