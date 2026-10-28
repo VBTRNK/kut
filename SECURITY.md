@@ -11,7 +11,8 @@ the invariants (Part L) this must never violate, and
 [`docs/PRODUCT.md`](docs/PRODUCT.md) for the backend model.
 
 If you notice something suspicious (an RLS gap, a CSP bypass, a vulnerable
-dependency, a leaked credential), report it to m.f.vanoostrom@gmail.com
+dependency, a leaked credential), report it privately through GitHub's
+[private vulnerability reporting](https://github.com/VBTRNK/kut/security/advisories/new)
 rather than opening a public issue.
 
 The `service_role` Supabase key must never be `PUBLIC_`-prefixed, never ships

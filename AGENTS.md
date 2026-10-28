@@ -59,7 +59,7 @@ and recording it in `docs/decisions.md`. Never silently "improve" a formula.
 
 ## Workspace and branches
 
-- Work only in `C:\Users\mfvan\dev\kut` (and `C:\Users\mfvan\dev\supabase`).
+- Work only in `~\dev\kut` (and `~\dev\supabase`).
   A second agent's `git worktree` goes under the ignored
   `.release-evidence/worktrees/` and merges into the PR branch. Shared plan
   files (`~\.claude\plans`) and handoff files (`~\.agents\handoffs`, see the

@@ -37,8 +37,8 @@ gh run download <run-id> -R VBTRNK/kut -n kut-backup-<stamp> -D $env:USERPROFILE
 age -d -i $keyFile -o kut-backup.tar kut-backup-<stamp>.tar.age   # key from the password manager
 (Get-FileHash kut-backup.tar -Algorithm SHA256).Hash               # must match the .sha256
 New-Item -ItemType Directory plain | Out-Null; tar -xf kut-backup.tar -C plain
-git -C C:\Users\mfvan\dev\kut worktree add .release-evidence\worktrees\kut-restore <repo_sha>
-Set-Location C:\Users\mfvan\dev\kut\.release-evidence\worktrees\kut-restore; npm ci
+git -C $env:USERPROFILE\dev\kut worktree add .release-evidence\worktrees\kut-restore <repo_sha>
+Set-Location $env:USERPROFILE\dev\kut\.release-evidence\worktrees\kut-restore; npm ci
 & "C:\Program Files\Git\bin\bash.exe" scripts/ci/backup/restore-check.sh <plain> <new-work-folder>
 ```
 
