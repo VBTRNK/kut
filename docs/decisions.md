@@ -297,3 +297,19 @@ seated everyone). Migration `20261026000000`.
   squads towards auto opponents.
 - Stored weeks keep their bracket; a week first simulated after the push uses
   the rule, an overdue open week included. Golden vectors regenerated (ADR-090).
+
+## ADR-167 — Complete session reports through one member action
+
+Date: 2026-11-01 (#358). Amends ADR-068's member draft workflow.
+
+- Remove Save draft and its instructions: a successful member save is a submitted
+  report. Require explicit G+A (zero included) and a nominee or explicit Skip in
+  every category. Name unanswered categories beside the action, with focus links.
+- Save changes compares the current values with the last successful save, or
+  the report loaded on opening. Unchanged and reverted edits cannot save; pending
+  saves disable the action. Failures/conflicts retain edits and the last saved
+  baseline/revision, with retry or refresh guidance.
+- Existing drafts remain readable and can be completed during the open window;
+  they are never discarded, silently skipped or automatically submitted.
+- SQL/RPC draft support, ballot privacy, the 24-hour window, explicit Skip,
+  high-count confirmation and once-only rewards stay unchanged. No migration.

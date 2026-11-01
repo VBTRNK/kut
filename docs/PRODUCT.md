@@ -199,27 +199,26 @@ Ground rules for every area:
 ## Reports and kudos
 
 **Behaviour.**
-- Publishing opens a **24-hour report** for each linked attendee
-  (`/sessions/[sessionId]/report`, the Home "now" card).
-- Members report G+A and distinct nominees (or Skip) in three rotating
-  categories. Unanswered is not Skip (ADR-068).
-- New reports add **Safe Hands** last: “Who impressed you most in goal?” It may
-  repeat a regular nominee; any other attendee qualifies, no statistics needed.
-  Desktop puts G+A/actions beside kudos; phones stack them (ADR-162).
-- A complete form (zero G+A and skipped kudos included) pays **50 once**.
-  A submitted report never goes back to draft (ADR-078).
+- Publishing opens a **24-hour report** per linked attendee
+  (`/sessions/[sessionId]/report`, Home's "now" card).
+- Submission needs explicit G+A (zero included), and a distinct nominee
+  or explicit Skip in three rotating categories. Unanswered is not Skip (ADR-068).
+- **Safe Hands** is last on new ballots: “Who impressed you most in goal?”
+  Any other attendee qualifies and may repeat a regular pick (ADR-162).
+  Desktop places G+A/actions beside kudos; phones stack them.
+- Only complete reports save, as submitted, paying **50 once** (ADR-167).
+  Unanswered categories have focus links beside the action. Save changes disables
+  when unchanged, reverted or saving. Existing drafts reopen for completion;
+  submitted reports stay submitted (ADR-078). No automatic submission.
 - **At finalization:**
-  - a category is recognised when at least two distinct teammates nominated
-    it, and only once at least three reporters gave kudos;
-  - Safe Hands: one outright leader across both teams, ≥2 distinct submitted
-    nominators, same participation gate; ties get nothing. Ordinary scoring;
-  - results and rating snapshots are versioned and the ratings rebuilt;
-  - each linked attendee gets `session_results`;
-  - each recognised Player gets `kudos_awarded`, which names the categories
-    and the OVR change, never the nominators (ADR-069).
-- Ballots and per-player provisional values stay private until then.
-- Admins can correct G+A (never pays) or close early, both with a reason;
-  early closure preserves `closes_at` (ADR-067).
+  - recognition needs ≥2 distinct nominators and ≥3 reporters giving kudos;
+    Safe Hands also needs one outright leader across both teams; ties get nothing;
+  - results/snapshots are versioned; ratings rebuilt;
+  - linked attendees get `session_results`; recognised Players get
+    `kudos_awarded` naming categories and OVR change, never nominators (ADR-069).
+- Ballots and provisional player values stay private until finalization.
+- Admin G+A corrections (unpaid) and early closure need reasons;
+  early closure keeps `closes_at` (ADR-067).
 
 **Part L:** 4, 5, 16. Paid-once reward: ADR-059.
 

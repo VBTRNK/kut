@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { formatReportedCount } from "@/game/reported-count";
+import { countNoun, formatReportedCount } from "@/game/reported-count";
 import { requireUser } from "@/lib/auth/user";
 import { ballotPayload, type Ballot } from "@/lib/session-reports/kudos-ballot";
 import { createClient } from "@/lib/supabase/server";
@@ -12,16 +12,18 @@ export type ReportState = {
   saved?: boolean;
   rewarded?: boolean;
   revision?: number;
+  savedValues?: { goals: number; ballot: Ballot };
 };
 
 export async function saveSessionReport(
-  _previous: ReportState,
+  previous: ReportState,
   formData: FormData,
 ): Promise<ReportState> {
   await requireUser();
+  // Keep the last successful baseline and revision when a later save fails.
+  const fail = (error: string): ReportState => ({ ...previous, error, saved: false });
   const sessionId = String(formData.get("sessionId") ?? "");
   const idempotencyKey = String(formData.get("idempotencyKey") ?? "");
-  const intent = formData.get("intent") === "draft" ? "draft" : "submit";
   const revision = Number(formData.get("revision"));
   const rawGoals = String(formData.get("goals") ?? "").trim();
   const goals = rawGoals === "" ? null : Number(rawGoals);
@@ -32,18 +34,17 @@ export async function saveSessionReport(
     revision < 0 ||
     (goals !== null && (!Number.isInteger(goals) || goals < 0 || goals > 99))
   )
-    return { error: "Check the report fields and try again." };
-  if (
-    intent === "submit" &&
-    goals !== null &&
-    goals >= 10 &&
-    formData.get("confirmGoals") !== "yes"
-  )
+    return fail("Check the report fields and try again.");
+  if (goals === null)
+    return fail(
+      `Enter your ${countNoun(String(formData.get("sessionDate") ?? ""))} (including zero) before submitting.`,
+    );
+  if (goals >= 10 && formData.get("confirmGoals") !== "yes")
     // The date only chooses the wording ("goals" or "G+A", ADR-101); nothing is
     // scored from it, so a client-supplied value cannot change the outcome.
-    return {
-      error: `Confirm ${formatReportedCount(goals, String(formData.get("sessionDate") ?? ""))} before submitting.`,
-    };
+    return fail(
+      `Confirm ${formatReportedCount(goals, String(formData.get("sessionDate") ?? ""))} before submitting.`,
+    );
   const categoryIds = String(formData.get("categoryIds") ?? "")
     .split(",")
     .filter(Boolean);
@@ -53,36 +54,45 @@ export async function saveSessionReport(
       String(formData.get(`category-${categoryId}`) ?? ""),
     ]),
   );
-  const payload = ballotPayload(categoryIds, ballot, intent);
-  if (!payload.ok) return { error: `${payload.error} Refresh if the form looks out of date.` };
+  // Historical drafts remain readable, but the member action only submits.
+  const payload = ballotPayload(categoryIds, ballot, "submit");
+  if (!payload.ok) return fail(`${payload.error} Refresh if the form looks out of date.`);
   const supabase = await createClient();
-  const { data, error } = await supabase.schema("kut").rpc("submit_session_report", {
-    p_session_id: sessionId,
-    p_goals: goals,
-    p_nominations: payload.nominations,
-    p_expected_revision: revision,
-    p_idempotency_key: idempotencyKey,
-    p_intent: intent,
-  });
+  let response;
+  try {
+    response = await supabase.schema("kut").rpc("submit_session_report", {
+      p_session_id: sessionId,
+      p_goals: goals,
+      p_nominations: payload.nominations,
+      p_expected_revision: revision,
+      p_idempotency_key: idempotencyKey,
+      p_intent: "submit",
+    });
+  } catch {
+    return fail("Could not save the report. Check your connection and try again.");
+  }
+  const { data, error } = response;
   if (error)
-    return {
-      error: error.message.includes("closed")
+    return fail(
+      error.message.includes("closed")
         ? "Reports are closed for this session."
         : error.message.includes("only once")
           ? "Choose a different teammate in each category."
           : error.message.includes("Skip")
             ? "Choose a teammate or Skip in every kudos category."
-            : "Could not save the report. Check every category and try again.",
-    };
+            : "Could not save the report. Check your connection and try again.",
+    );
   if (data && typeof data === "object" && "conflict" in data && data.conflict)
-    return { error: "This report changed elsewhere. Refresh to load the saved version." };
+    return fail("This report changed elsewhere. Refresh to load the saved version.");
+  if (!data || typeof data !== "object" || !("revision" in data))
+    return fail("Could not confirm the save. Refresh to check your report before trying again.");
   revalidatePath(`/sessions/${sessionId}/report`);
   revalidatePath("/");
   return {
     error: null,
     saved: true,
     rewarded: Boolean(data && typeof data === "object" && "rewarded" in data && data.rewarded),
-    revision:
-      data && typeof data === "object" && "revision" in data ? Number(data.revision) : revision + 1,
+    revision: Number(data.revision),
+    savedValues: { goals, ballot },
   };
 }
