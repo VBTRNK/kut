@@ -78,6 +78,12 @@ it("keeps high-count confirmation", async () => {
   data.set("confirmGoals", "yes");
   expect((await saveSessionReport({ error: null }, data)).saved).toBe(true);
 });
+it("asks members to refresh after an unrecognised server rejection", async () => {
+  rpc.mockResolvedValue({ data: null, error: { message: "nominee must be another attendee" } });
+  expect((await saveSessionReport({ error: null }, form())).error).toBe(
+    "Could not save the report. Refresh and try again.",
+  );
+});
 it.each(["conflict", "error", "network", "missing"])(
   "preserves the last saved baseline and revision after %s",
   async (failure) => {

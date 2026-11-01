@@ -83,6 +83,7 @@ export function ReportForm({
     startTransition(() => action(formData));
   }
   const highGoals = /^\d+$/.test(goals) && Number(goals) >= 10;
+  const needsConfirmation = highGoals && (!submitted || changed);
   const validGoals = /^\d+$/.test(goals) && Number(goals) <= 99;
   const undecided = undecidedCategories(categoryIds, ballot);
   const duplicates = new Set(duplicateNominees(categoryIds, ballot));
@@ -94,7 +95,7 @@ export function ReportForm({
           .join(" and ")} ${duplicates.size > 1 ? "are" : "is"} picked twice.`
       : !validGoals
         ? `Enter your ${combined ? "G+A" : "goals"} (0–99, including zero) before submitting.`
-        : highGoals && confirmedGoals !== goals
+        : needsConfirmation && confirmedGoals !== goals
           ? `Confirm ${formatReportedCount(Number(goals), sessionDate)} before submitting.`
           : null;
   const incomplete = blocker !== null || undecided.length > 0;
@@ -143,7 +144,7 @@ export function ReportForm({
             value={goals}
           />
         </label>
-        {highGoals && (
+        {needsConfirmation && (
           <label className="flex min-h-11 items-center gap-3 text-small font-semibold">
             <input
               checked={confirmedGoals === goals}

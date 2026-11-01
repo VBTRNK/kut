@@ -80,7 +80,7 @@ export async function saveSessionReport(
           ? "Choose a different teammate in each category."
           : error.message.includes("Skip")
             ? "Choose a teammate or Skip in every kudos category."
-            : "Could not save the report. Check your connection and try again.",
+            : "Could not save the report. Refresh and try again.",
     );
   if (data && typeof data === "object" && "conflict" in data && data.conflict)
     return fail("This report changed elsewhere. Refresh to load the saved version.");

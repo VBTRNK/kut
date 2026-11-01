@@ -244,6 +244,25 @@ test("complete reports, unchanged/reverted edits, pending, failures, conflicts a
     await expect(other.getByRole("spinbutton")).toHaveValue("3");
     await expect(other.getByRole("button", { name: "Save changes", exact: true })).toBeDisabled();
     await other.close();
+    await count.fill("10");
+    await page.getByRole("checkbox", { name: "Confirm 10 G+A" }).check();
+    await save.click();
+    await expect(save).toBeDisabled();
+    await page.reload();
+    await hydratedForm(page);
+    await expect(count).toHaveValue("10");
+    await expect(save).toBeDisabled();
+    await expect(page.getByText("Confirm 10 G+A before submitting.", { exact: true })).toHaveCount(
+      0,
+    );
+    await expect(page.getByRole("checkbox")).toHaveCount(0);
+    await count.fill("11");
+    await expect(save).toBeDisabled();
+    await page.getByRole("checkbox", { name: "Confirm 11 G+A" }).check();
+    await expect(save).toBeEnabled();
+    await count.fill("10");
+    await expect(save).toBeDisabled();
+    await expect(page.getByRole("checkbox")).toHaveCount(0);
     const rewards = await db.query(
       "select amount from kut.session_report_rewards where session_id=$1",
       [session],
@@ -256,7 +275,7 @@ test("complete reports, unchanged/reverted edits, pending, failures, conflicts a
   });
 });
 
-test("historical drafts reopen without promotion and submit only when completed @narrow", async ({
+test("historical drafts reopen without promotion and submit only when completed", async ({
   page,
 }) => {
   await withReport(true, async (db, session, peer) => {
