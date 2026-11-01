@@ -43,11 +43,6 @@ export function ReportForm({
   savedNominations: Record<string, string>;
   explicitSkips: string[];
 }) {
-  // Once a report is submitted it stays submitted: the RPC refuses to move it
-  // back, so offering "Save draft" would be offering an action the server will
-  // not perform (KB-020). rewardReceived is checked too, so a row that already
-  // regressed loses the button before the migration that repairs it lands.
-  const submitted = reportStatus === "submitted" || rewardReceived;
   // From the week of 28 Sep 2026 the one number is goals and assists combined;
   // an older session keeps asking for goals (ADR-101).
   const combined = reportsGoalsAndAssists(sessionDate);
@@ -63,6 +58,13 @@ export function ReportForm({
     seedBallot(categoryIds, savedNominations, explicitSkips),
   );
   const [state, action, pending] = useActionState(saveSessionReport, initial);
+  const [openingValues] = useState(() => ({ goals: initialGoals, ballot }));
+  const savedValues = state.savedValues ?? openingValues;
+  const submitted = reportStatus === "submitted" || rewardReceived || !!state.savedValues;
+  const changed =
+    (goals === "" ? null : Number(goals)) !== savedValues.goals ||
+    categoryIds.some((id) => ballot[id] !== savedValues.ballot[id]);
+  const [confirmedGoals, setConfirmedGoals] = useState<string | null>(null);
   const effectiveRevision = state.revision ?? revision;
   // Dispatched from onSubmit rather than through `action={...}`, because React
   // resets a form with a function action once that action settles. A reset
@@ -72,6 +74,7 @@ export function ReportForm({
   // kudos picks were wiped on every save even once controlled.
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending || incomplete || (submitted && !changed)) return;
     const formData = new FormData(
       event.currentTarget,
       (event.nativeEvent as SubmitEvent).submitter,
@@ -80,6 +83,8 @@ export function ReportForm({
     startTransition(() => action(formData));
   }
   const highGoals = /^\d+$/.test(goals) && Number(goals) >= 10;
+  const needsConfirmation = highGoals && (!submitted || changed);
+  const validGoals = /^\d+$/.test(goals) && Number(goals) <= 99;
   const undecided = undecidedCategories(categoryIds, ballot);
   const duplicates = new Set(duplicateNominees(categoryIds, ballot));
   const nameOf = new Map(attendees.map((a) => [a.player_id, a.display_name]));
@@ -88,13 +93,12 @@ export function ReportForm({
       ? `Choose a different teammate in each category — ${[...duplicates]
           .map((id) => nameOf.get(id) ?? "that teammate")
           .join(" and ")} ${duplicates.size > 1 ? "are" : "is"} picked twice.`
-      : undecided.length > 0
-        ? `Choose a teammate or Skip in ${
-            undecided.length === categoryIds.length
-              ? "every kudos category"
-              : `${undecided.length} more kudos ${undecided.length === 1 ? "category" : "categories"}`
-          } before submitting.`
-        : null;
+      : !validGoals
+        ? `Enter your ${combined ? "G+A" : "goals"} (0–99, including zero) before submitting.`
+        : needsConfirmation && confirmedGoals !== goals
+          ? `Confirm ${formatReportedCount(Number(goals), sessionDate)} before submitting.`
+          : null;
+  const incomplete = blocker !== null || undecided.length > 0;
   return (
     <form
       className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:items-start"
@@ -140,9 +144,15 @@ export function ReportForm({
             value={goals}
           />
         </label>
-        {highGoals && (
+        {needsConfirmation && (
           <label className="flex min-h-11 items-center gap-3 text-small font-semibold">
-            <input name="confirmGoals" type="checkbox" value="yes" />
+            <input
+              checked={confirmedGoals === goals}
+              name="confirmGoals"
+              onChange={(event) => setConfirmedGoals(event.target.checked ? goals : null)}
+              type="checkbox"
+              value="yes"
+            />
             Confirm {formatReportedCount(Number(goals), sessionDate)}
           </label>
         )}
@@ -153,7 +163,7 @@ export function ReportForm({
           {hasSafeHands
             ? "Choose different teammates for the three rotating categories. Safe Hands may repeat a pick. Choose or Skip each one."
             : "Choose a different teammate in each category, or explicitly Skip."}{" "}
-          Unanswered is not a Skip{submitted ? "." : " — save a draft to finish later."}
+          Unanswered is not a Skip. Complete every category before submitting.
         </p>
         {categories.map((category) => {
           const choice = ballot[category.id] ?? UNDECIDED;
@@ -233,16 +243,18 @@ export function ReportForm({
       </fieldset>
       <div className="grid gap-3 md:col-start-1 md:row-start-2">
         <p
-          className={`text-small ${state.saved ? "font-semibold text-moss" : "text-ink-dim"}`}
+          className={`text-small ${state.saved && !changed ? "font-semibold text-moss" : "text-ink-dim"}`}
           role="status"
         >
-          {state.saved
-            ? state.rewarded
-              ? "Report submitted → +50 FLUT Coins received."
+          {changed && submitted
+            ? "You have unsaved changes."
+            : state.saved
+              ? state.rewarded
+                ? "Report submitted → +50 FLUT Coins received."
+                : "Report submitted. Your changes are saved. Edits never pay twice."
               : submitted
-                ? "Your report is saved. Reward already received."
-                : "Draft saved. Finish and submit for 50 FLUT Coins."
-            : "First complete report: +50 FLUT Coins. Edits never pay twice."}
+                ? "Report submitted. No unsaved changes. Edits never pay twice."
+                : "First complete report: +50 FLUT Coins. Edits never pay twice."}
         </p>
         {(state.error || blocker) && (
           <p
@@ -252,26 +264,35 @@ export function ReportForm({
             {state.error ?? blocker}
           </p>
         )}
-        <div className={`grid gap-3 ${submitted ? "" : "sm:grid-cols-2"}`}>
-          {!submitted && (
-            <button
-              className="min-h-13 rounded-xl border border-line bg-panel font-extrabold"
-              disabled={pending || duplicates.size > 0}
-              name="intent"
-              type="submit"
-              value="draft"
-            >
-              Save draft
-            </button>
-          )}
+        {undecided.length > 0 && (
+          <div className="text-small text-ink-dim" role="status">
+            <p>Choose a teammate or Skip in each unanswered category:</p>
+            <ul>
+              {categories
+                .filter((category) => undecided.includes(category.id))
+                .map((category) => (
+                  <li key={category.id}>
+                    <button
+                      className="min-h-11 text-left font-semibold text-brass underline"
+                      onClick={() => document.getElementById("category-" + category.id)?.focus()}
+                      type="button"
+                    >
+                      {category.title}
+                    </button>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        )}
+        <div className="grid gap-3">
           <button
             className="min-h-13 rounded-xl bg-brass font-extrabold text-ink-on-accent disabled:opacity-50"
-            disabled={pending || blocker !== null}
+            disabled={pending || incomplete || (submitted && !changed)}
             name="intent"
             type="submit"
             value="submit"
           >
-            {pending ? "Saving…" : rewardReceived ? "Save changes" : "Submit report"}
+            {pending ? "Saving…" : submitted ? "Save changes" : "Submit report"}
           </button>
         </div>
       </div>
