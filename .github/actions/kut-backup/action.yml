@@ -3,7 +3,7 @@ description: >
   Dumps schema kut as kut_backup from one exported snapshot, encrypts the dump
   and its manifest with age, uploads them, and restores them into a disposable
   `kut_restore` stack to prove the backup (ADR-141). Expects the repository
-  checked out, `npm ci` done, and PGHOST, PGPORT, PGUSER, PGPASSWORD and
+  checked out, `npm ci` done, age on PATH, and PGHOST, PGPORT, PGUSER, PGPASSWORD and
   PGSSLMODE in the environment. The repository is public: database output goes
   to a private log, which is uploaded only age-encrypted, and only on failure.
 
@@ -21,17 +21,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install age
-      shell: bash
-      run: |
-        set -euo pipefail
-        if ! command -v age > /dev/null; then
-          echo "https://archive.ubuntu.com/ubuntu" | sudo tee /etc/apt/apt-mirrors.txt > /dev/null
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends age > /dev/null
-        fi
-        age --version
-
     - name: Prepare a private work directory
       shell: bash
       run: |
@@ -98,7 +87,7 @@ runs:
       run: scripts/ci/backup/restore-check.sh "$BACKUP_WORK/plain" "$BACKUP_WORK/restore"
 
     - name: Encrypt the private logs of a failed run
-      if: failure()
+      if: failure() && env.BACKUP_WORK != ''
       shell: bash
       env:
         RECIPIENTS: ${{ inputs.recipients-file }}
@@ -114,7 +103,7 @@ runs:
         rm -- failure/logs.tar
 
     - name: Upload the encrypted private logs
-      if: failure()
+      if: failure() && env.BACKUP_WORK != ''
       uses: actions/upload-artifact@v7
       with:
         name: kut-backup-log-${{ env.BACKUP_STAMP }}
@@ -123,7 +112,7 @@ runs:
         if-no-files-found: ignore
 
     - name: Delete the plaintext
-      if: always()
+      if: always() && env.BACKUP_WORK != ''
       shell: bash
       run: |
         for file in "$BACKUP_WORK/plain/kut.dump" "$BACKUP_WORK/plain/manifest.json"; do
