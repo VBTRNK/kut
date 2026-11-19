@@ -11,6 +11,8 @@ and row; it does not cover `auth.users` (no read-only role can read it) or the
 `.github/workflows/backup.yml` runs at 03:41 UTC and on dispatch
 (`gh workflow run backup.yml -R VBTRNK/kut`), as the read-only `kut_backup`
 role through the Session pooler, from the `backup` environment (main only).
+The hosted job and fixture test install the same pinned, SHA-256-verified `age`
+release from GitHub with retries.
 
 - **Each run** audits the role's privileges, dumps `kut` (`pg_dump -Fc`) with a
   manifest (repo SHA, migration versions, row counts, SHA-256) from one
