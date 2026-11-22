@@ -107,15 +107,85 @@ describe("shared agent hook payloads", () => {
     }
   });
 
-  it("uses identical guard bodies for both agents and denies unknown agents", () => {
-    const guards = agents.map((agent) =>
-      fs.readFileSync(`.${agent}/hooks/block-dangerous-commands.cjs`, "utf8"),
+  it("uses identical guard bodies for all three agents and denies unknown agents", () => {
+    const guards = [
+      { dir: ".codex", agent: "codex" },
+      { dir: ".claude", agent: "claude" },
+      { dir: ".agents", agent: "antigravity" },
+    ].map(({ dir, agent }) =>
+      fs
+        .readFileSync(`${dir}/hooks/block-dangerous-commands.cjs`, "utf8")
+        .replace(`run("${agent}");`, 'run("AGENT");'),
     );
-    expect(guards[0].replace('run("codex");', 'run("AGENT");')).toBe(
-      guards[1].replace('run("claude");', 'run("AGENT");'),
-    );
+    expect(guards[0]).toBe(guards[1]);
+    expect(guards[0]).toBe(guards[2]);
     for (const agent of agents)
       expect(decisionOf(runtime(agent).evaluate(payload("git status"), "unknown"))).toBe("deny");
+  });
+
+  it("denies Antigravity run_command mutations and defers safe commands to policy", () => {
+    const agyRuntime = runtime("agents");
+    const agyPayload = (CommandLine: string) =>
+      JSON.stringify({ toolCall: { name: "run_command", args: { CommandLine } } });
+    for (const command of [
+      "supabase db push",
+      "git reset --hard",
+      "rm -rf build",
+      "node scripts/tidy.mjs --apply --branch old=abc",
+    ]) {
+      const res = agyRuntime.evaluate(agyPayload(command), "antigravity");
+      expect(res?.decision).toBe("deny");
+      expect(res).toEqual(evaluate(agyPayload(command), "antigravity"));
+    }
+    for (const command of ["git status", "supabase db push --dry-run", "node scripts/tidy.mjs"]) {
+      expect(agyRuntime.evaluate(agyPayload(command), "antigravity")).toBeNull();
+      expect(evaluate(agyPayload(command), "antigravity")).toBeNull();
+    }
+  });
+
+  it("registered .agents/hooks.json command runs from .agents and denies dangerous and malformed payloads", () => {
+    const hooksConfig = JSON.parse(fs.readFileSync(".agents/hooks.json", "utf8"));
+    const command = hooksConfig["safety-gate"]?.PreToolUse?.[0]?.hooks?.[0]?.command;
+    expect(command).toBeTruthy();
+
+    const denyPayload = JSON.stringify({
+      toolCall: { name: "run_command", args: { CommandLine: "git reset --hard" } },
+    });
+    const res1 = spawnSync(command, {
+      shell: true,
+      cwd: ".agents",
+      input: denyPayload,
+      encoding: "utf8",
+      windowsHide: true,
+      timeout: 10000,
+    });
+    expect(res1.status).toBe(0);
+    expect(JSON.parse(res1.stdout).decision).toBe("deny");
+
+    const res2 = spawnSync(command, {
+      shell: true,
+      cwd: ".agents",
+      input: "not valid json {{{",
+      encoding: "utf8",
+      windowsHide: true,
+      timeout: 10000,
+    });
+    expect(res2.status).toBe(0);
+    expect(JSON.parse(res2.stdout).decision).toBe("deny");
+
+    const safePayload = JSON.stringify({
+      toolCall: { name: "run_command", args: { CommandLine: "git status" } },
+    });
+    const res3 = spawnSync(command, {
+      shell: true,
+      cwd: ".agents",
+      input: safePayload,
+      encoding: "utf8",
+      windowsHide: true,
+      timeout: 10000,
+    });
+    expect(res3.status).toBe(0);
+    expect(res3.stdout).toBe("");
   });
 
   it("does not load an injected editable policy next to either actual hook", () => {
