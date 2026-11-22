@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-// Self-contained: never load policy from agent-editable application scripts.
-// Runtime coverage still requires an actual probe; rules are not owner consent.
-// Hooks use CommonJS because the runtime launches .cjs before project loading.
+// Hooks use CommonJS because both runtimes launch .cjs before project loading.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const fs = require("node:fs");
 
+// Safety hook (PreToolUse): denies a short list of destructive shell commands
+// before they run. Claude loads it from .claude/settings.json; .codex/hooks/
+// holds Codex's copy, and .agents/hooks/ holds Antigravity's copy, identical
+// except for the agent name in the last line. Keep all in sync.
 const dangers = [
   // Hosted mutations are owner/workflow steps. Only a literal --dry-run
   // flag on this push command is exempt; another command's flag is not.
@@ -53,7 +55,12 @@ const dangers = [
   ],
 ];
 
-function decision(value, reason) {
+function decision(value, reason, agent) {
+  if (agent === "antigravity") {
+    const out = { decision: value };
+    if (reason) out.reason = reason;
+    return out;
+  }
   return {
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
@@ -63,30 +70,47 @@ function decision(value, reason) {
   };
 }
 function evaluate(raw, agent) {
-  if (agent !== "codex" && agent !== "claude")
-    return decision("deny", "Unsupported agent; no approval can be inferred.");
+  if (agent !== "codex" && agent !== "claude" && agent !== "antigravity")
+    return decision("deny", "Unsupported agent; no approval can be inferred.", agent);
   let payload;
   try {
     payload = JSON.parse(raw);
   } catch {
-    return decision("deny", "Safety payload is unreadable; no consent can be inferred.");
+    return decision("deny", "Safety payload is unreadable; no consent can be inferred.", agent);
   }
-  const supported = ["Bash", "PowerShell", "exec_command", "functions.exec_command"];
-  if (!payload || !supported.includes(payload.tool_name))
-    return decision(
-      "deny",
-      "Unsupported safety tool name; coverage must be established before proceeding.",
-    );
-  const input = payload.tool_input;
-  const command = input?.command ?? input?.cmd;
+  let command;
+  if (agent === "antigravity") {
+    const toolCall = payload?.toolCall;
+    if (!toolCall || toolCall.name !== "run_command")
+      return decision(
+        "deny",
+        "Unsupported safety tool name; coverage must be established before proceeding.",
+        agent,
+      );
+    const args = toolCall.args;
+    command = args?.CommandLine ?? args?.command ?? args?.cmd;
+  } else {
+    const supported = ["Bash", "PowerShell", "exec_command", "functions.exec_command"];
+    if (!payload || !supported.includes(payload.tool_name))
+      return decision(
+        "deny",
+        "Unsupported safety tool name; coverage must be established before proceeding.",
+        agent,
+      );
+    const input = payload.tool_input;
+    command = input?.command ?? input?.cmd;
+  }
   if (typeof command !== "string" || !command.trim())
-    return decision("deny", "Missing shell command; fail closed.");
+    return decision("deny", "Missing shell command; fail closed.", agent);
   for (const [pattern, reason] of dangers)
     if (pattern.test(command))
       return decision(
         "deny",
         "Repository safety policy blocks " + reason + ". A wrapper is not an exception.",
+        agent,
       );
+  // No output defers to the agent's own permission policy. Antigravity ran a
+  // hook "ask" headless even in strict mode (review 4), so never return it.
   return null;
 }
 
@@ -95,7 +119,7 @@ function run(agent) {
   try {
     result = evaluate(fs.readFileSync(0, "utf8"), agent);
   } catch {
-    result = decision("deny", "Safety check could not read its input; fail closed.");
+    result = decision("deny", "Safety check could not read its input; fail closed.", agent);
   }
   if (result) process.stdout.write(JSON.stringify(result));
 }

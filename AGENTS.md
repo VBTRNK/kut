@@ -111,7 +111,7 @@ protection and other hosted changes need their own written instruction.
 
 ## Agent safety
 
-- Hooks in `.claude/` and `.codex/` block destructive commands. What they
+- Hooks in `.claude/`, `.codex/` and `.agents/` block destructive commands. What they
   enforce is non-negotiable; changing a guard needs a PR the owner asked for.
   Codex rules need the repo to be trusted.
 - Never auto-allowed: `git commit`, `git push`, `supabase functions deploy`,
